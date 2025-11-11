@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global minimal styles */
+html, body, #root {
+  height: 100%;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide scrollbar for clean minimalist look on WebKit */
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* Utility: soft radial vignette mask for overlays */
+.mask-vignette {
+  -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 100%);
+  mask-image: radial-gradient(ellipse at center, black 40%, transparent 100%);
+}
+
+/* Utility: animated stroke-dash for doodles */
+.dash-anim {
+  stroke-dasharray: 6 10;
+  animation: dash 18s linear infinite;
+}
+@keyframes dash {
+  to {
+    stroke-dashoffset: -1000;
+  }
+}
+
