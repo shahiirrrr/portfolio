@@ -90,10 +90,10 @@ function App() {
       issued: '2021 – 2023',
       summary: 'Graduated with a Bachelor of Science degree in Computer Science, focusing on software development, algorithms, and computer systems.',
       skills: ['Computer Science Fundamentals', 'Programming', 'Data Structures', 'Algorithms'],
-      logo: { 
+      logo: {
         image: 'calicut_university.jpeg',
         bg: 'bg-white',
-        border: 'border-white/20' 
+        border: 'border-white/20'
       },
     },
     {
@@ -105,10 +105,10 @@ function App() {
       credentialUrl: 'https://synnefo.in',
       summary: 'Successfully completed a comprehensive training program covering front-end, back-end, and database development conducted from June 21, 2023 to November 21, 2023 by Synnefo Solutions, Cochin.',
       skills: ['Python', 'Django', 'REST APIs', 'Frontend Development'],
-      logo: { 
+      logo: {
         image: 'synnefo_solutions.jpeg',
         bg: 'bg-white',
-        border: 'border-white/20' 
+        border: 'border-white/20'
       },
     },
     {
@@ -120,10 +120,10 @@ function App() {
       credentialUrl: 'https://www.jetking.com',
       summary: 'Participated in a specialized workshop focusing on fundamentals and practical aspects of Cloud Computing and Cyber Security led by industry experts from Jetking Infotrain Ltd.',
       skills: ['Cloud Computing', 'Cybersecurity'],
-      logo: { 
+      logo: {
         image: 'jetking.png',
         bg: 'bg-white',
-        border: 'border-white/20' 
+        border: 'border-white/20'
       },
     },
     {
@@ -133,10 +133,10 @@ function App() {
       issued: 'Issued Jun 2023',
       summary: 'Participated in a hands-on web development workshop covering modern frontend technologies and best practices.',
       skills: ['HTML', 'CSS', 'JavaScript', 'Responsive Design'],
-      logo: { 
+      logo: {
         image: 'regional-technologies.avif',
         bg: 'bg-white',
-        border: 'border-white/20' 
+        border: 'border-white/20'
       },
     },
   ]), [])
@@ -297,8 +297,8 @@ function App() {
               <path d="M2 12 C80 2, 140 20, 220 10 S360 20, 418 8" stroke="url(#g1)" strokeWidth="3" className="dash-anim" strokeLinecap="round" />
               <defs>
                 <linearGradient id="g1" x1="0" y1="0" x2="420" y2="0" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#e5e5e5"/>
-                  <stop offset="1" stopColor="#9ca3af"/>
+                  <stop stopColor="#e5e5e5" />
+                  <stop offset="1" stopColor="#9ca3af" />
                 </linearGradient>
               </defs>
             </svg>
@@ -519,13 +519,13 @@ function App() {
       {/* Skills slider */}
       <motion.section
         id="skills"
-        className="px-6 py-16 md:py-24"
+        className="px-6 py-16 md:py-24 max-w-6xl mx-auto"
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-10% 0px' }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
       >
-        <div className="relative max-w-6xl mx-auto overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02] px-6 md:px-10 py-12">
+        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02] px-6 md:px-10 py-12">
           <DoodleField items={doodleFields.skills} />
           <SectionHeading
             eyebrow="Toolkit"
@@ -703,7 +703,7 @@ function App() {
                     shahirp.official@gmail.com
                   </a>
                 </div>
-      <div>
+                <div>
                   <p className="text-neutral-400">LinkedIn</p>
                   <a href="https://linkedin.com/in/shahiirrrr" target="_blank" rel="noreferrer" className="text-neutral-100 hover:text-sky-200">
                     linkedin.com/in/shahiirrrr
@@ -713,8 +713,8 @@ function App() {
                   <p className="text-neutral-400">Phone / WhatsApp</p>
                   <a href="https://wa.me/918891873321" target="_blank" rel="noreferrer" className="text-neutral-100 hover:text-sky-200">
                     +91 88918 73321
-        </a>
-      </div>
+                  </a>
+                </div>
               </div>
               <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3 text-xs text-neutral-400">
                 <p>Preferred collaboration modes:</p>
@@ -768,7 +768,7 @@ function App() {
 
       {/* Floating WhatsApp button */}
       <SocialDock />
-      </div>
+    </div>
   )
 }
 
@@ -796,17 +796,17 @@ function ExperienceItem({ title, company, location, time, bullets }) {
 
 function ProjectCard({ title, summary, tags = [], links = [] }) {
   return (
-    <motion.div 
+    <motion.div
       className="group relative flex flex-col h-full bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all overflow-hidden"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-50px" }}
       variants={{
         hidden: { opacity: 0, y: 20 },
-        visible: { 
-          opacity: 1, 
+        visible: {
+          opacity: 1,
           y: 0,
-          transition: { 
+          transition: {
             duration: 0.6,
             ease: [0.16, 1, 0.3, 1]
           }
@@ -823,11 +823,11 @@ function ProjectCard({ title, summary, tags = [], links = [] }) {
     >
       <h3 className="text-lg font-medium text-white mb-2 group-hover:text-blue-300 transition-colors">{title}</h3>
       <p className="text-neutral-300 text-sm mb-4 flex-grow group-hover:text-white/80 transition-colors">{summary}</p>
-      
+
       {tags.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
           {tags.map((tag) => (
-            <motion.span 
+            <motion.span
               key={tag}
               className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/5 text-neutral-300 group-hover:bg-blue-500/20 group-hover:text-blue-300 transition-colors"
               whileHover={{ scale: 1.05 }}
@@ -840,7 +840,7 @@ function ProjectCard({ title, summary, tags = [], links = [] }) {
       )}
 
       {links.length > 0 && (
-        <motion.div 
+        <motion.div
           className="mt-auto pt-4 border-t border-white/5 group-hover:border-white/20 transition-colors"
           initial={{ opacity: 0.8 }}
           whileHover={{ opacity: 1 }}
@@ -882,19 +882,19 @@ function ProjectCard({ title, summary, tags = [], links = [] }) {
 
 function CertificationCard({ cert }) {
   const { title, issuer, issued, summary, skills = [], logo, credentialText, credentialUrl } = cert;
-  
+
   return (
-    <motion.div 
+    <motion.div
       className="group relative flex flex-col h-full bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all overflow-hidden"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-50px" }}
       variants={{
         hidden: { opacity: 0, y: 20 },
-        visible: { 
-          opacity: 1, 
+        visible: {
+          opacity: 1,
           y: 0,
-          transition: { 
+          transition: {
             duration: 0.6,
             ease: [0.16, 1, 0.3, 1]
           }
@@ -912,8 +912,8 @@ function CertificationCard({ cert }) {
       <div className="flex items-start gap-4">
         {logo ? (
           <div className={`flex-shrink-0 h-12 w-12 rounded-lg ${logo.bg || 'bg-white/5'} ${logo.border ? 'border ' + logo.border : ''} flex items-center justify-center overflow-hidden`}>
-            <img 
-              src={`/${logo.image}`} 
+            <img
+              src={`/${logo.image}`}
               alt={issuer}
               className="w-full h-full object-contain p-1.5"
             />
@@ -931,15 +931,15 @@ function CertificationCard({ cert }) {
           <p className="text-xs text-neutral-500 mt-1 uppercase tracking-wide">{issued}</p>
         </div>
       </div>
-      
+
       <p className="mt-4 text-sm text-neutral-300 leading-relaxed">
         {summary}
       </p>
-      
+
       {skills.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-2">
           {skills.map((skill) => (
-            <motion.span 
+            <motion.span
               key={skill}
               className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-white/5 text-neutral-300 group-hover:bg-blue-500/20 group-hover:text-blue-300 transition-colors"
               whileHover={{ scale: 1.05 }}
@@ -950,7 +950,7 @@ function CertificationCard({ cert }) {
           ))}
         </div>
       )}
-      
+
       {credentialText && credentialUrl && (
         <motion.div className="mt-4 pt-4 border-t border-white/5 group-hover:border-white/20 transition-colors">
           <a
@@ -1302,8 +1302,8 @@ function DoodlesHero() {
       </svg>
       {/* Curly brace */}
       <svg data-float width="80" height="120" viewBox="0 0 80 120" className="absolute top-8 md:top-20 left-1/2 opacity-30">
-        <path d="M30 10c-10 0-10 10-10 20s-10 10-10 10 10 0 10 10 0 20 10 20" stroke="white" strokeOpacity="0.5" strokeWidth="2" fill="none"/>
-        <path d="M50 10c10 0 10 10 10 20s10 10 10 10-10 0-10 10 0 20-10 20" stroke="white" strokeOpacity="0.5" strokeWidth="2" fill="none"/>
+        <path d="M30 10c-10 0-10 10-10 20s-10 10-10 10 10 0 10 10 0 20 10 20" stroke="white" strokeOpacity="0.5" strokeWidth="2" fill="none" />
+        <path d="M50 10c10 0 10 10 10 20s10 10 10 10-10 0-10 10 0 20-10 20" stroke="white" strokeOpacity="0.5" strokeWidth="2" fill="none" />
       </svg>
       {/* Code slash */}
       <svg data-float width="90" height="90" viewBox="0 0 90 90" className="absolute bottom-10 right-10 opacity-40 hidden sm:block">
@@ -1316,50 +1316,50 @@ function DoodlesHero() {
 function IconHome() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-      <path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-10.5Z" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-10.5Z" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
 function IconUser() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-      <circle cx="12" cy="8" r="4" strokeWidth="1.6"/>
-      <path d="M4 21a8 8 0 0 1 16 0" strokeWidth="1.6" strokeLinecap="round"/>
+      <circle cx="12" cy="8" r="4" strokeWidth="1.6" />
+      <path d="M4 21a8 8 0 0 1 16 0" strokeWidth="1.6" strokeLinecap="round" />
     </svg>
   )
 }
 function IconBriefcase() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-      <rect x="3" y="7" width="18" height="12" rx="2" strokeWidth="1.6"/>
-      <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" strokeWidth="1.6"/>
-      <path d="M3 12h6m6 0h6" strokeWidth="1.6" strokeLinecap="round"/>
+      <rect x="3" y="7" width="18" height="12" rx="2" strokeWidth="1.6" />
+      <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" strokeWidth="1.6" />
+      <path d="M3 12h6m6 0h6" strokeWidth="1.6" strokeLinecap="round" />
     </svg>
   )
 }
 function IconSparkles() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-      <path d="M12 2l2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5Z" strokeWidth="1.6" strokeLinejoin="round"/>
-      <path d="M19 14l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2Z" strokeWidth="1.4" strokeLinejoin="round"/>
+      <path d="M12 2l2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5Z" strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M19 14l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2Z" strokeWidth="1.4" strokeLinejoin="round" />
     </svg>
   )
 }
 function IconGrid() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-      <rect x="3" y="3" width="8" height="8" rx="2" strokeWidth="1.6"/>
-      <rect x="13" y="3" width="8" height="8" rx="2" strokeWidth="1.6"/>
-      <rect x="3" y="13" width="8" height="8" rx="2" strokeWidth="1.6"/>
-      <rect x="13" y="13" width="8" height="8" rx="2" strokeWidth="1.6"/>
+      <rect x="3" y="3" width="8" height="8" rx="2" strokeWidth="1.6" />
+      <rect x="13" y="3" width="8" height="8" rx="2" strokeWidth="1.6" />
+      <rect x="3" y="13" width="8" height="8" rx="2" strokeWidth="1.6" />
+      <rect x="13" y="13" width="8" height="8" rx="2" strokeWidth="1.6" />
     </svg>
   )
 }
 function IconMail() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-      <rect x="3" y="5" width="18" height="14" rx="2" strokeWidth="1.6"/>
-      <path d="M4 7l8 6 8-6" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+      <rect x="3" y="5" width="18" height="14" rx="2" strokeWidth="1.6" />
+      <path d="M4 7l8 6 8-6" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
@@ -1367,7 +1367,7 @@ function IconMail() {
 function IconBook() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-      <path d="M5 4h9a3 3 0 0 1 3 3v13H8a3 3 0 0 0-3 3V7a3 3 0 0 1 3-3Z" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M5 4h9a3 3 0 0 1 3 3v13H8a3 3 0 0 0-3 3V7a3 3 0 0 1 3-3Z" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M17 4h2a2 2 0 0 1 2 2v13" strokeWidth="1.6" strokeLinecap="round" />
     </svg>
   )
@@ -1393,8 +1393,8 @@ function IconQuote() {
 function CSSIcon() {
   return (
     <svg viewBox="0 0 128 128" className="h-7 w-7 sm:h-8 sm:w-8">
-      <path fill="#1572B6" d="M18 0l8.2 92 37.8 10 38-10.1L110 0H18zm73 26H62l.7 7h27.6l-3 33.3-21.3 6-21.4-6-.8-13.6h10.4l.3 6.8 11.5 3 11.4-3 1.2-13.3H41.6L39 18h68.3l-2.3 26z"/>
-      <path fill="#33A9DC" d="M64 23H41.6l2.6 29.9H76l-1.2 13.3-10.8 3-11.4-3-.3-6.8H42l.8 13.6 21.4 6 21.3-6 3-33.3H62l-.7-7H91l2.3-26H39l2.6 29.9H64z"/>
+      <path fill="#1572B6" d="M18 0l8.2 92 37.8 10 38-10.1L110 0H18zm73 26H62l.7 7h27.6l-3 33.3-21.3 6-21.4-6-.8-13.6h10.4l.3 6.8 11.5 3 11.4-3 1.2-13.3H41.6L39 18h68.3l-2.3 26z" />
+      <path fill="#33A9DC" d="M64 23H41.6l2.6 29.9H76l-1.2 13.3-10.8 3-11.4-3-.3-6.8H42l.8 13.6 21.4 6 21.3-6 3-33.3H62l-.7-7H91l2.3-26H39l2.6 29.9H64z" />
     </svg>
   )
 }
@@ -1448,11 +1448,11 @@ function InstagramIcon() {
       />
       <defs>
         <linearGradient id="instaGradient" x1="32" y1="24" x2="224" y2="232" gradientUnits="userSpaceOnUse">
-          <stop offset="0.05" stopColor="#F58529"/>
-          <stop offset="0.3" stopColor="#FEDA77"/>
-          <stop offset="0.6" stopColor="#DD2A7B"/>
-          <stop offset="0.9" stopColor="#8134AF"/>
-          <stop offset="1" stopColor="#515BD4"/>
+          <stop offset="0.05" stopColor="#F58529" />
+          <stop offset="0.3" stopColor="#FEDA77" />
+          <stop offset="0.6" stopColor="#DD2A7B" />
+          <stop offset="0.9" stopColor="#8134AF" />
+          <stop offset="1" stopColor="#515BD4" />
         </linearGradient>
       </defs>
       <circle cx="128" cy="128" r="38" stroke="#FFF" strokeWidth="16" fill="none" />
@@ -1463,7 +1463,7 @@ function InstagramIcon() {
 function IconGithub() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 2C6.48 2 2 6.58 2 12.26c0 4.52 2.87 8.35 6.84 9.71.5.09.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.62-3.37-1.2-3.37-1.2-.46-1.2-1.13-1.52-1.13-1.52-.93-.66.07-.65.07-.65 1.03.07 1.57 1.07 1.57 1.07.91 1.59 2.39 1.13 2.97.86.09-.67.36-1.13.65-1.39-2.22-.26-4.56-1.13-4.56-5.04 0-1.11.38-2.01 1.02-2.72-.1-.26-.45-1.31.1-2.72 0 0 .84-.27 2.75 1.04A9.26 9.26 0 0 1 12 7.3c.85 0 1.7.12 2.5.35 1.91-1.31 2.75-1.04 2.75-1.04.55 1.41.2 2.46.1 2.72.64.71 1.02 1.61 1.02 2.72 0 3.92-2.34 4.77-4.57 5.03.37.33.69.98.69 1.98 0 1.43-.01 2.58-.01 2.93 0 .27.18.59.69.49A10.06 10.06 0 0 0 22 12.26C22 6.58 17.52 2 12 2Z"/>
+      <path d="M12 2C6.48 2 2 6.58 2 12.26c0 4.52 2.87 8.35 6.84 9.71.5.09.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.62-3.37-1.2-3.37-1.2-.46-1.2-1.13-1.52-1.13-1.52-.93-.66.07-.65.07-.65 1.03.07 1.57 1.07 1.57 1.07.91 1.59 2.39 1.13 2.97.86.09-.67.36-1.13.65-1.39-2.22-.26-4.56-1.13-4.56-5.04 0-1.11.38-2.01 1.02-2.72-.1-.26-.45-1.31.1-2.72 0 0 .84-.27 2.75 1.04A9.26 9.26 0 0 1 12 7.3c.85 0 1.7.12 2.5.35 1.91-1.31 2.75-1.04 2.75-1.04.55 1.41.2 2.46.1 2.72.64.71 1.02 1.61 1.02 2.72 0 3.92-2.34 4.77-4.57 5.03.37.33.69.98.69 1.98 0 1.43-.01 2.58-.01 2.93 0 .27.18.59.69.49A10.06 10.06 0 0 0 22 12.26C22 6.58 17.52 2 12 2Z" />
     </svg>
   )
 }
@@ -1471,7 +1471,7 @@ function IconGithub() {
 function IconLinkedIn() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor">
-      <path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5Zm.02 6H2V22h3V9.5ZM8 9.5h2.9V11h.04c.4-.76 1.38-1.56 2.83-1.56C17.8 9.44 19 11 19 13.7V22h-3v-7.2c0-1.72-.61-2.9-2.14-2.9-1.16 0-1.85.78-2.16 1.53-.11.26-.14.62-.14.98V22H8V9.5Z"/>
+      <path d="M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5Zm.02 6H2V22h3V9.5ZM8 9.5h2.9V11h.04c.4-.76 1.38-1.56 2.83-1.56C17.8 9.44 19 11 19 13.7V22h-3v-7.2c0-1.72-.61-2.9-2.14-2.9-1.16 0-1.85.78-2.16 1.53-.11.26-.14.62-.14.98V22H8V9.5Z" />
     </svg>
   )
 }
