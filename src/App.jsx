@@ -9,6 +9,7 @@ function App() {
   const roles = useMemo(() => ['Software Developer', 'Frontend Developer'], [])
   const logos = useMemo(() => ([
     { name: 'React', url: 'https://cdn.simpleicons.org/react/61dafb' },
+    { name: 'Next.js', url: 'https://cdn.simpleicons.org/nextdotjs/FFFFFF' },
     { name: 'JavaScript', url: 'https://cdn.simpleicons.org/javascript/f7df1e' },
     { name: 'TypeScript', url: 'https://cdn.simpleicons.org/typescript/3178c6' },
     { name: 'Python', url: 'https://cdn.simpleicons.org/python/3776AB' },
@@ -447,6 +448,16 @@ function App() {
           />
           <div className="mt-10 grid gap-6">
             <ExperienceItem
+              title="Frontend Developer"
+              company="Noviindus Technologies"
+              location="Kozhikode, Kerala"
+              time="Dec 2025 – Present"
+              bullets={[
+                'Building modern web applications using Next.js and Tailwind CSS.',
+                'Developing performant, scalable frontend solutions for client projects.',
+              ]}
+            />
+            <ExperienceItem
               title="Software Developer"
               company="Neopraxis Innovations Pvt Ltd"
               location="Wayanad, Kerala"
@@ -557,7 +568,7 @@ function App() {
               <p className="text-sm uppercase tracking-[0.3em] text-neutral-500">Tooling I use</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {[
-                  'React', 'Vite', 'Tailwind', 'shadcn/ui', 'GSAP', 'Framer Motion',
+                  'React', 'Next.js', 'Vite', 'Tailwind', 'shadcn/ui', 'GSAP', 'Framer Motion',
                   'BigCommerce', 'Stencil', 'Django', 'Flask', 'Node.js',
                   'GitHub', 'Trello', 'Notion', 'Zoho Sprints',
                 ].map((tool) => (
