@@ -1,7 +1,8 @@
 import './index.css'
-import { motion } from 'framer-motion'
-import { useMemo, useEffect, useRef } from 'react'
+import { motion, useScroll, useSpring } from 'framer-motion'
+import { useMemo, useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
+import Lenis from 'lenis'
 
 function App() {
   const name = 'SHAHIR FARHAN'
@@ -241,8 +242,53 @@ function App() {
     { id: 'ambient-5', type: 'circle', top: '78%', left: '26%', size: 70, background: 'linear-gradient(135deg, rgba(147,197,253,0.22), rgba(147,197,253,0))', float: { x: 12, y: 14 }, blur: true },
   ]), [])
 
+  const sectionIds = useMemo(() => ['home', 'about', 'experience', 'education', 'skills', 'projects', 'recommendations', 'contact'], [])
+  const [activeSection, setActiveSection] = useState('home')
+
+  // Lenis smooth scroll
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.4,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      smoothWheel: true,
+      wheelMultiplier: 1,
+      touchMultiplier: 2,
+    })
+
+    function raf(time) {
+      lenis.raf(time)
+      requestAnimationFrame(raf)
+    }
+    const rafId = requestAnimationFrame(raf)
+
+    return () => {
+      cancelAnimationFrame(rafId)
+      lenis.destroy()
+    }
+  }, [])
+
+  // Active section tracking
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) setActiveSection(entry.target.id)
+        })
+      },
+      { rootMargin: '-40% 0px -40% 0px' }
+    )
+    sectionIds.forEach((id) => {
+      const el = document.getElementById(id)
+      if (el) observer.observe(el)
+    })
+    return () => observer.disconnect()
+  }, [sectionIds])
+
   return (
     <div className="min-h-screen bg-neutral-900 text-neutral-100 font-sans relative">
+      <ScrollProgressBar />
+      <SectionDots sections={sectionIds} activeSection={activeSection} />
       <BackgroundFX />
       <DoodleField items={ambientDoodles} className="hidden md:block" />
       {/* Hero */}
@@ -773,6 +819,54 @@ function App() {
 }
 
 export default App
+
+function ScrollProgressBar() {
+  const { scrollYProgress } = useScroll()
+  const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 30, restDelta: 0.001 })
+  return (
+    <motion.div
+      style={{ scaleX }}
+      className="fixed top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 to-indigo-600 origin-left z-[100] pointer-events-none"
+    />
+  )
+}
+
+function SectionDots({ sections, activeSection }) {
+  const labels = {
+    home: 'Home', about: 'About', experience: 'Experience',
+    education: 'Education', skills: 'Skills', projects: 'Projects',
+    recommendations: 'Recommendations', contact: 'Contact',
+  }
+  return (
+    <div className="fixed right-4 top-1/2 -translate-y-1/2 z-50 hidden lg:flex flex-col gap-3 items-center">
+      {sections.map((id) => {
+        const isActive = activeSection === id
+        return (
+          <a
+            key={id}
+            href={`#${id}`}
+            aria-label={labels[id] ?? id}
+            title={labels[id] ?? id}
+            className="group relative flex items-center justify-end"
+          >
+            {/* Label tooltip */}
+            <span className="absolute right-5 px-2 py-0.5 rounded text-[11px] text-neutral-300 bg-neutral-800/80 border border-white/10 backdrop-blur-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+              {labels[id] ?? id}
+            </span>
+            {/* Dot */}
+            <span
+              className={`block rounded-full transition-all duration-300 ${
+                isActive
+                  ? 'w-2 h-2 bg-blue-400 shadow-[0_0_8px_2px_rgba(96,165,250,0.5)]'
+                  : 'w-1.5 h-1.5 bg-white/20 group-hover:bg-white/50'
+              }`}
+            />
+          </a>
+        )
+      })}
+    </div>
+  )
+}
 
 function ExperienceItem({ title, company, location, time, bullets }) {
   return (
