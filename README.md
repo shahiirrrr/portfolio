@@ -1,16 +1,56 @@
-# React + Vite
+# Personal Portfolio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, interactive personal portfolio website built with React and Vite, featuring premium GSAP animations and smooth scrolling.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Interactive Design:** Rich aesthetics with smooth gradients and micro-animations.
+- **Premium Animations:** Custom GSAP implementation including preloader, physics-based effects, scroll-triggered storytelling elements, and magnetic cursor.
+- **Smooth Scrolling:** Integrated with Lenis for an enhanced, buttery-smooth scrolling experience.
+- **Motion Effects:** Framer Motion for elegant component transitions.
+- **Responsive Layout:** Optimized for all devices and screen sizes using TailwindCSS.
+- **Project Showcase:** Detailed display of professional projects.
+- **Experience Timeline:** Highlighting work history and skills.
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Framework:** [React 19](https://react.dev/)
+- **Build Tool:** [Vite](https://vitejs.dev/)
+- **Animations:** [GSAP](https://gsap.com/) & [Framer Motion](https://www.framer.com/motion/)
+- **Scrolling:** [Lenis](https://lenis.darkroom.engineering/)
+- **Styling:** [TailwindCSS](https://tailwindcss.com/)
 
-## Expanding the ESLint configuration
+## Project Structure
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```text
+portfolio/
+├── public/          # Static assets
+├── src/
+│   ├── utils/       # Helper functions and utilities
+│   ├── App.jsx      # Main application component
+│   ├── main.jsx     # Entry point
+│   ├── App.css      # Component styles
+│   └── index.css    # Global styles & Tailwind directives
+├── package.json     # Project dependencies and scripts
+└── vite.config.js   # Vite configuration
+```
+
+## Getting Started
+
+First, install the dependencies:
+
+```bash
+npm install
+# or
+yarn install
+```
+
+Then, run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+```
+
+Open [http://localhost:5173](http://localhost:5173) with your browser to see the result.
