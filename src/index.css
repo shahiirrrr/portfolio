@@ -1,9 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap');
+
 @tailwind base;
+
 @tailwind components;
 @tailwind utilities;
 
 /* Global minimal styles */
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
 }
 
@@ -26,9 +31,9 @@ html, body, #root {
   stroke-dasharray: 6 10;
   animation: dash 18s linear infinite;
 }
+
 @keyframes dash {
   to {
     stroke-dashoffset: -1000;
   }
 }
-

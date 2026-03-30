@@ -3,6 +3,8 @@ import { motion, useScroll, useSpring } from 'framer-motion'
 import { useMemo, useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import Lenis from 'lenis'
+import CodeParticles from './components/CodeParticles'
+
 
 function App() {
   const name = 'SHAHIR FARHAN'
@@ -287,6 +289,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-neutral-900 text-neutral-100 font-sans relative">
+      <CodeParticles />
       <ScrollProgressBar />
       <SectionDots sections={sectionIds} activeSection={activeSection} />
       <BackgroundFX />
@@ -855,11 +858,10 @@ function SectionDots({ sections, activeSection }) {
             </span>
             {/* Dot */}
             <span
-              className={`block rounded-full transition-all duration-300 ${
-                isActive
-                  ? 'w-2 h-2 bg-blue-400 shadow-[0_0_8px_2px_rgba(96,165,250,0.5)]'
-                  : 'w-1.5 h-1.5 bg-white/20 group-hover:bg-white/50'
-              }`}
+              className={`block rounded-full transition-all duration-300 ${isActive
+                ? 'w-2 h-2 bg-blue-400 shadow-[0_0_8px_2px_rgba(96,165,250,0.5)]'
+                : 'w-1.5 h-1.5 bg-white/20 group-hover:bg-white/50'
+                }`}
             />
           </a>
         )
