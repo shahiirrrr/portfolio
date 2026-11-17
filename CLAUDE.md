@@ -211,6 +211,7 @@ Motion is specified per section in the Figma "Dev Notes" frames — implement wh
 - `draft: true` entries render in `pnpm dev` only and are excluded from production builds and the sitemap.
 - Structured page data lives in `src/data/*.ts` with types from `src/types`.
 - Copy is real or absent: only text that exists in Figma or comes from the owner. Never write lorem ipsum or invented biography, clients, metrics or results.
+- Licensing: code is MIT (`LICENSE`); personal content, images, copy, CV and branding are all rights reserved (`CONTENT-LICENSE.md`). Keep `README.md` factual and in sync when features or the stack change; never change the license scope without the owner.
 
 ## 17. Image optimization
 
