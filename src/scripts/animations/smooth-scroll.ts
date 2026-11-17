@@ -19,6 +19,9 @@ import { CAN_HOVER, gsap, MOTION_OK, ScrollTrigger } from './core.ts';
 /** Glide strength per 60 Hz frame (Lenis default 0.1). Lower is silkier. */
 const LERP = 0.075;
 
+/** Where Lenis runs: mouse/trackpad devices with motion allowed. */
+export const SMOOTH_SCROLL = `${MOTION_OK} and ${CAN_HOVER}`;
+
 let lenis: Lenis | undefined;
 let locked = false;
 
@@ -27,7 +30,7 @@ const isNestedScroller = (node: HTMLElement): boolean =>
   node instanceof HTMLTextAreaElement && node.scrollHeight > node.clientHeight;
 
 // Created synchronously, so it exists before any other module's script runs.
-gsap.matchMedia().add(`${MOTION_OK} and ${CAN_HOVER}`, () => {
+gsap.matchMedia().add(SMOOTH_SCROLL, () => {
   const instance = new Lenis({
     lerp: LERP,
     smoothWheel: true,
@@ -37,8 +40,9 @@ gsap.matchMedia().add(`${MOTION_OK} and ${CAN_HOVER}`, () => {
     prevent: isNestedScroller,
   });
   const raf = (time: number): void => instance.raf(time * 1000);
-  // ScrollTrigger refreshes can add or remove pin spacing; re-measure after them.
-  const resize = (): void => instance.resize();
+  // ScrollTrigger refreshes can add or remove pin spacing; re-measure the
+  // scroll limit after them (dimensions only, so a glide in flight continues).
+  const resize = (): void => instance.dimensions.resize();
 
   instance.on('scroll', ScrollTrigger.update);
   gsap.ticker.add(raf);
@@ -54,18 +58,35 @@ gsap.matchMedia().add(`${MOTION_OK} and ${CAN_HOVER}`, () => {
   };
 });
 
-// Focus moves (Tab, form errors) scroll natively. Drop any glide still in
-// flight so Lenis re-syncs to the new position instead of pulling it back.
-document.addEventListener('focusin', () => {
+/**
+ * Focus moves and keyboard scrolling are native scrolls. While a wheel glide
+ * is in flight Lenis ignores native scrolls and would pull the page back, so
+ * drop the glide and let Lenis re-sync to wherever the browser scrolls.
+ */
+function yieldToNativeScroll(): void {
   if (lenis?.isScrolling !== 'smooth') return;
   lenis.stop();
   if (!locked) lenis.start();
+}
+
+const SCROLL_KEYS = new Set([' ', 'PageUp', 'PageDown', 'Home', 'End', 'ArrowUp', 'ArrowDown']);
+
+/** Keys typed into controls edit or activate them instead of scrolling the page. */
+const isControl = (target: EventTarget | null): boolean =>
+  target instanceof HTMLElement &&
+  (target.isContentEditable || target.closest('input, textarea, select, button') !== null);
+
+document.addEventListener('focusin', yieldToNativeScroll);
+document.addEventListener('keydown', (event) => {
+  if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
+  if (!SCROLL_KEYS.has(event.key) || isControl(event.target)) return;
+  yieldToNativeScroll();
 });
 
-/** Scroll the page to `y` px (smooth glide with Lenis, instant otherwise). */
+/** Scroll the page to `y` px: Lenis glide, native smooth scroll, or instant with reduced motion. */
 export function scrollToY(y: number): void {
   if (lenis) lenis.scrollTo(y);
-  else window.scrollTo(0, y);
+  else window.scrollTo({ top: y, behavior: matchMedia(MOTION_OK).matches ? 'smooth' : 'auto' });
 }
 
 /** Freeze page scrolling (e.g. while a modal is open). */

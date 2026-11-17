@@ -15,14 +15,8 @@
  * With prefers-reduced-motion nothing moves: content is simply visible.
  * Without JavaScript every element is visible as authored.
  */
-import {
-  gsap,
-  markMotionReady,
-  MOTION_OK,
-  MOTION_REDUCED,
-  ScrollTrigger,
-  SplitText,
-} from './core.ts';
+import { gsap, markMotionReady, MOTION_OK, MOTION_REDUCED, SplitText } from './core.ts';
+import { refreshScroll } from './smooth-scroll.ts';
 
 function numberAttr(el: HTMLElement, name: string, fallback: number): number {
   const value = Number(el.dataset[name]);
@@ -132,4 +126,4 @@ mm.add(MOTION_REDUCED, () => {
 });
 
 // Web fonts and lazy images shift layout after first paint; re-measure triggers.
-window.addEventListener('load', () => ScrollTrigger.refresh(), { once: true });
+window.addEventListener('load', refreshScroll, { once: true });
