@@ -23,12 +23,16 @@ Fix issues you are confident about, inside the changed code, with minimal edits:
 rule violations, bugs, failing `pnpm validate`. Then run `pnpm validate` and keep
 going until it passes.
 
+Only edit files under `src/` — edits anywhere else are rejected and nothing is
+pushed. In particular never touch `package.json`, the lockfile, `tsconfig.json`,
+`astro.config.ts`, Prettier config or ignore files, `vercel.json`, `public/`,
+`.github/`, `.claude/` or `CLAUDE.md`; never make a check pass by weakening it.
+
 Never:
 
 - change visual design, copy or content meaning (Figma is the source of truth and
   you cannot see it), or fill a `PLACEHOLDER` value
 - add, remove or upgrade dependencies
-- touch `.github/`, `.claude/`, `CLAUDE.md`, `pnpm-lock.yaml` or `public/`
 - refactor code the pull request did not change
 
 ## Output files
@@ -46,4 +50,5 @@ Write these into the review directory given above:
 3. `blockers.md` — only if a blocking problem remains that you could not or should
    not fix (e.g. `pnpm validate` still fails, content looks invented, a change needs
    an owner decision). List each with `path:line` and why. Its presence stops the
-   merge, so do not use it for suggestions.
+   merge and your edits are **not** pushed, so do not use it for suggestions; in
+   that case title the **Fixed** section **Proposed fixes (not applied)**.

@@ -262,15 +262,25 @@ Examples: `feat/contact-form`, `fix/mobile-menu-focus`, `content/nextbase-case-s
 
 Examples: `feat(nav): replace stack link with home`, `fix(mobile-menu): close dialog on same-page links`, `content(work): add nextbase case study`, `chore(deps): update astro to 7.1`.
 
-The scope `review` is reserved: `fix(review): …` commits are made only by the CI reviewer (a commit starting with it skips the review).
+The scope `review` is reserved for the CI reviewer's `fix(review): …` commits; don't use it by hand.
 
 ### CI/CD (fully automatic)
 
-1. **Push** to `feat/portfolio-phase-<n>` → `auto-pr.yml` opens a PR into `main` (if none is open) and enables auto-merge (merge commit, so the phase branch keeps working).
-2. **Every PR** → `ci.yml` runs `pnpm validate` (check **`validate`**); `claude-review.yml` reviews the diff against this file using `.github/claude-review.md`, edits what it can fix, and pushes a `fix(review): …` commit (check **`claude-review`**). The owner authorises this job — and only this job — to push to PR branches. Unfixable problems fail the check and are posted as a PR comment; the merge then waits for the owner.
+1. **Push** to `feat/portfolio-phase-<n>` → `auto-pr.yml` opens a PR into `main` (if none is open) and enables auto-merge (merge commit, so the phase branch keeps working). It refuses to run unless the `main` ruleset requires both checks. Add the `hold` label to a PR to stop auto-merge being re-enabled (disable it once in the PR UI).
+2. **Every PR** → `ci.yml` runs `pnpm validate` (check **`validate`**). `claude-review.yml` reviews the diff against this file using `.github/claude-review.md` (check **`claude-review`**):
+   - job `analyze` runs Claude with no write token; Claude's edits leave it only as a patch;
+   - job `claude-review` always runs (never passes by being skipped), posts the review as a PR comment, fails on blockers, and otherwise applies the patch — **only files under `src/`** — and pushes a `fix(review): …` commit. The owner authorises this job, and only this job, to push to PR branches.
+   - The fix commit gets a `claude-review/automated-fix` status that only this workflow can set; a run on a commit with that marker passes without re-reviewing (CI still validates it). Drafts and fork PRs fail the check.
 3. Both required checks green → GitHub merges → Vercel deploys `main` to production. Vercel also deploys a preview for every PR.
 
-Setup lives outside the repo: secrets `AUTOMATION_TOKEN` (owner's fine-grained PAT: Contents + Pull requests read/write, this repo only) and `CLAUDE_CODE_OAUTH_TOKEN` (or `ANTHROPIC_API_KEY`); a ruleset on `main` requiring `validate` + `claude-review`; "Allow auto-merge" on; "Automatically delete head branches" **off**; the Vercel project connected to this repo with `main` as production branch. Never weaken the review prompt's guardrails (no design/content changes, no dependencies, no protected paths).
+To overrule a blocker, merge manually with the ruleset bypass. Never weaken the review guardrails (src/-only edits, no design/content changes, no dependencies, no token while project code runs).
+
+**One-time setup (outside the repo):**
+
+- Secrets: `AUTOMATION_TOKEN` — owner's fine-grained PAT for this repo only with Contents, Pull requests and Workflows read/write; `CLAUDE_CODE_OAUTH_TOKEN` (from `claude setup-token`) or `ANTHROPIC_API_KEY`.
+- Settings → General: "Allow auto-merge" on, "Allow merge commits" on, "Automatically delete head branches" **off**.
+- Ruleset on `main`: require a pull request (0 approvals); require status checks `validate` and `claude-review`, with "require branches to be up to date" **off**; block force pushes; Repository admin as a bypass actor (pull requests only).
+- Vercel project connected to this repo, production branch `main`.
 
 ## 19. Validation
 

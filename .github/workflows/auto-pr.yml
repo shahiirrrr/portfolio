@@ -32,6 +32,21 @@ jobs:
         run: |
           set -euo pipefail
 
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::Set the AUTOMATION_TOKEN repository secret (see CLAUDE.md §18)."
+            exit 1
+          fi
+
+          # Refuse to enable auto-merge unless main requires both checks.
+          required="$(gh api "repos/$REPO/rules/branches/main" \
+            --jq '[.[] | select(.type == "required_status_checks") | .parameters.required_status_checks[].context] | join(" ")')"
+          for check in validate claude-review; do
+            if [[ " $required " != *" $check "* ]]; then
+              echo "::error::The main ruleset must require the '$check' status check before auto-merge is allowed."
+              exit 1
+            fi
+          done
+
           ahead="$(gh api "repos/$REPO/compare/main...$BRANCH" --jq .ahead_by)"
           if [ "$ahead" = "0" ]; then
             echo "$BRANCH has no commits ahead of main; nothing to do."
@@ -52,7 +67,11 @@ jobs:
               --json number --jq '.[0].number')"
           fi
 
-          if [ "$(gh pr view "$number" --repo "$REPO" --json autoMergeRequest --jq '.autoMergeRequest != null')" = "true" ]; then
+          # The owner pauses a release by adding the `hold` label to the PR.
+          if [ "$(gh pr view "$number" --repo "$REPO" --json labels --jq '[.labels[].name] | index("hold") != null')" = "true" ]; then
+            gh pr merge "$number" --repo "$REPO" --disable-auto 2> /dev/null || true
+            echo "#$number has the 'hold' label; auto-merge is off."
+          elif [ "$(gh pr view "$number" --repo "$REPO" --json autoMergeRequest --jq '.autoMergeRequest != null')" = "true" ]; then
             echo "Auto-merge already enabled on #$number."
           else
             gh pr merge "$number" --repo "$REPO" --auto --merge

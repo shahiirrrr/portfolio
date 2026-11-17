@@ -1,77 +1,92 @@
-# Claude reviews every pull request against CLAUDE.md, fixes what it can, and
-# pushes the fixes as a `fix(review): …` commit authored as the PR's last
-# committer (no AI attribution). Remaining blockers fail the `claude-review`
-# check, which is required on main, so auto-merge waits for the owner.
+# Claude reviews every pull request against CLAUDE.md and fixes what it can.
+# Required check on main: `claude-review` (job 2). It always runs and only
+# passes when a review genuinely passed — never by being skipped.
 #
-# Loop guard: when the newest commit is a `fix(review):` commit, the review job
-# is skipped (a skipped required check counts as passing); CI still validates it.
+# Job 1 `analyze` runs Claude with no write token and no stored git credentials;
+#   Claude's edits leave the job only as a patch artifact.
+# Job 2 `claude-review` posts the review, stops on blockers, applies the patch
+#   (files under src/ only — no project code is executed while the owner token
+#   is present), pushes a `fix(review): …` commit as the PR's last committer
+#   (no AI attribution) and marks that commit with a status only this workflow
+#   can create. A run on a commit carrying the marker passes without
+#   re-reviewing it (CI still validates it).
 #
 # Prompt: .github/claude-review.md
 name: Claude review
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
 
 concurrency:
   group: claude-review-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
-  pull-requests: write
+permissions: {}
 
 env:
   CLAUDE_CODE_VERSION: 2.1.326
+  MARKER_CONTEXT: claude-review/automated-fix
+  PR: ${{ github.event.pull_request.number }}
+  BASE: ${{ github.event.pull_request.base.ref }}
+  HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+  HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
 
 jobs:
-  gate:
-    name: gate
-    if: github.event.pull_request.head.repo.full_name == github.repository && !github.event.pull_request.draft
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    outputs:
-      review: ${{ steps.check.outputs.review }}
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-      - id: check
-        name: Skip automated fix commits
-        run: |
-          subject="$(git log -1 --format=%s)"
-          if [[ "$subject" == "fix(review):"* ]]; then
-            echo "Newest commit is an automated review fix; skipping review."
-            echo "review=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "review=true" >> "$GITHUB_OUTPUT"
-          fi
-
-  claude-review:
-    name: claude-review
-    needs: gate
-    if: needs.gate.outputs.review == 'true'
+  analyze:
+    name: analyze
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    env:
-      PR: ${{ github.event.pull_request.number }}
-      BASE: ${{ github.event.pull_request.base.ref }}
-      HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
-      REVIEW_DIR: ${{ runner.temp }}/review
+    permissions:
+      contents: read
+      statuses: read
+    outputs:
+      mode: ${{ steps.mode.outputs.mode }}
     steps:
       - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
-          # Owner token: pushes made with it trigger CI on the fix commit.
-          token: ${{ secrets.AUTOMATION_TOKEN }}
+          persist-credentials: false
+
+      - name: Decide mode
+        id: mode
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IS_FORK: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
+          IS_DRAFT: ${{ github.event.pull_request.draft }}
+        run: |
+          set -euo pipefail
+          echo "REVIEW_DIR=$RUNNER_TEMP/review" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/review"
+
+          mode=review
+          if [ "$IS_FORK" = "true" ]; then
+            mode=fork
+          elif [ "$IS_DRAFT" = "true" ]; then
+            mode=draft
+          elif [[ "$(git log -1 --format=%s)" == "fix(review):"* ]]; then
+            # The subject is only a hint; the marker status (set by this workflow's
+            # GITHUB_TOKEN right after its own push) is the proof.
+            for _ in 1 2 3 4 5 6; do
+              n="$(gh api "repos/$GITHUB_REPOSITORY/commits/$HEAD_SHA/statuses" \
+                --jq "[.[] | select(.context == \"$MARKER_CONTEXT\" and .state == \"success\" and .creator.login == \"github-actions[bot]\")] | length")"
+              if [ "$n" != "0" ]; then mode=bot-fix; break; fi
+              sleep 5
+            done
+          fi
+          echo "mode=$mode" >> "$GITHUB_OUTPUT"
+          echo "Mode: $mode"
 
       - uses: ./.github/actions/setup
+        if: steps.mode.outputs.mode == 'review'
 
       - name: Install Claude Code
+        if: steps.mode.outputs.mode == 'review'
         run: npm install --global "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
 
       - name: Review and fix
+        if: steps.mode.outputs.mode == 'review'
         env:
           OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -86,7 +101,7 @@ jobs:
             echo "::error::Set the CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY repository secret."
             exit 1
           fi
-          mkdir -p "$REVIEW_DIR"
+
           prompt="$(printf 'Pull request: #%s\nBase ref: origin/%s\nReview directory: %s\n\n' \
             "$PR" "$BASE" "$REVIEW_DIR"; cat .github/claude-review.md)"
           claude -p "$prompt" \
@@ -95,50 +110,157 @@ jobs:
             --allowedTools Read Glob Grep Edit Write \
               "Bash(git diff *)" "Bash(git log *)" "Bash(git show *)" "Bash(git status)" \
               "Bash(pnpm validate)" "Bash(pnpm check)" "Bash(pnpm format)" "Bash(pnpm build)" \
-            --max-budget-usd 5
+            --max-budget-usd 5 \
+            --output-format json > "$RUNNER_TEMP/claude-result.json"
+
+          if ! jq -e '.is_error == false and .subtype == "success"' "$RUNNER_TEMP/claude-result.json" > /dev/null; then
+            echo "::error::Claude did not complete the review."
+            jq '{subtype, is_error}' "$RUNNER_TEMP/claude-result.json" || true
+            exit 1
+          fi
+          if [ ! -s "$REVIEW_DIR/summary.md" ]; then
+            echo "::error::The review produced no summary."
+            exit 1
+          fi
+
+      - name: Package fixes
+        if: steps.mode.outputs.mode == 'review'
+        run: |
+          set -euo pipefail
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No fixes."
+            exit 0
+          fi
+          git diff --cached --binary --no-renames > "$REVIEW_DIR/fix.patch"
+          git diff --cached --stat
+          # The fixed tree must pass; otherwise nothing is pushed.
+          if ! pnpm validate; then
+            printf -- '- `pnpm validate` fails after the automated fixes.\n' >> "$REVIEW_DIR/blockers.md"
+          fi
+
+      - uses: actions/upload-artifact@v7
+        if: steps.mode.outputs.mode == 'review'
+        with:
+          name: claude-review
+          path: ${{ runner.temp }}/review/
+          retention-days: 7
+
+  claude-review:
+    name: claude-review
+    needs: analyze
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+      statuses: write
+    env:
+      MODE: ${{ needs.analyze.outputs.mode }}
+      ANALYZE: ${{ needs.analyze.result }}
+    steps:
+      - name: Check analysis
+        run: |
+          echo "REVIEW_DIR=$RUNNER_TEMP/review" >> "$GITHUB_ENV"
+          case "$ANALYZE/$MODE" in
+            success/review) ;;
+            success/bot-fix) echo "Automated fix commit from a completed review; passing." ;;
+            success/draft) echo "::error::Draft PR: the review runs when it is marked ready."; exit 1 ;;
+            success/fork) echo "::error::Fork PRs are not reviewed automatically; merge manually."; exit 1 ;;
+            *) echo "::error::The review did not complete (analyze: $ANALYZE)."; exit 1 ;;
+          esac
+
+      - uses: actions/download-artifact@v8
+        if: env.MODE == 'review'
+        with:
+          name: claude-review
+          path: ${{ runner.temp }}/review
+
+      - name: Scrub attribution
+        if: env.MODE == 'review'
+        run: |
+          for f in summary.md blockers.md commit.txt; do
+            if [ -f "$REVIEW_DIR/$f" ]; then
+              sed -i -E '/(Co-authored-by:|Generated with .*Claude|Claude-Session|noreply@anthropic\.com|claude\.ai\/code)/Id' "$REVIEW_DIR/$f"
+            fi
+          done
 
       - name: Post review comment
-        if: always()
+        if: env.MODE == 'review'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if [ -f "$REVIEW_DIR/summary.md" ]; then
-            gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" \
-              --body-file "$REVIEW_DIR/summary.md" --edit-last --create-if-none
+          set -euo pipefail
+          body="$REVIEW_DIR/summary.md"
+          if [ -f "$REVIEW_DIR/blockers.md" ] && [ -s "$REVIEW_DIR/fix.patch" ]; then
+            printf '\n---\n**Blocking issues remain, so the fixes listed above were not pushed.**\n' >> "$body"
           fi
+          gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" \
+            --body-file "$body" --edit-last --create-if-none
 
       - name: Stop on blockers
+        if: env.MODE == 'review'
         run: |
           if [ -f "$REVIEW_DIR/blockers.md" ]; then
-            echo "::error::Review found blocking issues; auto-merge will wait."
+            echo "::error::The review found blocking issues; auto-merge will wait."
             cat "$REVIEW_DIR/blockers.md"
             exit 1
           fi
 
-      - name: Commit and push fixes
+      - name: Check for fixes
+        id: fixes
+        if: env.MODE == 'review'
         run: |
-          set -euo pipefail
-          if [ -z "$(git status --porcelain)" ]; then
-            echo "No fixes needed."
-            exit 0
+          if [ -s "$REVIEW_DIR/fix.patch" ]; then
+            echo "push=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No fixes to push."
           fi
 
-          if git status --porcelain | grep -E ' (\.github/|\.claude/|CLAUDE\.md|pnpm-lock\.yaml|public/)'; then
-            echo "::error::Review edited a protected path; refusing to push."
+      - uses: actions/checkout@v7
+        if: steps.fixes.outputs.push == 'true'
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - name: Apply and push fixes
+        if: steps.fixes.outputs.push == 'true'
+        env:
+          TOKEN: ${{ secrets.AUTOMATION_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git apply --index "$REVIEW_DIR/fix.patch"
+
+          # Only regular files under src/ may change (NUL-safe; renames split into delete + add).
+          outside="$(git diff --cached --name-only --no-renames -z | tr '\0' '\n' | grep -v '^src/' || true)"
+          if [ -n "$outside" ]; then
+            echo "::error::The fixes touch files outside src/; refusing to push:"
+            echo "$outside"
+            exit 1
+          fi
+          if git diff --cached --raw --no-renames | grep -qE '^:[0-7]+ 120000 '; then
+            echo "::error::The fixes add a symlink; refusing to push."
             exit 1
           fi
 
-          pnpm validate
-
           msg="$REVIEW_DIR/commit.txt"
-          if ! head -n1 "$msg" 2>/dev/null | grep -q '^fix(review): '; then
+          if [ ! -s "$msg" ] || ! head -n1 "$msg" | grep -q '^fix(review): '; then
             printf 'fix(review): apply automated review fixes\n' > "$msg"
           fi
-          # Belt and braces: never let an attribution line reach a commit.
-          sed -i -E '/^(Co-authored-by|Generated with|Claude-Session)/Id; /claude\.(ai|com)/Id' "$msg"
 
-          git config user.name "$(git log -1 --format=%an)"
-          git config user.email "$(git log -1 --format=%ae)"
-          git add -A
-          git commit --file "$msg"
-          git push origin "HEAD:refs/heads/${HEAD_BRANCH}"
+          git -c core.hooksPath=/dev/null \
+            -c user.name="$(git log -1 --format=%an)" \
+            -c user.email="$(git log -1 --format=%ae)" \
+            commit --no-verify --file "$msg"
+
+          auth="$(printf 'x-access-token:%s' "$TOKEN" | base64 -w0)"
+          echo "::add-mask::$auth"
+          git -c core.hooksPath=/dev/null \
+            -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" \
+            push "https://github.com/$GITHUB_REPOSITORY.git" "HEAD:refs/heads/$HEAD_BRANCH"
+
+          gh api -X POST "repos/$GITHUB_REPOSITORY/statuses/$(git rev-parse HEAD)" \
+            -f state=success -f context="$MARKER_CONTEXT" \
+            -f description="Automated fix for reviewed commit ${HEAD_SHA:0:7}" > /dev/null
