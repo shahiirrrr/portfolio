@@ -1,0 +1,60 @@
+# On every push to a phase branch (feat/portfolio-phase-<n>), make sure a PR
+# into main exists and has auto-merge (merge commit) enabled. GitHub merges it
+# once the required checks (`validate`, `claude-review`) pass; Vercel then
+# deploys main to production.
+#
+# Uses the owner's AUTOMATION_TOKEN (not GITHUB_TOKEN) so the PR is authored by
+# the owner and its events trigger the CI and review workflows.
+name: Auto PR
+
+on:
+  push:
+    branches: ['feat/portfolio-phase-*']
+
+concurrency:
+  group: auto-pr-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  open-pr:
+    name: open-pr
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ secrets.AUTOMATION_TOKEN }}
+      REPO: ${{ github.repository }}
+      BRANCH: ${{ github.ref_name }}
+    steps:
+      - name: Open PR into main and enable auto-merge
+        run: |
+          set -euo pipefail
+
+          ahead="$(gh api "repos/$REPO/compare/main...$BRANCH" --jq .ahead_by)"
+          if [ "$ahead" = "0" ]; then
+            echo "$BRANCH has no commits ahead of main; nothing to do."
+            exit 0
+          fi
+
+          number="$(gh pr list --repo "$REPO" --head "$BRANCH" --base main --state open \
+            --json number --jq '.[0].number // empty')"
+
+          if [ -z "$number" ]; then
+            phase="${BRANCH#feat/}"
+            commits="$(gh api "repos/$REPO/compare/main...$BRANCH" \
+              --jq '.commits[].commit.message | split("\n")[0] | "- " + .')"
+            gh pr create --repo "$REPO" --head "$BRANCH" --base main \
+              --title "feat: ${phase//-/ }" \
+              --body "$(printf 'Automated PR for `%s`. Merges automatically once `validate` and `claude-review` pass.\n\n## Commits\n\n%s\n' "$BRANCH" "$commits")"
+            number="$(gh pr list --repo "$REPO" --head "$BRANCH" --base main --state open \
+              --json number --jq '.[0].number')"
+          fi
+
+          if [ "$(gh pr view "$number" --repo "$REPO" --json autoMergeRequest --jq '.autoMergeRequest != null')" = "true" ]; then
+            echo "Auto-merge already enabled on #$number."
+          else
+            gh pr merge "$number" --repo "$REPO" --auto --merge
+            echo "Auto-merge enabled on #$number."
+          fi

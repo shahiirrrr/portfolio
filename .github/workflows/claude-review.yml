@@ -1,0 +1,144 @@
+# Claude reviews every pull request against CLAUDE.md, fixes what it can, and
+# pushes the fixes as a `fix(review): …` commit authored as the PR's last
+# committer (no AI attribution). Remaining blockers fail the `claude-review`
+# check, which is required on main, so auto-merge waits for the owner.
+#
+# Loop guard: when the newest commit is a `fix(review):` commit, the review job
+# is skipped (a skipped required check counts as passing); CI still validates it.
+#
+# Prompt: .github/claude-review.md
+name: Claude review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: claude-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  CLAUDE_CODE_VERSION: 2.1.326
+
+jobs:
+  gate:
+    name: gate
+    if: github.event.pull_request.head.repo.full_name == github.repository && !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      review: ${{ steps.check.outputs.review }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - id: check
+        name: Skip automated fix commits
+        run: |
+          subject="$(git log -1 --format=%s)"
+          if [[ "$subject" == "fix(review):"* ]]; then
+            echo "Newest commit is an automated review fix; skipping review."
+            echo "review=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "review=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  claude-review:
+    name: claude-review
+    needs: gate
+    if: needs.gate.outputs.review == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PR: ${{ github.event.pull_request.number }}
+      BASE: ${{ github.event.pull_request.base.ref }}
+      HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+      REVIEW_DIR: ${{ runner.temp }}/review
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          # Owner token: pushes made with it trigger CI on the fix commit.
+          token: ${{ secrets.AUTOMATION_TOKEN }}
+
+      - uses: ./.github/actions/setup
+
+      - name: Install Claude Code
+        run: npm install --global "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
+
+      - name: Review and fix
+        env:
+          OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set -euo pipefail
+          # Use whichever credential is configured (subscription token preferred).
+          if [ -n "$OAUTH_TOKEN" ]; then
+            export CLAUDE_CODE_OAUTH_TOKEN="$OAUTH_TOKEN"
+          elif [ -n "$API_KEY" ]; then
+            export ANTHROPIC_API_KEY="$API_KEY"
+          else
+            echo "::error::Set the CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY repository secret."
+            exit 1
+          fi
+          mkdir -p "$REVIEW_DIR"
+          prompt="$(printf 'Pull request: #%s\nBase ref: origin/%s\nReview directory: %s\n\n' \
+            "$PR" "$BASE" "$REVIEW_DIR"; cat .github/claude-review.md)"
+          claude -p "$prompt" \
+            --add-dir "$REVIEW_DIR" \
+            --permission-mode acceptEdits \
+            --allowedTools Read Glob Grep Edit Write \
+              "Bash(git diff *)" "Bash(git log *)" "Bash(git show *)" "Bash(git status)" \
+              "Bash(pnpm validate)" "Bash(pnpm check)" "Bash(pnpm format)" "Bash(pnpm build)" \
+            --max-budget-usd 5
+
+      - name: Post review comment
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -f "$REVIEW_DIR/summary.md" ]; then
+            gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" \
+              --body-file "$REVIEW_DIR/summary.md" --edit-last --create-if-none
+          fi
+
+      - name: Stop on blockers
+        run: |
+          if [ -f "$REVIEW_DIR/blockers.md" ]; then
+            echo "::error::Review found blocking issues; auto-merge will wait."
+            cat "$REVIEW_DIR/blockers.md"
+            exit 1
+          fi
+
+      - name: Commit and push fixes
+        run: |
+          set -euo pipefail
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No fixes needed."
+            exit 0
+          fi
+
+          if git status --porcelain | grep -E ' (\.github/|\.claude/|CLAUDE\.md|pnpm-lock\.yaml|public/)'; then
+            echo "::error::Review edited a protected path; refusing to push."
+            exit 1
+          fi
+
+          pnpm validate
+
+          msg="$REVIEW_DIR/commit.txt"
+          if ! head -n1 "$msg" 2>/dev/null | grep -q '^fix(review): '; then
+            printf 'fix(review): apply automated review fixes\n' > "$msg"
+          fi
+          # Belt and braces: never let an attribution line reach a commit.
+          sed -i -E '/^(Co-authored-by|Generated with|Claude-Session)/Id; /claude\.(ai|com)/Id' "$msg"
+
+          git config user.name "$(git log -1 --format=%an)"
+          git config user.email "$(git log -1 --format=%ae)"
+          git add -A
+          git commit --file "$msg"
+          git push origin "HEAD:refs/heads/${HEAD_BRANCH}"

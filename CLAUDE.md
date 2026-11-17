@@ -42,6 +42,7 @@ case-study content for every project except Nextbase.
 | `@astrojs/sitemap`                                    | Sitemap                        | Only integration installed                                               |
 | Prettier + `prettier-plugin-astro`                    | Formatting                     | No ESLint — `astro check` covers correctness                             |
 | Vercel                                                | Hosting                        | Static deploy; `vercel.json` only enforces trailing slashes              |
+| GitHub Actions                                        | CI/CD                          | Validate, auto-PR, Claude review → auto-merge (see §18)                  |
 
 ## 3. Architecture overview
 
@@ -65,6 +66,7 @@ src/
 │   └── sections/        ContactCta (shared) + home/, work/, about/, case-study/, contact/, not-found/
 └── pages/               index, work/ (index + [slug]), about/, contact/, 404, robots.txt.ts
 public/                  favicon.svg, images/og-default.png
+.github/                 workflows/ (ci, auto-pr, claude-review), actions/setup, claude-review.md (review prompt)
 ```
 
 Data flow: `config/` + `data/` + `content/` → `utils/` → pages → sections → ui/common components.
@@ -253,12 +255,22 @@ Examples: `feat/contact-form`, `fix/mobile-menu-focus`, `content/nextbase-case-s
 ```
 
 - **type** — one of the types in the table above.
-- **scope** — optional; the area touched: `home`, `work`, `about`, `contact`, `case-study`, `header`, `footer`, `nav`, `seo`, `a11y`, `animation`, `deps`, `config`.
+- **scope** — optional; the area touched: `home`, `work`, `about`, `contact`, `case-study`, `header`, `footer`, `nav`, `seo`, `a11y`, `animation`, `deps`, `config`, `ci`.
 - **subject** — imperative mood ("add", not "added"), lowercase, no trailing period; whole header ≤ 72 characters.
 - **body** — optional; wrap at 72 characters; explain what changed and why (bullets are fine).
 - One logical change per commit; don't mix refactors with features.
 
 Examples: `feat(nav): replace stack link with home`, `fix(mobile-menu): close dialog on same-page links`, `content(work): add nextbase case study`, `chore(deps): update astro to 7.1`.
+
+The scope `review` is reserved: `fix(review): …` commits are made only by the CI reviewer (a commit starting with it skips the review).
+
+### CI/CD (fully automatic)
+
+1. **Push** to `feat/portfolio-phase-<n>` → `auto-pr.yml` opens a PR into `main` (if none is open) and enables auto-merge (merge commit, so the phase branch keeps working).
+2. **Every PR** → `ci.yml` runs `pnpm validate` (check **`validate`**); `claude-review.yml` reviews the diff against this file using `.github/claude-review.md`, edits what it can fix, and pushes a `fix(review): …` commit (check **`claude-review`**). The owner authorises this job — and only this job — to push to PR branches. Unfixable problems fail the check and are posted as a PR comment; the merge then waits for the owner.
+3. Both required checks green → GitHub merges → Vercel deploys `main` to production. Vercel also deploys a preview for every PR.
+
+Setup lives outside the repo: secrets `AUTOMATION_TOKEN` (owner's fine-grained PAT: Contents + Pull requests read/write, this repo only) and `CLAUDE_CODE_OAUTH_TOKEN` (or `ANTHROPIC_API_KEY`); a ruleset on `main` requiring `validate` + `claude-review`; "Allow auto-merge" on; "Automatically delete head branches" **off**; the Vercel project connected to this repo with `main` as production branch. Never weaken the review prompt's guardrails (no design/content changes, no dependencies, no protected paths).
 
 ## 19. Validation
 
