@@ -127,7 +127,7 @@ const { pathname } = Astro.url;
       }
     });
 
-    // A link tap navigates; close immediately so same-page links (#stack) reveal the page.
+    // A link tap navigates; close immediately so same-page links (e.g. Home on /) reveal the page.
     menu.querySelectorAll('[data-menu-link]').forEach((link) => {
       link.addEventListener('click', () => menu.close());
     });
