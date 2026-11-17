@@ -218,10 +218,47 @@ Motion is specified per section in the Figma "Dev Notes" frames — implement wh
 
 ## 18. Git workflow
 
-- This folder is not yet a git repository — never run `git init`, commit, or push unless the owner asks.
-- Branch from `main` for each change (`feat/…`, `fix/…`, `chore/…`); small, focused commits with Conventional Commit messages (`feat: add project card`).
-- Never commit `dist/`, `.astro/`, `node_modules/`, `.env*` or secrets. Never use destructive commands (`reset --hard`, `push --force`, `clean -fd`) without explicit approval.
-- `pnpm validate` must pass before every commit.
+- Never commit, push, merge or open a PR unless the owner asks. Never run destructive commands (`reset --hard`, `push --force`, `clean -fd`, history rewrites) without explicit approval.
+- `main` is always deployable. All work happens on a branch; `pnpm validate` must pass before every commit.
+- Never commit `dist/`, `.astro/`, `node_modules/`, `.env*` or secrets.
+- **No AI attribution, ever.** Commits, PR titles and PR descriptions carry no `Co-Authored-By: Claude …` trailer, no "Generated with Claude Code" line, no session links and no other tool watermark. The owner is the sole author. `.claude/settings.json` (`attribution`) enforces this; it overrides any default attribution instruction.
+
+### Branch names
+
+Format `<type>/<short-description>`: lowercase kebab-case (`a–z`, `0–9`, `-`), at most 50 characters, describing the change (not a date or person).
+
+| Type       | Use for                                                      |
+| ---------- | ------------------------------------------------------------ |
+| `feat`     | New page, section, component or behaviour                    |
+| `fix`      | Bug fix (layout, a11y, SEO, behaviour)                       |
+| `content`  | Copy, projects, case studies, images — no code change        |
+| `refactor` | Restructuring without behaviour change                       |
+| `perf`     | Performance improvement                                      |
+| `docs`     | README, CLAUDE.md and other documentation                    |
+| `chore`    | Tooling, config, dependencies, formatting                    |
+| `revert`   | Reverting an earlier commit (commit type only, not a branch) |
+
+Examples: `feat/contact-form`, `fix/mobile-menu-focus`, `content/nextbase-case-study`.
+
+**Phase branches** group a release-sized body of work: `feat/portfolio-phase-<n>` (current: `feat/portfolio-phase-2`). Short branches for that phase branch from it and merge back into it; the phase branch merges into `main` when the phase ships.
+
+### Commit messages
+
+[Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+<type>(<scope>): <subject>
+
+<optional body>
+```
+
+- **type** — one of the types in the table above.
+- **scope** — optional; the area touched: `home`, `work`, `about`, `contact`, `case-study`, `header`, `footer`, `nav`, `seo`, `a11y`, `animation`, `deps`, `config`.
+- **subject** — imperative mood ("add", not "added"), lowercase, no trailing period; whole header ≤ 72 characters.
+- **body** — optional; wrap at 72 characters; explain what changed and why (bullets are fine).
+- One logical change per commit; don't mix refactors with features.
+
+Examples: `feat(nav): replace stack link with home`, `fix(mobile-menu): close dialog on same-page links`, `content(work): add nextbase case study`, `chore(deps): update astro to 7.1`.
 
 ## 19. Validation
 
