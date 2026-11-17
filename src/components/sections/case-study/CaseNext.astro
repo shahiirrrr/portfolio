@@ -1,0 +1,141 @@
+---
+/**
+ * Next project panel (Figma: 11 Next Project). The whole panel is one link;
+ * on hover its image zooms to 1.04 and the arrow slides 4px right.
+ */
+import { Image } from 'astro:assets';
+
+interface Props {
+  href: string;
+  title: string;
+  /** Already formatted, e.g. "BigCommerce · React · Widgets". */
+  stack: string;
+  image?: ImageMetadata | undefined;
+}
+
+const { href, title, stack, image } = Astro.props;
+---
+
+<section class="cs-next" aria-labelledby="cs-next-title">
+  <a class="cs-next__panel" href={href} data-reveal>
+    <div class="cs-next__text">
+      <p class="cs-next__label text-mono">
+        NEXT PROJECT{' '}
+        <span class="cs-next__arrow" aria-hidden="true">
+          →
+        </span>
+      </p>
+      <h2 class="cs-next__title" id="cs-next-title">
+        {title}
+      </h2>
+      <p class="cs-next__stack text-body">{stack}</p>
+    </div>
+    {image && (
+      <div class="cs-next__image">
+        <Image src={image} alt="" widths={[400, 640, 1040]} sizes="(min-width: 48em) 520px, 85vw" />
+      </div>
+    )}
+  </a>
+</section>
+
+<style>
+  .cs-next {
+    /* 56px at 390 (scales down on narrower screens) → 128px at 1440. */
+    --cs-next-title-size: min(14.359vw, clamp(3.5rem, 1.829rem + 6.857vw, 8rem));
+
+    padding-inline: var(--panel-gutter);
+  }
+
+  .cs-next__panel {
+    display: flex;
+    flex-direction: column;
+    max-width: 1400px;
+    margin-inline: auto;
+    padding: var(--space-8) var(--space-6);
+    overflow: hidden;
+    color: var(--color-text-inverse);
+    background-color: var(--color-bg-cream);
+    border-radius: var(--radius-panel);
+  }
+
+  .cs-next__text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    min-width: 0;
+  }
+
+  .cs-next__label {
+    color: var(--color-ember);
+  }
+
+  .cs-next__arrow {
+    display: inline-block;
+    transition: translate var(--duration-base) var(--ease-out);
+  }
+
+  .cs-next__title {
+    font-size: var(--cs-next-title-size);
+    font-weight: var(--weight-bold);
+    line-height: 0.9;
+    letter-spacing: -0.06em;
+  }
+
+  .cs-next__stack {
+    opacity: 0.68;
+  }
+
+  .cs-next__image {
+    height: 220px;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+  }
+
+  .cs-next__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: scale var(--duration-slow) var(--ease-out);
+  }
+
+  @media (hover: hover) {
+    .cs-next__panel:hover .cs-next__image img {
+      scale: 1.04;
+    }
+
+    .cs-next__panel:hover .cs-next__arrow {
+      translate: 4px 0;
+    }
+  }
+
+  .cs-next__panel:focus-visible .cs-next__image img {
+    scale: 1.04;
+  }
+
+  .cs-next__panel:focus-visible .cs-next__arrow {
+    translate: 4px 0;
+  }
+
+  @media (min-width: 48em) {
+    .cs-next__panel {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-12);
+      padding: var(--space-12);
+    }
+
+    .cs-next__title {
+      line-height: var(--leading-display);
+      letter-spacing: var(--tracking-display);
+    }
+
+    .cs-next__image {
+      flex: 0 0 auto;
+      width: min(520px, 40%);
+      height: auto;
+      aspect-ratio: 520 / 340;
+      border-radius: var(--radius-card);
+    }
+  }
+</style>

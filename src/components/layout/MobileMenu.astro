@@ -1,0 +1,251 @@
+---
+/**
+ * Full-screen mobile menu (Figma: Mobile Menu). A native <dialog>, so focus is
+ * trapped, the page behind is inert, Esc closes it and focus returns to the
+ * Menu button. Opens as a circle expanding from the Menu button.
+ */
+import arrowIcon from '@/assets/icons/arrow-up-right-md.svg';
+import closeIcon from '@/assets/icons/close-dark.svg';
+import glow from '@/assets/images/dial/glow.svg';
+import Button from '@/components/common/Button.astro';
+import { MAIN_NAV } from '@/config/navigation';
+import { SITE, SOCIAL_LINKS } from '@/config/site';
+import { isActivePath, padIndex } from '@/utils/helpers';
+
+const { pathname } = Astro.url;
+---
+
+<dialog class="menu" id="mobile-menu" aria-label="Menu" data-menu>
+  <img class="menu__glow" src={glow.src} width="800" height="800" alt="" />
+
+  <div class="menu__top">
+    <button class="menu__close" type="button" aria-label="Close menu" data-menu-close>
+      <img src={closeIcon.src} width="18" height="18" alt="" />
+    </button>
+  </div>
+
+  <nav aria-label="Mobile">
+    <ul class="menu__links" role="list">
+      {MAIN_NAV.map(({ label, href }, i) => {
+        const current = isActivePath(href, pathname);
+        return (
+          <li class="menu__item">
+            <a
+              class="menu__link"
+              href={href}
+              aria-current={current ? 'page' : undefined}
+              data-menu-link
+            >
+              <span class="menu__index text-mono">{padIndex(i + 1)}</span>
+              <span class="menu__label">{label}</span>
+              {current && <img src={arrowIcon.src} width="24" height="24" alt="" />}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  </nav>
+
+  <div class="menu__bottom" data-menu-contact>
+    <a class="menu__email" href={`mailto:${SITE.email}`}>
+      {SITE.email}
+    </a>
+    <ul class="menu__socials text-label" role="list">
+      {SOCIAL_LINKS.map(({ label, href }) => (
+        <li>
+          <a href={href} target="_blank" rel="noopener">
+            {label}
+          </a>
+        </li>
+      ))}
+    </ul>
+    <Button label="Start a project" href="/contact/" />
+  </div>
+</dialog>
+
+<script>
+  import { gsap, MOTION_OK } from '@/scripts/animations/core';
+
+  const menu = document.querySelector<HTMLDialogElement>('[data-menu]');
+  const openButton = document.querySelector<HTMLButtonElement>('[data-menu-open]');
+
+  if (menu && openButton) {
+    // Circle origin: the centre of the Menu button (design: 44px from the top-right corner).
+    const origin = 'at calc(100% - 44px) 44px';
+    let timeline: gsap.core.Timeline | undefined;
+
+    const mm = gsap.matchMedia();
+    mm.add(MOTION_OK, () => {
+      timeline = gsap
+        .timeline({ paused: true, onReverseComplete: () => menu.close() })
+        .fromTo(
+          menu,
+          { clipPath: `circle(0% ${origin})` },
+          { clipPath: `circle(150% ${origin})`, duration: 0.7, ease: 'power3.inOut' },
+        )
+        .from(
+          menu.querySelectorAll('[data-menu-link]'),
+          { yPercent: 100, opacity: 0, stagger: 0.06, duration: 0.6, ease: 'power3.out' },
+          '-=0.3',
+        )
+        .from(menu.querySelector('[data-menu-contact]'), { opacity: 0, y: 16 }, '-=0.3');
+
+      return () => {
+        timeline = undefined;
+      };
+    });
+
+    const open = () => {
+      menu.showModal();
+      openButton.setAttribute('aria-expanded', 'true');
+      document.documentElement.style.overflow = 'hidden';
+      timeline?.timeScale(1).play(0);
+    };
+
+    const close = () => {
+      // Closing plays the opening in reverse, faster.
+      if (timeline) timeline.timeScale(1.8).reverse();
+      else menu.close();
+    };
+
+    openButton.addEventListener('click', open);
+    menu.querySelector('[data-menu-close]')?.addEventListener('click', close);
+
+    // Esc: play the closing animation instead of closing instantly.
+    menu.addEventListener('cancel', (event) => {
+      if (!timeline) return;
+      event.preventDefault();
+      close();
+    });
+
+    menu.addEventListener('close', () => {
+      openButton.setAttribute('aria-expanded', 'false');
+      document.documentElement.style.overflow = '';
+      // Safari does not focus buttons on click, so the dialog has nothing to restore.
+      if (!menu.contains(document.activeElement) && document.activeElement !== openButton) {
+        openButton.focus({ preventScroll: true });
+      }
+    });
+
+    // A link tap navigates; close immediately so same-page links (#stack) reveal the page.
+    menu.querySelectorAll('[data-menu-link]').forEach((link) => {
+      link.addEventListener('click', () => menu.close());
+    });
+
+    // Leaving the mobile breakpoint with the menu open would strand it.
+    window.matchMedia('(min-width: 768px)').addEventListener('change', (event) => {
+      if (event.matches && menu.open) menu.close();
+    });
+  }
+</script>
+
+<style>
+  .menu {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    padding: var(--space-8) var(--space-5);
+    overflow: hidden auto;
+    color: var(--color-text);
+    background-color: var(--color-bg);
+    border: 0;
+  }
+
+  .menu[open] {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--space-8);
+  }
+
+  .menu::backdrop {
+    background: transparent;
+  }
+
+  .menu__glow {
+    position: absolute;
+    inset-block-start: 420px;
+    inset-inline-start: -180px;
+    width: 800px;
+    max-width: none;
+    pointer-events: none;
+  }
+
+  .menu__top,
+  .menu nav,
+  .menu__bottom {
+    position: relative;
+  }
+
+  .menu__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background-color: var(--color-bg-cream);
+    border-radius: var(--radius-full);
+  }
+
+  .menu__item + .menu__item {
+    border-block-start: var(--border-strong);
+  }
+
+  .menu__item {
+    overflow: hidden;
+  }
+
+  .menu__link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding-block: 14px;
+  }
+
+  .menu__index {
+    color: var(--color-text-muted);
+  }
+
+  .menu__link[aria-current='page'] .menu__index {
+    color: var(--color-accent);
+  }
+
+  .menu__label {
+    flex: 1;
+    font-size: 3.25rem;
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-h1);
+  }
+
+  .menu__bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-5);
+  }
+
+  .menu__email {
+    font-size: var(--text-xl);
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-h3);
+    text-decoration: underline;
+  }
+
+  .menu__socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    color: var(--color-text-secondary);
+  }
+
+  .menu__socials a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--space-6);
+  }
+</style>

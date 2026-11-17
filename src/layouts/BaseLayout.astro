@@ -1,0 +1,45 @@
+---
+/**
+ * Document shell: <html>, <head> (SEO, fonts, favicon, global CSS) and <body>.
+ * Has no visible chrome — use PageLayout for regular pages.
+ */
+import '@/styles/global.css';
+
+import { Font } from 'astro:assets';
+
+import Seo from '@/components/common/Seo.astro';
+import { SITE } from '@/config/site';
+import type { LayoutProps } from '@/types';
+
+type Props = LayoutProps;
+
+const { seo = {}, jsonLd = [] } = Astro.props;
+---
+
+<!doctype html>
+<html lang={SITE.locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b0b0b" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <Font cssVariable="--font-manrope" preload={[{ weight: 600 }, { weight: 700 }]} />
+    <Font cssVariable="--font-jetbrains-mono" />
+    <Font cssVariable="--font-antonio" />
+    <Font cssVariable="--font-unbounded" />
+    <Seo seo={seo} jsonLd={jsonLd} />
+    <!-- Marks JS as available so on-load intros can hide their start state
+         (see `[data-intro]` in global.css). The timeout is a failsafe: content
+         is shown even if the animation script never runs. -->
+    <script is:inline>
+      document.documentElement.classList.add('js');
+      setTimeout(function () {
+        document.documentElement.classList.add('motion-ready');
+      }, 2500);
+    </script>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

@@ -1,0 +1,126 @@
+---
+/**
+ * Experience timeline (Figma: 02 Experience, Timeline Row). Rows come from
+ * `data/experience.ts`, newest first. Desktop: period | company + role |
+ * description | location. Mobile: period + location, company, role, description.
+ */
+import { EXPERIENCE } from '@/data/experience';
+---
+
+<section class="experience container" aria-labelledby="experience-heading">
+  <h2 class="text-h1" id="experience-heading">
+    Where I've worked
+  </h2>
+
+  <div class="experience__timeline">
+    <ol class="timeline" role="list" data-reveal-group data-y="30" data-stagger="0.1">
+      {EXPERIENCE.map(({ company, role, location, period, summary, summaryShort }) => (
+        <li class="timeline-row" data-reveal-item>
+          <p class="timeline-row__period text-mono">{period}</p>
+          <p class="timeline-row__location text-mono">
+            <span class="visually-hidden">Location: </span>
+            {location}
+          </p>
+          <div class="timeline-row__company">
+            <h3 class="text-h3">{company}</h3>
+            <p class="text-body text-secondary">{role}</p>
+          </div>
+          <p class="timeline-row__summary text-secondary">
+            {summaryShort ? (
+              <>
+                <span class="mobile-only">{summaryShort}</span>
+                <span class="desktop-only">{summary}</span>
+              </>
+            ) : (
+              summary
+            )}
+          </p>
+        </li>
+      ))}
+    </ol>
+    <span class="experience__end-rule" aria-hidden="true" data-end-rule></span>
+  </div>
+</section>
+
+<script>
+  import { initAboutTimeline } from '@/scripts/animations/about-timeline';
+
+  document.querySelectorAll<HTMLElement>('[data-end-rule]').forEach(initAboutTimeline);
+</script>
+
+<style>
+  .experience {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    padding-block: var(--space-6) var(--space-18);
+  }
+
+  .experience__end-rule {
+    display: block;
+    height: var(--border-width);
+    background-color: var(--color-border-strong);
+  }
+
+  .timeline-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'period location'
+      'company company'
+      'summary summary';
+    gap: var(--space-2);
+    padding-block: var(--space-6);
+    border-block-start: var(--border-strong);
+  }
+
+  .timeline-row__period {
+    grid-area: period;
+    color: var(--color-accent);
+  }
+
+  .timeline-row__location {
+    grid-area: location;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .timeline-row__company {
+    display: flex;
+    flex-direction: column;
+    grid-area: company;
+    gap: var(--space-2);
+  }
+
+  .timeline-row__summary {
+    grid-area: summary;
+    font-size: var(--text-sm);
+    line-height: var(--leading-body-sm);
+  }
+
+  @media (min-width: 48em) {
+    .experience {
+      gap: var(--space-10);
+      padding-block: var(--space-10) var(--space-35);
+    }
+
+    .timeline-row {
+      grid-template-columns:
+        clamp(7rem, 13.8vw, 11.25rem) clamp(12rem, 27.6vw, 22.5rem)
+        minmax(0, 1fr) auto;
+      grid-template-areas: 'period company summary location';
+      gap: clamp(var(--space-6), 2.78vw, var(--space-10));
+      padding-block: calc(var(--space-8) + var(--space-1));
+    }
+
+    .timeline-row__company {
+      gap: 6px;
+    }
+
+    .timeline-row__summary {
+      font-size: var(--text-base);
+      line-height: var(--leading-normal);
+    }
+  }
+</style>

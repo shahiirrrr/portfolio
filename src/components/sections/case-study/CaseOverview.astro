@@ -1,0 +1,69 @@
+---
+/** Overview: label column + statement and body copy (Figma: 04 Overview). */
+interface Props {
+  heading: string;
+  body: string;
+}
+
+const { heading, body } = Astro.props;
+---
+
+<section class="cs-overview container" aria-labelledby="cs-overview-heading">
+  <h2 class="cs-overview__label text-h4" id="cs-overview-heading">
+    Overview
+  </h2>
+  <div class="cs-overview__content">
+    <h3 class="cs-overview__heading text-h2">{heading}</h3>
+    <p class="cs-overview__body text-secondary">{body}</p>
+  </div>
+</section>
+
+<style>
+  .cs-overview {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding-block: var(--space-16) var(--space-6);
+  }
+
+  .cs-overview__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .cs-overview__heading {
+    line-height: 1.12;
+  }
+
+  .cs-overview__body {
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+  }
+
+  @media (min-width: 48em) {
+    .cs-overview {
+      flex-direction: row;
+      gap: var(--space-20);
+      padding-block: 120px var(--space-10);
+    }
+
+    .cs-overview__label {
+      flex: 0 1 300px;
+    }
+
+    .cs-overview__content {
+      flex: 1 1 0;
+      min-width: 60%;
+    }
+
+    .cs-overview__heading {
+      line-height: var(--leading-tight);
+    }
+
+    .cs-overview__body {
+      font-size: var(--text-lg);
+      line-height: var(--leading-body-sm);
+    }
+  }
+</style>

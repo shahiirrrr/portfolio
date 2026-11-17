@@ -1,0 +1,148 @@
+---
+/**
+ * Global fixed header (Figma: Site Header).
+ *  - Desktop: the four nav links spread across the content width.
+ *  - Mobile (< 768px): a single "Menu" button that opens MobileMenu.
+ *  - Hides on scroll down, returns on scroll up, and gains a blurred dark
+ *    background once the page has scrolled past `[data-header-hero]` (or 80px
+ *    when the page has no hero marker).
+ * `theme="light"` is for pages that start on a white hero (Home).
+ */
+import { MAIN_NAV } from '@/config/navigation';
+import { isActivePath } from '@/utils/helpers';
+
+import MobileMenu from './MobileMenu.astro';
+
+interface Props {
+  theme?: 'dark' | 'light';
+}
+
+const { theme = 'dark' } = Astro.props;
+const { pathname } = Astro.url;
+---
+
+<header class="site-header" data-theme={theme} data-site-header data-intro>
+  <div class="container site-header__inner">
+    <nav class="desktop-only" aria-label="Primary">
+      <ul class="site-header__nav" role="list">
+        {MAIN_NAV.map(({ label, href }) => (
+          <li>
+            <a href={href} aria-current={isActivePath(href, pathname) ? 'page' : undefined}>
+              {label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <button
+      class="site-header__menu mobile-only"
+      type="button"
+      aria-haspopup="dialog"
+      aria-expanded="false"
+      aria-controls="mobile-menu"
+      data-menu-open
+    >
+      Menu
+    </button>
+  </div>
+</header>
+
+<MobileMenu />
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-site-header]');
+
+  if (header) {
+    const hero = document.querySelector<HTMLElement>('[data-header-hero]');
+    let lastY = window.scrollY;
+
+    const update = () => {
+      const y = window.scrollY;
+      // Past the hero (minus the header's own height) when there is one, else 80px.
+      const solidAfter = hero ? hero.offsetHeight - header.offsetHeight : 80;
+      header.classList.toggle('is-hidden', y > lastY && y > 120);
+      header.classList.toggle('is-solid', y > solidAfter);
+      lastY = y;
+    };
+
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+  }
+</script>
+
+<style>
+  .site-header {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: var(--z-header);
+    padding-block-start: var(--space-5);
+    font-size: var(--text-nav);
+    font-weight: var(--weight-medium);
+    line-height: normal;
+    color: var(--color-text);
+    transition:
+      transform var(--duration-base) var(--ease-out),
+      background-color var(--duration-base) ease-out,
+      color var(--duration-base) ease-out;
+  }
+
+  .site-header[data-theme='light'] {
+    color: var(--color-text-inverse);
+  }
+
+  .site-header.is-solid {
+    color: var(--color-text);
+    background-color: var(--color-header-solid);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+  }
+
+  .site-header.is-hidden:not(:focus-within) {
+    transform: translateY(-100%);
+  }
+
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    height: var(--header-height);
+  }
+
+  .site-header nav {
+    flex: 1;
+  }
+
+  .site-header__nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .site-header__nav a,
+  .site-header__menu {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-min);
+    color: inherit;
+    font: inherit;
+  }
+
+  .site-header__nav a[aria-current='page'] {
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
+  }
+
+  @media (hover: hover) {
+    .site-header__nav a:hover {
+      text-decoration: underline;
+      text-underline-offset: 0.3em;
+    }
+  }
+
+  @media (min-width: 48em) {
+    .site-header {
+      padding-block-start: var(--space-8);
+    }
+  }
+</style>

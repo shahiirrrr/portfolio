@@ -1,0 +1,25 @@
+---
+import ContactCta from '@/components/sections/ContactCta.astro';
+import Playground from '@/components/sections/work/Playground.astro';
+import WorkFilters from '@/components/sections/work/WorkFilters.astro';
+import WorkHero from '@/components/sections/work/WorkHero.astro';
+import WorkList from '@/components/sections/work/WorkList.astro';
+import PageLayout from '@/layouts/PageLayout.astro';
+import { getProjects } from '@/utils/projects';
+
+const projects = await getProjects();
+
+const seo = {
+  title: 'Work',
+  description:
+    'Browse all work and experiments by Shahir: client builds, product work and side projects, from headless storefronts to computer vision.',
+};
+---
+
+<PageLayout seo={seo}>
+  <WorkHero total={projects.length} />
+  <WorkFilters />
+  <WorkList projects={projects} />
+  <Playground />
+  <ContactCta />
+</PageLayout>

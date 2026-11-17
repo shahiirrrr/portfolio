@@ -1,0 +1,201 @@
+---
+/**
+ * Case study hero (Figma: 01 Hero): breadcrumb, title, subtitle and the
+ * ROLE / STACK / TIMELINE / LIVE facts. Only facts that exist are rendered.
+ */
+import { padIndex } from '@/utils/helpers';
+
+interface MetaItem {
+  label: string;
+  value: string;
+  /** External URL: the value becomes a link that opens in a new tab. */
+  href?: string;
+}
+
+interface Props {
+  title: string;
+  subtitle?: string | undefined;
+  /** 1-based position in the case-study cycle. */
+  index: number;
+  /** Number of case studies. */
+  total: number;
+  meta: MetaItem[];
+}
+
+const { title, subtitle, index, total, meta } = Astro.props;
+---
+
+<header class="cs-hero container" data-cs-hero>
+  <div class="cs-hero__top">
+    <nav class="cs-hero__breadcrumb" aria-label="Breadcrumb">
+      <a class="cs-hero__back text-label" href="/work/">
+        <span aria-hidden="true">←</span> All work
+      </a>
+    </nav>
+    <p class="cs-hero__count text-mono">
+      CASE STUDY — {padIndex(index)} / {padIndex(total)}
+    </p>
+  </div>
+
+  <h1 class="cs-hero__title" data-line-reveal="load" data-intro>
+    {title}
+  </h1>
+
+  {subtitle && (
+    <p class="cs-hero__subtitle text-h2" data-cs-fade data-intro>
+      {subtitle}
+    </p>
+  )}
+
+  {meta.length > 0 && (
+    <dl class="cs-hero__meta">
+      {meta.map((item) => (
+        <div class="cs-hero__meta-item" data-cs-fade data-intro>
+          <dt class="text-mono">{item.label}</dt>
+          <dd class="text-h4">
+            {item.href ? (
+              <a class="cs-hero__live" href={item.href} target="_blank" rel="noopener">
+                {item.value}{' '}
+                <span class="cs-hero__live-arrow" aria-hidden="true">
+                  &#x2197;&#xFE0E;
+                </span>
+                <span class="visually-hidden">(opens in a new tab)</span>
+              </a>
+            ) : (
+              item.value
+            )}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  )}
+</header>
+
+<script>
+  import { initCaseStudyHero } from '@/scripts/animations/case-study-hero';
+
+  document.querySelectorAll<HTMLElement>('[data-cs-hero]').forEach(initCaseStudyHero);
+</script>
+
+<style>
+  .cs-hero {
+    /* Mobile/Display 76px at 390 (scales down on narrower screens) → Display/XL 176px at 1440. */
+    --cs-title-size: min(19.487vw, clamp(4.75rem, 2.429rem + 9.524vw, 11rem));
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    padding-block: var(--space-14) var(--space-10);
+  }
+
+  .cs-hero__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .cs-hero__breadcrumb {
+    display: flex;
+  }
+
+  .cs-hero__back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-height: var(--tap-min);
+    /* Keeps the 44px tap target without growing the row beyond the text line. */
+    margin-block: calc((var(--text-sm) * var(--leading-snug) - var(--tap-min)) / 2);
+    color: var(--color-text-secondary);
+    transition: color var(--duration-fast) ease-out;
+  }
+
+  .cs-hero__count {
+    color: var(--color-text-muted);
+    white-space: nowrap;
+  }
+
+  .cs-hero__title {
+    font-size: var(--cs-title-size);
+    font-weight: var(--weight-bold);
+    line-height: 0.9;
+    letter-spacing: -0.06em;
+  }
+
+  /* SplitText line masks clip at the line box; give descenders ("Yoga") room. */
+  .cs-hero__title > :global(*) {
+    padding-block-end: 0.12em;
+    margin-block-end: -0.12em;
+  }
+
+  .cs-hero__subtitle {
+    line-height: 1.12;
+  }
+
+  .cs-hero__meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-5) var(--space-4);
+  }
+
+  .cs-hero__meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-block-start: var(--space-5);
+    border-block-start: var(--border-strong);
+  }
+
+  .cs-hero__meta-item dt {
+    color: var(--color-text-muted);
+  }
+
+  .cs-hero__meta-item dd {
+    overflow-wrap: break-word;
+  }
+
+  .cs-hero__live {
+    text-decoration: underline transparent;
+    transition: text-decoration-color var(--duration-fast) ease-out;
+  }
+
+  .cs-hero__live-arrow {
+    font-variant-emoji: text;
+  }
+
+  .cs-hero__live:focus-visible {
+    text-decoration-color: currentcolor;
+  }
+
+  @media (hover: hover) {
+    .cs-hero__back:hover {
+      color: var(--color-text);
+    }
+
+    .cs-hero__live:hover {
+      text-decoration-color: currentcolor;
+    }
+  }
+
+  @media (min-width: 48em) {
+    .cs-hero {
+      gap: var(--space-10);
+      padding-block: 104px var(--space-18);
+    }
+
+    .cs-hero__title {
+      line-height: var(--leading-display);
+      letter-spacing: var(--tracking-display);
+    }
+
+    .cs-hero__subtitle {
+      max-width: 1000px;
+      line-height: var(--leading-tight);
+    }
+
+    .cs-hero__meta {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--space-6);
+    }
+  }
+</style>

@@ -1,0 +1,45 @@
+---
+/** About principles: three folder panels (Figma: 04 Principles). */
+import FolderPanel from '@/components/ui/FolderPanel.astro';
+import { PRINCIPLES } from '@/data/about';
+---
+
+<section class="principles container" aria-labelledby="principles-heading">
+  <h2 class="text-h1" id="principles-heading">
+    How I think about frontend
+  </h2>
+
+  <div class="principles__panels" data-reveal-group>
+    {PRINCIPLES.map((item, i) => (
+      <FolderPanel index={i + 1} {...item} />
+    ))}
+  </div>
+</section>
+
+<style>
+  .principles {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    padding-block-end: var(--space-18);
+  }
+
+  .principles__panels {
+    --folder-panel-height: 300px; /* About mobile frame */
+
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  @media (min-width: 48em) {
+    .principles {
+      gap: var(--space-10);
+      padding-block-end: var(--space-35);
+    }
+
+    .principles__panels {
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: var(--space-4);
+    }
+  }
+</style>

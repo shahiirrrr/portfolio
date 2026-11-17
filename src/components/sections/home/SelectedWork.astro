@@ -1,0 +1,203 @@
+---
+/**
+ * Home "Selected work" (Figma: 03 Selected Work): light panel with a native
+ * horizontal scroll rail of folder cards. Desktop: prev/next arrows, progress
+ * track and counter. Mobile: swipe rail with counter + "All work" button.
+ */
+import chevronLeft from '@/assets/icons/chevron-left-dark.svg';
+import chevronRight from '@/assets/icons/chevron-right-light.svg';
+import Button from '@/components/common/Button.astro';
+import ProjectCard from '@/components/ui/ProjectCard.astro';
+import { padIndex } from '@/utils/helpers';
+import { getFeaturedProjects } from '@/utils/projects';
+
+const projects = await getFeaturedProjects();
+---
+
+<section class="work" aria-labelledby="work-heading" data-rail>
+  <div class="work__inner">
+    <header class="work__header">
+      <h2 class="text-h1" id="work-heading" data-reveal>
+        Work that ships, <br class="desktop-only" />
+        stories that stick.
+      </h2>
+      <div class="work__aside desktop-only">
+        <p class="text-body">
+          Four builds, from headless commerce to
+          <br />
+          computer vision — each shipped end to end.
+        </p>
+        <Button label="View all work" href="/work/" variant="accent" />
+      </div>
+    </header>
+
+    <div
+      class="work__rail"
+      data-rail-track
+      tabindex="0"
+      role="group"
+      aria-label="Selected projects"
+    >
+      {projects.map((project, i) => (
+        <ProjectCard project={project} index={i + 1} />
+      ))}
+    </div>
+
+    <div class="work__controls">
+      <div class="work__progress">
+        <p class="text-mono" data-rail-count aria-live="polite">
+          01 / {padIndex(projects.length)}
+        </p>
+        <div class="work__track desktop-only" aria-hidden="true">
+          <div class="work__fill" data-rail-fill></div>
+        </div>
+      </div>
+
+      <div class="work__arrows desktop-only">
+        <button class="work__arrow" type="button" aria-label="Previous project" data-rail-prev>
+          <img src={chevronLeft.src} width="20" height="20" alt="" />
+        </button>
+        <button
+          class="work__arrow work__arrow--next"
+          type="button"
+          aria-label="Next project"
+          data-rail-next
+        >
+          <img src={chevronRight.src} width="20" height="20" alt="" />
+        </button>
+      </div>
+
+      <Button class="mobile-only" label="All work" href="/work/" variant="accent" />
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initRail } from '@/scripts/animations/rail';
+
+  document.querySelectorAll<HTMLElement>('[data-rail]').forEach((rail) => initRail(rail));
+</script>
+
+<style>
+  .work {
+    overflow: hidden;
+    color: var(--color-text-inverse);
+    background-color: var(--color-bg-cream);
+    border-radius: var(--radius-panel);
+  }
+
+  .work__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    max-width: calc(var(--container-default) + 2 * var(--container-gutter));
+    margin-inline: auto;
+    padding: var(--space-20) var(--container-gutter) var(--space-16);
+  }
+
+  .work__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-8);
+  }
+
+  .work__aside {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-7);
+  }
+
+  /* The rail bleeds to both panel edges; cards snap to the content edge. */
+  .work__rail {
+    display: flex;
+    gap: var(--space-3);
+    margin-inline: calc(-1 * var(--container-gutter));
+    padding-inline: var(--container-gutter);
+    overflow-x: auto;
+    scroll-padding-inline: var(--container-gutter);
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .work__rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .work__controls,
+  .work__progress,
+  .work__arrows {
+    display: flex;
+    align-items: center;
+  }
+
+  .work__controls {
+    justify-content: space-between;
+  }
+
+  .work__progress {
+    gap: var(--space-5);
+  }
+
+  .work__track {
+    width: 280px;
+    height: 2px;
+    background-color: var(--color-text-inverse);
+  }
+
+  .work__fill {
+    height: 100%;
+    background-color: var(--color-ember);
+    transform: scaleX(0.25);
+    transform-origin: left;
+  }
+
+  .work__arrows {
+    gap: var(--space-3);
+  }
+
+  .work__arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--space-14);
+    height: var(--space-14);
+    border: var(--border-width) solid var(--color-text-inverse);
+    border-radius: var(--radius-full);
+    transition: opacity var(--duration-fast) ease-out;
+  }
+
+  .work__arrow--next {
+    background-color: var(--color-text-inverse);
+  }
+
+  .work__arrow:disabled {
+    cursor: default;
+    opacity: 0.35;
+  }
+
+  .work :focus-visible {
+    outline-color: var(--color-text-inverse);
+  }
+
+  @media (min-width: 48em) {
+    .work__inner {
+      gap: var(--space-12);
+      padding-block: var(--space-24) var(--space-18);
+    }
+
+    .work__rail {
+      gap: var(--space-4);
+    }
+  }
+
+  /* Past the content width the rail bleeds to the viewport edge, like the 1440 frame. */
+  @media (min-width: 90em) {
+    .work__rail {
+      margin-inline-end: calc(-1 * (var(--container-gutter) + (100vw - 90rem) / 2));
+      padding-inline-end: calc(var(--container-gutter) + (100vw - 90rem) / 2);
+    }
+  }
+</style>

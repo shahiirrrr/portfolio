@@ -1,0 +1,91 @@
+---
+/**
+ * Project list (Figma: Work / 03 Project List): every project from the
+ * collection as a Work Row, closed by an end rule. `data-view` switches
+ * between the list and the desktop grid (set by work-filter.ts).
+ */
+import WorkRow from '@/components/sections/work/WorkRow.astro';
+import { WORK_FILTERS, tagSlug } from '@/data/work';
+import { formatStack, projectPath, type Project } from '@/utils/projects';
+
+interface Props {
+  projects: Project[];
+}
+
+const { projects } = Astro.props;
+
+const rows = projects.map((project) => {
+  const { title, order, stack, year, thumbnail, card } = project.data;
+  const tags = WORK_FILTERS.filter((label) => stack.some((entry) => entry.startsWith(label)))
+    .map(tagSlug)
+    .join(' ');
+  return {
+    index: order,
+    title,
+    stack: formatStack(stack),
+    year,
+    href: projectPath(project),
+    // Only Topbar Suite has a preview in the design; others reuse their Home card image.
+    thumbnail: thumbnail ?? card?.image,
+    tags,
+  };
+});
+---
+
+<section class="work-projects container" aria-labelledby="work-projects-heading">
+  <h2 class="visually-hidden" id="work-projects-heading">
+    Projects
+  </h2>
+  <ul
+    class="work-list"
+    role="list"
+    data-work-list
+    data-view="list"
+    data-reveal-group
+    data-stagger="0.06"
+  >
+    {rows.map((row) => (
+      <WorkRow {...row} />
+    ))}
+  </ul>
+  <p class="work-empty" data-work-empty hidden>
+    Nothing here yet.{' '}
+    <a href="/work/" data-work-reset>
+      Show all projects
+    </a>
+  </p>
+</section>
+
+<style>
+  .work-projects {
+    padding-block-end: var(--space-16);
+  }
+
+  .work-list {
+    border-block-end: var(--border-strong);
+  }
+
+  .work-empty {
+    padding-block: var(--space-12);
+    font-size: var(--text-lg);
+    color: var(--color-text-secondary);
+  }
+
+  .work-empty a {
+    color: var(--color-text);
+    text-decoration: underline;
+  }
+
+  @media (min-width: 48em) {
+    .work-projects {
+      padding-block-end: calc(var(--space-28) + var(--space-2));
+    }
+
+    .work-list[data-view='grid'] {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-12) var(--space-6);
+      border-block-end: 0;
+    }
+  }
+</style>

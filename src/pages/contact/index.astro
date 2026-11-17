@@ -1,0 +1,16 @@
+---
+import ContactFaq from '@/components/sections/contact/ContactFaq.astro';
+import ContactHero from '@/components/sections/contact/ContactHero.astro';
+import PageLayout from '@/layouts/PageLayout.astro';
+
+const seo = {
+  title: 'Contact',
+  description:
+    'Have a project, a role or just a question? Get in touch with Shahir, a frontend developer in Wayanad, Kerala, and expect a reply within 24 hours.',
+};
+---
+
+<PageLayout seo={seo}>
+  <ContactHero />
+  <ContactFaq />
+</PageLayout>

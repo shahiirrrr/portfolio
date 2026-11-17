@@ -1,0 +1,138 @@
+---
+/**
+ * "Good to know." FAQ accordion (Figma: 02 FAQ / FAQ Item).
+ * Without JS every answer is visible; with JS one item is open at a time
+ * (the first by default) and heights animate (see contact-faq.ts).
+ */
+import minusIcon from '@/assets/icons/minus-light.svg';
+import plusIcon from '@/assets/icons/plus-light.svg';
+import { CONTACT_FAQ, CONTACT_FAQ_TITLE } from '@/data/contact';
+
+const [titleTop, titleBottom] = CONTACT_FAQ_TITLE;
+---
+
+<section class="faq container" aria-labelledby="faq-heading">
+  <h2 class="faq__title text-h1" id="faq-heading">
+    {titleTop}
+    <br />
+    {titleBottom}
+  </h2>
+
+  <div class="faq__items" data-faq>
+    {CONTACT_FAQ.map(({ question, answer }, i) => (
+      <div class="faq__item" data-faq-item>
+        <h3 class="faq__question text-h4">
+          <button
+            class="faq__button"
+            type="button"
+            id={`faq-q-${i}`}
+            aria-expanded="true"
+            aria-controls={`faq-a-${i}`}
+            data-faq-button
+          >
+            <span>{question}</span>
+            <span class="faq__icon">
+              <img class="faq__plus" src={plusIcon.src} width="20" height="20" alt="" />
+              <img class="faq__minus" src={minusIcon.src} width="20" height="20" alt="" />
+            </span>
+          </button>
+        </h3>
+        <div
+          class="faq__panel"
+          id={`faq-a-${i}`}
+          role="region"
+          aria-labelledby={`faq-q-${i}`}
+          data-faq-panel
+        >
+          <p class="faq__answer text-body text-secondary">{answer}</p>
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
+
+<script>
+  import { initContactFaq } from '@/scripts/animations/contact-faq';
+
+  const root = document.querySelector<HTMLElement>('[data-faq]');
+  if (root) initContactFaq(root);
+</script>
+
+<style>
+  .faq {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    padding-block-end: var(--space-20);
+  }
+
+  .faq__items {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Open: 28 + question + 16 + answer + 28. Closed: 28 + question + 28. */
+  .faq__item {
+    padding-block-end: var(--space-3);
+    border-block-start: var(--border-strong);
+  }
+
+  .faq__question {
+    margin: 0;
+  }
+
+  .faq__button {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+    width: 100%;
+    padding-block: var(--space-7) var(--space-4);
+    text-align: start;
+  }
+
+  .faq__button > span:first-child {
+    flex: 1;
+  }
+
+  .faq__icon {
+    flex-shrink: 0;
+  }
+
+  .faq__button[aria-expanded='true'] .faq__plus,
+  .faq__button[aria-expanded='false'] .faq__minus {
+    display: none;
+  }
+
+  .faq__panel {
+    overflow: hidden;
+  }
+
+  .faq__answer {
+    /* Inside the panel so the height animation includes it. */
+    padding-block-end: var(--space-4);
+  }
+
+  @media (hover: hover) {
+    .faq__button:hover > span:first-child {
+      color: var(--color-text-secondary);
+    }
+  }
+
+  @media (min-width: 48em) {
+    .faq {
+      flex-direction: row;
+      gap: var(--space-10);
+      padding-block-end: var(--space-40);
+    }
+
+    .faq__title {
+      flex: 0 1 26.25rem; /* 420 */
+    }
+  }
+
+  @media (min-width: 80em) {
+    .faq {
+      gap: var(--space-20);
+    }
+  }
+</style>

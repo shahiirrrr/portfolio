@@ -1,0 +1,42 @@
+---
+/**
+ * Renders all SEO-related <head> tags for a page.
+ * Used only by BaseLayout — pages pass overrides through the layout's `seo` prop.
+ */
+import { SITE } from '@/config/site';
+import type { JsonLdSchema, SeoProps } from '@/types';
+import { resolveSeo, serializeJsonLd } from '@/utils/seo';
+
+interface Props {
+  seo: SeoProps;
+  jsonLd: JsonLdSchema[];
+}
+
+const { seo, jsonLd } = Astro.props;
+const meta = resolveSeo(seo, Astro.url.pathname);
+---
+
+<title>{meta.title}</title>
+<meta name="description" content={meta.description} />
+<meta name="robots" content={meta.robots} />
+<link rel="canonical" href={meta.canonical} />
+
+<meta property="og:type" content={meta.type} />
+<meta property="og:site_name" content={SITE.name} />
+<meta property="og:locale" content={SITE.ogLocale} />
+<meta property="og:title" content={meta.title} />
+<meta property="og:description" content={meta.description} />
+<meta property="og:url" content={meta.canonical} />
+<meta property="og:image" content={meta.image.src} />
+<meta property="og:image:alt" content={meta.image.alt} />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={meta.title} />
+<meta name="twitter:description" content={meta.description} />
+<meta name="twitter:image" content={meta.image.src} />
+<meta name="twitter:image:alt" content={meta.image.alt} />
+{SITE.twitterHandle && <meta name="twitter:creator" content={SITE.twitterHandle} />}
+
+{jsonLd.map((schema) => (
+  <script is:inline type="application/ld+json" set:html={serializeJsonLd(schema)} />
+))}

@@ -1,0 +1,398 @@
+---
+/**
+ * Home process section (Figma: Process Dial / Desktop + Mobile).
+ *
+ * Baseline (no JS, or prefers-reduced-motion): a plain numbered list of steps.
+ * Enhanced (`.is-enhanced`, set by the script): the section pins while the
+ * user scrolls; progress rotates the dial one notch per step, snaps to each
+ * step and cross-fades the big numeral, the step copy and the right-hand index.
+ *
+ * Geometry is expressed in design pixels × `--u`, relative to the dial centre
+ * (`--cx`, `--cy`), so the composition scales with the viewport.
+ */
+import activeDot from '@/assets/images/dial/active-dot.svg';
+import dot from '@/assets/images/dial/dot.svg';
+import glow from '@/assets/images/dial/glow.svg';
+import ringInner from '@/assets/images/dial/ring-inner.png';
+import ring from '@/assets/images/dial/ring.svg';
+import { PROCESS_STEPS } from '@/data/home';
+import { padIndex } from '@/utils/helpers';
+---
+
+<section class="process" aria-labelledby="process-heading" data-process>
+  <div class="process__stage" aria-hidden="true">
+    <img class="process__glow" src={glow.src} width="800" height="800" alt="" />
+    <img class="process__ring" src={ring.src} width="760" height="760" alt="" />
+    <img
+      class="process__ring process__ring--inner desktop-only"
+      src={ringInner.src}
+      width="580"
+      height="580"
+      alt=""
+      loading="lazy"
+    />
+    <div class="process__dial" data-process-dial>
+      {PROCESS_STEPS.map((_, i) => (
+        <div class="process__notch" style={`--i:${i - 2}`}>
+          <img class="process__dot" src={dot.src} width="8" height="8" alt="" />
+          <span class="process__notch-number" data-process-notch>
+            {padIndex(i + 1)}
+          </span>
+        </div>
+      ))}
+    </div>
+    <img class="process__active-dot" src={activeDot.src} width="12" height="12" alt="" />
+    <span class="process__tick desktop-only"></span>
+    <div class="process__numerals">
+      {PROCESS_STEPS.map((_, i) => (
+        <span class="process__numeral" data-process-numeral>
+          {padIndex(i + 1)}
+        </span>
+      ))}
+    </div>
+  </div>
+
+  <div class="container process__heading">
+    <h2 class="text-h1" id="process-heading" data-reveal>
+      A five-act process, <br class="desktop-only" />
+      never a template.
+    </h2>
+  </div>
+
+  <ol class="process__steps" role="list">
+    {PROCESS_STEPS.map(({ title, body, bodyShort }, i) => (
+      <li class="process__step" data-process-step>
+        <span class="process__step-number text-mono text-muted">{padIndex(i + 1)}</span>
+        <h3 class="text-h3">{title}</h3>
+        {body && (
+          <p class="text-body">
+            {bodyShort ? (
+              <>
+                <span class="mobile-only">{bodyShort}</span>
+                <span class="desktop-only">{body}</span>
+              </>
+            ) : (
+              body
+            )}
+          </p>
+        )}
+      </li>
+    ))}
+  </ol>
+
+  <ul class="process__index desktop-only" role="list" aria-label="Process steps">
+    {PROCESS_STEPS.map(({ title }, i) => (
+      <li>
+        <button class="process__index-item" type="button" data-process-jump>
+          <span class="text-label">{title}</span>
+          <span class="text-mono">{padIndex(i + 1)}</span>
+        </button>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<script>
+  import { initProcessDial } from '@/scripts/animations/home-process-dial';
+
+  const section = document.querySelector<HTMLElement>('[data-process]');
+  if (section) initProcessDial(section);
+</script>
+
+<style>
+  /* ---------- Baseline: a numbered list ---------- */
+  .process {
+    position: relative;
+    padding-block: var(--space-section) var(--space-10);
+  }
+
+  .process__stage,
+  .process__index {
+    display: none;
+  }
+
+  .process__steps {
+    display: grid;
+    gap: var(--space-8);
+    max-width: calc(var(--container-default) + 2 * var(--container-gutter));
+    margin-inline: auto;
+    padding: var(--space-12) var(--container-gutter) 0;
+  }
+
+  .process__step {
+    display: grid;
+    align-content: start;
+    gap: var(--space-2);
+    max-width: 350px;
+  }
+
+  @media (min-width: 48em) {
+    .process__steps {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+  }
+
+  /* ---------- Enhanced: pinned dial ---------- */
+  .process.is-enhanced {
+    /* Mobile frame: 390 wide, dial centre at (-150, 560), radius 260, 20° per step. */
+    --u: min(0.25641vw, 1.3px);
+    --cx: calc(-150 * var(--u));
+    --cy: calc(100% - 460px);
+    --radius: calc(260 * var(--u));
+    --step-angle: 20deg;
+
+    height: 100svh;
+    min-height: 700px;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .is-enhanced .process__stage {
+    position: absolute;
+    inset: 0;
+    display: block;
+    pointer-events: none;
+  }
+
+  .is-enhanced .process__heading {
+    position: relative;
+    padding-block-start: var(--space-section);
+  }
+
+  .process__glow,
+  .process__ring,
+  .process__dial,
+  .process__active-dot {
+    position: absolute;
+    inset-block-start: var(--cy);
+    max-width: none;
+    translate: -50% -50%;
+  }
+
+  .process__glow {
+    inset-inline-start: calc(260 * var(--u));
+    width: calc(500 * var(--u));
+    height: auto;
+  }
+
+  .process__ring {
+    inset-inline-start: var(--cx);
+    width: calc(2 * var(--radius));
+    height: auto;
+  }
+
+  .process__ring--inner {
+    width: calc(580 * var(--u));
+  }
+
+  .process__dial {
+    inset-inline-start: var(--cx);
+    width: 0;
+    height: 0;
+    /* Step 1 rests two notches clockwise; the script scrubs it to the mirror angle. */
+    rotate: calc(2 * var(--step-angle));
+  }
+
+  .process__notch {
+    position: absolute;
+    inset: 0 auto auto 0;
+    display: flex;
+    align-items: center;
+    gap: calc(21 * var(--u));
+    height: 0;
+    rotate: calc(var(--i) * var(--step-angle));
+    /* Dot centre sits on the ring. */
+    translate: calc(var(--radius) - 3 * var(--u)) 0;
+    transform-origin: calc(-1 * (var(--radius) - 3 * var(--u))) 50%;
+  }
+
+  .process__dot {
+    width: calc(6 * var(--u));
+    height: auto;
+    max-width: none;
+  }
+
+  .process__notch-number,
+  .process__numeral {
+    font-family: var(--font-numeric);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-none);
+  }
+
+  .process__notch-number {
+    font-size: calc(32 * var(--u));
+    color: var(--color-text-muted);
+    transition: opacity var(--duration-base) ease-out;
+  }
+
+  .process__notch-number.is-active {
+    opacity: 0;
+  }
+
+  .process__active-dot {
+    inset-inline-start: calc(var(--cx) + var(--radius));
+    width: calc(10 * var(--u));
+    height: auto;
+  }
+
+  .process__numerals {
+    position: absolute;
+    inset-block-start: var(--cy);
+    inset-inline-start: calc(150 * var(--u));
+    font-size: calc(120 * var(--u));
+    translate: 0 -50%;
+  }
+
+  .process__numeral {
+    display: block;
+    opacity: 0;
+    transition: opacity var(--duration-medium) ease-out;
+  }
+
+  .process__numeral + .process__numeral {
+    position: absolute;
+    inset: 0 auto auto 0;
+  }
+
+  .process__numeral.is-active {
+    opacity: 1;
+  }
+
+  .is-enhanced .process__steps {
+    position: absolute;
+    inset-block-start: calc(var(--cy) + 290 * var(--u));
+    inset-inline: 0;
+    display: block;
+    padding-block: 0;
+  }
+
+  .is-enhanced .process__step {
+    gap: var(--space-2);
+    opacity: 0;
+    transition: opacity var(--duration-medium) ease-out;
+  }
+
+  .is-enhanced .process__step + .process__step {
+    position: absolute;
+    inset-block-start: 0;
+  }
+
+  .is-enhanced .process__step.is-active {
+    opacity: 1;
+  }
+
+  .is-enhanced .process__step-number {
+    display: none;
+  }
+
+  @media (min-width: 48em) {
+    .process.is-enhanced {
+      /* Desktop frame: 1440 wide, dial centre at (40, 690), radius 380, 25° per step. */
+      --u: min(0.069444vw, 1px);
+      --cx: calc(40 * var(--u));
+      --cy: calc(100% - 334px);
+      --radius: calc(380 * var(--u));
+      --step-angle: 25deg;
+
+      height: 100vh;
+      min-height: 760px;
+    }
+
+    .is-enhanced .process__stage {
+      inset-inline: max(0px, (100% - 90rem) / 2);
+    }
+
+    .process__glow {
+      inset-inline-start: calc(620 * var(--u));
+      width: calc(800 * var(--u));
+    }
+
+    .process__notch {
+      gap: calc(24 * var(--u));
+      translate: calc(var(--radius) - 4 * var(--u)) 0;
+      transform-origin: calc(-1 * (var(--radius) - 4 * var(--u))) 50%;
+    }
+
+    .process__dot {
+      width: calc(8 * var(--u));
+    }
+
+    .process__notch-number {
+      font-size: calc(88 * var(--u));
+    }
+
+    .process__active-dot {
+      width: calc(12 * var(--u));
+    }
+
+    .process__tick {
+      position: absolute;
+      inset-block-start: var(--cy);
+      inset-inline-start: calc(432 * var(--u));
+      width: calc(56 * var(--u));
+      height: 1px;
+      background-color: var(--color-accent);
+    }
+
+    .process__numerals {
+      inset-block-start: calc(var(--cy) + 20 * var(--u));
+      inset-inline-start: calc(500 * var(--u));
+      font-size: calc(200 * var(--u));
+    }
+
+    .is-enhanced .process__steps {
+      inset-block-start: calc(var(--cy) - 62 * var(--u));
+      inset-inline: max(0px, (100% - 90rem) / 2);
+      max-width: none;
+      margin: 0;
+      padding-inline: calc(760 * var(--u)) var(--container-gutter);
+    }
+
+    .is-enhanced .process__step {
+      gap: var(--space-3);
+      max-width: 340px;
+    }
+
+    .is-enhanced .process__step + .process__step {
+      inset-inline-start: calc(760 * var(--u));
+    }
+  }
+
+  @media (min-width: 64em) {
+    .is-enhanced .process__index {
+      position: absolute;
+      inset-block-start: calc(var(--cy) - 78.5px);
+      inset-inline-end: max(var(--container-gutter), (100% - var(--container-default)) / 2);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 18px;
+    }
+
+    .is-enhanced .process__steps {
+      padding-inline-end: calc(var(--container-gutter) + 140px);
+    }
+  }
+
+  .process__index-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: var(--color-text-muted);
+    transition: color var(--duration-base) ease-out;
+  }
+
+  .process__index-item[aria-current='step'] {
+    color: var(--color-text);
+  }
+
+  @media (hover: hover) {
+    .process__index-item:hover {
+      color: var(--color-text-secondary);
+    }
+
+    .process__index-item[aria-current='step']:hover {
+      color: var(--color-text);
+    }
+  }
+</style>

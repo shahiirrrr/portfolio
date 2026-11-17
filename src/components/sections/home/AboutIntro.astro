@@ -1,0 +1,157 @@
+---
+/** Home "Behind the code" intro: heading, scroll-revealed statement and experience cards (Figma: 02 About). */
+import Button from '@/components/common/Button.astro';
+import ExperienceCard from '@/components/ui/ExperienceCard.astro';
+import { EXPERIENCE } from '@/data/experience';
+import type { ExperienceItem } from '@/types';
+
+const cards = EXPERIENCE.filter(
+  (item): item is ExperienceItem & { image: ImageMetadata } => item.image !== undefined,
+);
+---
+
+<section class="about container" aria-labelledby="about-heading">
+  <div class="about__intro">
+    <div class="about__heading" data-reveal>
+      <p class="about__eyebrow">Behind the code</p>
+      <h2 class="text-h1" id="about-heading">
+        Crafting interfaces <br class="desktop-only" />
+        that feel effortless.
+      </h2>
+    </div>
+
+    <div class="about__statement">
+      <p class="about__lead" data-word-reveal>
+        I'm a frontend developer from Wayanad, Kerala — building headless storefronts, React
+        architectures and design systems that stay maintainable as they scale.
+      </p>
+      <div class="about__cta">
+        <p class="text-body-sm text-secondary desktop-only">
+          Let's build something
+          <br />
+          meaningful together.
+        </p>
+        <Button label="Get in touch" href="/contact/" variant="accent" />
+      </div>
+    </div>
+  </div>
+
+  <div class="about__experience">
+    <h3 class="visually-hidden">Experience</h3>
+    <div class="about__cards" data-reveal-group tabindex="0" role="group" aria-label="Experience">
+      {cards.map((item) => (
+        <ExperienceCard item={item} />
+      ))}
+    </div>
+    <p class="text-body-sm text-secondary desktop-only">
+      2+ years across commerce &amp; product teams
+    </p>
+    <p class="text-mono text-secondary mobile-only" aria-hidden="true">
+      ( EXPERIENCE ) — swipe →
+    </p>
+  </div>
+</section>
+
+<style>
+  .about {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-10);
+    padding-block: var(--space-section);
+  }
+
+  .about__intro,
+  .about__heading,
+  .about__statement {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .about__eyebrow {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-snug);
+    color: var(--color-accent);
+  }
+
+  .about__lead {
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-h4);
+  }
+
+  .about__experience {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  /* Mobile: native swipe rail that bleeds to the screen edges. */
+  .about__cards {
+    display: flex;
+    gap: var(--space-3);
+    margin-inline: calc(-1 * var(--container-gutter));
+    padding-inline: var(--container-gutter);
+    overflow-x: auto;
+    scroll-padding-inline: var(--container-gutter);
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .about__cards::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media (min-width: 48em) {
+    .about {
+      gap: var(--space-16);
+    }
+
+    .about__intro {
+      flex-flow: row wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: var(--space-8);
+    }
+
+    .about__heading {
+      gap: var(--space-8);
+    }
+
+    .about__statement {
+      gap: var(--space-10);
+      max-width: 580px;
+      padding-block-start: var(--space-14);
+    }
+
+    .about__eyebrow {
+      font-size: var(--text-lg);
+      line-height: var(--leading-h4);
+    }
+
+    .about__lead {
+      font-size: var(--text-2xl);
+      line-height: var(--leading-snug);
+      letter-spacing: var(--tracking-h3);
+    }
+
+    .about__cta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .about__cards {
+      gap: var(--space-6);
+    }
+  }
+
+  @media (min-width: 64em) {
+    .about__cards {
+      margin-inline: 0;
+      padding-inline: 0;
+      overflow: visible;
+    }
+  }
+</style>

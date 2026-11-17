@@ -1,0 +1,104 @@
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import { getImage } from 'astro:assets';
+
+import CaseCover from '@/components/sections/case-study/CaseCover.astro';
+import CaseHero from '@/components/sections/case-study/CaseHero.astro';
+import CaseMedia from '@/components/sections/case-study/CaseMedia.astro';
+import CaseNext from '@/components/sections/case-study/CaseNext.astro';
+import CaseOverview from '@/components/sections/case-study/CaseOverview.astro';
+import CaseResults from '@/components/sections/case-study/CaseResults.astro';
+import { SITE } from '@/config/site';
+import PageLayout from '@/layouts/PageLayout.astro';
+import { formatStack, getCaseStudies, projectPath } from '@/utils/projects';
+import { projectSchema } from '@/utils/seo';
+
+export const getStaticPaths = (async () => {
+  const caseStudies = await getCaseStudies();
+  return caseStudies.flatMap((project, position) => {
+    // "Next project" wraps from the last case study back to the first.
+    const next = caseStudies[(position + 1) % caseStudies.length];
+    if (!next) return [];
+    return [{ params: { slug: project.id }, props: { project, next, total: caseStudies.length } }];
+  });
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { project, next, total } = Astro.props;
+const { title, stack, year, card } = project.data;
+const study = project.data.caseStudy;
+const stackLabel = formatStack(stack);
+
+// Without a dedicated cover the Home card image stands in (no invented copy: the alt is title + category).
+const cover =
+  study.cover ??
+  (card ? { src: card.image, alt: `${title} — ${card.category.join(' ')}` } : undefined);
+
+// Social preview: a 1200px-wide JPEG rendition of the cover instead of the full-size source.
+const ogImage = cover ? await getImage({ src: cover.src, width: 1200, format: 'jpg' }) : undefined;
+
+const timeline = study.timeline ?? (year ? String(year) : undefined);
+const meta = [
+  ...(study.role ? [{ label: 'ROLE', value: study.role }] : []),
+  { label: 'STACK', value: stackLabel },
+  ...(timeline ? [{ label: 'TIMELINE', value: timeline }] : []),
+  ...(study.live ? [{ label: 'LIVE', value: study.live.label, href: study.live.url }] : []),
+];
+
+const { subtitle } = study;
+const description =
+  subtitle && subtitle.length >= 50 && subtitle.length <= 160
+    ? subtitle
+    : `${title} — a case study by ${SITE.name}. Stack: ${stack.join(', ')}.`.slice(0, 160);
+
+const nextStudy = next.data.caseStudy;
+const nextImage = nextStudy.teaser ?? nextStudy.cover?.src ?? next.data.card?.image;
+const nextHref = projectPath(next) ?? '/work/';
+---
+
+<PageLayout
+  seo={{
+    title,
+    description,
+    type: 'article',
+    ...(cover && ogImage && { image: { src: ogImage.src, alt: cover.alt } }),
+  }}
+  jsonLd={[
+    projectSchema({
+      pathname: Astro.url.pathname,
+      title,
+      description,
+      year,
+      stack,
+      imageSrc: ogImage?.src,
+    }),
+  ]}
+>
+  <article class:list={{ 'cs-article--short': study.media.length === 0 }}>
+    <CaseHero title={title} subtitle={subtitle} index={study.index} total={total} meta={meta} />
+    {cover && <CaseCover {...cover} />}
+    {study.overview && <CaseOverview {...study.overview} />}
+    {study.stats.length > 0 && <CaseResults stats={study.stats} />}
+    {study.media.length > 0 && <CaseMedia media={study.media} />}
+  </article>
+  <CaseNext
+    href={nextHref}
+    title={next.data.title}
+    stack={formatStack(next.data.stack)}
+    image={nextImage}
+  />
+</PageLayout>
+
+<style>
+  /* Without the before / after pair, keep the media section's bottom spacing above the next panel. */
+  .cs-article--short {
+    padding-block-end: var(--space-20);
+  }
+
+  @media (min-width: 48em) {
+    .cs-article--short {
+      padding-block-end: 140px;
+    }
+  }
+</style>

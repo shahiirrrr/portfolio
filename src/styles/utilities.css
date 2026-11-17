@@ -1,0 +1,132 @@
+/*
+ * Small set of global layout + typography utilities.
+ * Add a utility here only when a pattern repeats across components;
+ * component-specific styles belong in that component's scoped <style>.
+ */
+
+/* ---- Layout ---- */
+.container {
+  width: 100%;
+  max-width: calc(var(--container-default) + 2 * var(--container-gutter));
+  margin-inline: auto;
+  padding-inline: var(--container-gutter);
+}
+
+.section {
+  padding-block: var(--space-section);
+}
+
+/* Vertical rhythm between direct children. Tune with --flow-space. */
+.flow > * + * {
+  margin-block-start: var(--flow-space, var(--space-4));
+}
+
+/* ---- Typography roles (Figma text styles; independent of heading level) ---- */
+.text-display {
+  font-size: var(--text-display);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-display);
+  letter-spacing: var(--tracking-display);
+}
+
+.text-h1 {
+  font-size: var(--text-h1);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-h1);
+}
+
+.text-h2 {
+  font-size: var(--text-h2);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-h2);
+}
+
+.text-h3 {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-h3);
+}
+
+.text-h4 {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-h4);
+  letter-spacing: var(--tracking-normal);
+}
+
+.text-body-lg {
+  font-size: var(--text-lg);
+  line-height: var(--leading-body-sm);
+}
+
+.text-body {
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+}
+
+.text-body-sm {
+  font-size: var(--text-sm);
+  line-height: var(--leading-body-sm);
+}
+
+.text-label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+/* Mono/Index: small uppercase-style meta text. */
+.text-mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-mono);
+}
+
+.text-stat {
+  font-family: var(--font-numeric);
+  font-size: var(--text-stat);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-none);
+}
+
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+@media (min-width: 48em) {
+  .text-h1 {
+    line-height: var(--leading-none);
+  }
+}
+
+/* ---- Accessibility ---- */
+.visually-hidden:not(:focus, :active) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---- Responsive visibility (design breakpoint) ---- */
+@media (max-width: 47.99em) {
+  .desktop-only {
+    display: none !important;
+  }
+}
+
+@media (min-width: 48em) {
+  .mobile-only {
+    display: none !important;
+  }
+}

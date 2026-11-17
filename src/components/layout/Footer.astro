@@ -1,0 +1,153 @@
+---
+/** Global footer with the giant wordmark (Figma: Footer). Used on every page. */
+import { MAIN_NAV } from '@/config/navigation';
+import { SITE, SOCIAL_LINKS } from '@/config/site';
+---
+
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <div class="site-footer__top">
+      <div class="site-footer__brand">
+        <p class="site-footer__name">{SITE.name.toUpperCase()}</p>
+        <p class="text-body-sm text-secondary">
+          Frontend developer, {SITE.location}.<br />
+          {SITE.availability}.
+        </p>
+      </div>
+
+      <div class="site-footer__columns">
+        <nav class="site-footer__column" aria-labelledby="footer-sitemap">
+          <p class="text-mono text-muted" id="footer-sitemap">
+            SITEMAP
+          </p>
+          <ul class="site-footer__list text-label" role="list">
+            {MAIN_NAV.map(({ label, href }) => (
+              <li>
+                <a href={href}>{label}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <nav class="site-footer__column" aria-labelledby="footer-social">
+          <p class="text-mono text-muted" id="footer-social">
+            SOCIAL
+          </p>
+          <ul class="site-footer__list text-label" role="list">
+            {SOCIAL_LINKS.map(({ label, href }) => (
+              <li>
+                <a href={href} target="_blank" rel="me noopener">
+                  {label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <address class="site-footer__column desktop-only" aria-labelledby="footer-contact">
+          <p class="text-mono text-muted" id="footer-contact">
+            CONTACT
+          </p>
+          <ul class="site-footer__list text-label" role="list">
+            <li>
+              <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+            </li>
+            <li>
+              <a href={SITE.phone.href}>{SITE.phone.label}</a>
+            </li>
+          </ul>
+        </address>
+      </div>
+    </div>
+
+    <p class="site-footer__wordmark" aria-hidden="true">
+      {SITE.name.toUpperCase()}
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    overflow: hidden;
+  }
+
+  .site-footer__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-10);
+    padding-block: var(--space-16) var(--space-8);
+  }
+
+  .site-footer__top,
+  .site-footer__brand {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .site-footer__top {
+    gap: var(--space-10);
+  }
+
+  .site-footer__brand {
+    gap: var(--space-3);
+  }
+
+  .site-footer__name {
+    font-size: var(--text-2xl);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-h3);
+  }
+
+  .site-footer__columns {
+    display: flex;
+    gap: var(--space-14);
+  }
+
+  .site-footer__column,
+  .site-footer__list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  @media (hover: hover) {
+    .site-footer__list a:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .site-footer__wordmark {
+    /* Sized so the wordmark spans the content width in both frames. */
+    font-family: var(--font-wordmark);
+    font-size: clamp(4.5rem, 18.63vw, 16.769rem);
+    font-weight: var(--weight-extrabold);
+    line-height: 0.85;
+    letter-spacing: -0.02em;
+    text-align: center;
+    white-space: nowrap;
+    color: var(--color-bg-raised);
+    user-select: none;
+  }
+
+  @media (min-width: 48em) {
+    .site-footer__inner {
+      gap: var(--space-16);
+      padding-block: var(--space-24) var(--space-10);
+    }
+
+    .site-footer__top {
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .site-footer__brand {
+      gap: var(--space-4);
+    }
+
+    .site-footer__columns {
+      gap: var(--space-24);
+    }
+  }
+</style>

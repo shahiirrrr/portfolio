@@ -1,0 +1,204 @@
+---
+/**
+ * Home hero (Figma: Hero — Editorial). White, full viewport. The giant name
+ * sits BEHIND the portrait cut-out; the role uses mix-blend-mode: difference
+ * on desktop so it reads black on white and white on the hoodie.
+ */
+import { Image } from 'astro:assets';
+
+import portraitMask from '@/assets/images/portrait-mask.svg';
+import portrait from '@/assets/images/portrait.png';
+import { SITE, SOCIAL_LINKS } from '@/config/site';
+---
+
+<section class="hero" data-hero data-header-hero>
+  <h1 class="hero__name" data-hero-name-wrap>
+    <span data-hero-name>{SITE.name}</span>
+    <span class="visually-hidden"> — {SITE.jobTitle}, React &amp; Next.js</span>
+  </h1>
+
+  <div
+    class="hero__portrait"
+    style={`--mask: url("${portraitMask.src}")`}
+    data-hero-portrait
+    data-intro
+  >
+    <Image
+      src={portrait}
+      alt={`Portrait of ${SITE.name}, arms crossed, wearing a black hoodie`}
+      widths={[440, 704, 880, 1052]}
+      sizes="(min-width: 48em) 49vw, 113vw"
+      loading="eager"
+      fetchpriority="high"
+    />
+  </div>
+
+  <ul class="hero__socials" role="list" aria-label="Social profiles" data-hero-fade data-intro>
+    {SOCIAL_LINKS.map(({ label, href }) => (
+      <li>
+        <a href={href} target="_blank" rel="noopener">
+          {label}
+          <span class="hero__socials-arrow desktop-only" aria-hidden="true">
+            ↗
+          </span>
+        </a>
+      </li>
+    ))}
+  </ul>
+
+  <p class="hero__role" aria-hidden="true" data-hero-fade data-intro>
+    {SITE.jobTitle}
+    <br />
+    React &amp; Next.js
+  </p>
+</section>
+
+<script>
+  import { initHero } from '@/scripts/animations/home-hero';
+
+  const hero = document.querySelector<HTMLElement>('[data-hero]');
+  if (hero) initHero(hero);
+</script>
+
+<style>
+  .hero {
+    /* Portrait box: 440×550 in the mobile frame, capped so it never outgrows the hero. */
+    --portrait-w: min(112.8vw, 52.1svh);
+
+    position: relative;
+    /* Hero + logo band (84px) fill the first screen on mobile. svh, not dvh:
+       the hero must not resize when mobile browser chrome collapses. */
+    height: calc(100svh - 84px);
+    min-height: 560px;
+    overflow: hidden;
+    color: var(--color-text-inverse);
+    background-color: var(--color-bg-white);
+  }
+
+  .hero__name {
+    position: absolute;
+    inset-block-start: 32.9%;
+    inset-inline-start: var(--space-4);
+    /* Room for the letters to rise out of the mask without clipping ascenders. */
+    padding-block: 0.1em;
+    margin-block-start: -0.1em;
+    overflow: hidden;
+    font-size: clamp(120px, 33vw, 475px);
+    font-weight: var(--weight-semibold);
+    line-height: 0.9;
+    letter-spacing: -0.06em;
+    white-space: nowrap;
+  }
+
+  .hero__name > span:first-child {
+    display: inline-block;
+    padding-inline-end: 0.06em;
+  }
+
+  .hero__portrait {
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline-start: 50%;
+    z-index: var(--z-raised);
+    width: var(--portrait-w);
+    aspect-ratio: 704 / 880;
+    translate: -50% 0;
+    /* The photo is cut out by Figma's "Silhouette Mask" vector. */
+    -webkit-mask: var(--mask) no-repeat;
+    mask: var(--mask) no-repeat;
+    -webkit-mask-size: 85.653% 97.159%;
+    mask-size: 85.653% 97.159%;
+    -webkit-mask-position: calc(var(--portrait-w) * 0.06818) calc(var(--portrait-w) * 0.03551);
+    mask-position: calc(var(--portrait-w) * 0.06818) calc(var(--portrait-w) * 0.03551);
+  }
+
+  .hero__portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .hero__role {
+    position: absolute;
+    inset-block-start: 92px;
+    inset-inline-start: var(--space-5);
+    z-index: 2;
+    font-size: 1.875rem;
+    font-weight: var(--weight-semibold);
+    line-height: 1.05;
+    letter-spacing: var(--tracking-h1);
+    white-space: nowrap;
+  }
+
+  .hero__socials {
+    position: absolute;
+    inset-block-start: 160px;
+    inset-inline-start: var(--space-5);
+    z-index: 2;
+    display: flex;
+    gap: 0.8em;
+    font-size: var(--text-mono);
+    font-weight: var(--weight-medium);
+    line-height: normal;
+    white-space: nowrap;
+  }
+
+  .hero__socials a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+  }
+
+  .hero__socials-arrow {
+    font-family: var(--font-mono);
+  }
+
+  @media (hover: hover) {
+    .hero__socials a:hover {
+      text-decoration: underline;
+    }
+  }
+
+  @media (min-width: 48em) {
+    .hero {
+      /* 704×880 in a 900px-tall hero, overhanging the bottom edge by 24px. */
+      --portrait-w: min(48.9vw, calc((100dvh - 20px) * 0.8));
+
+      height: 100dvh;
+      min-height: 600px;
+    }
+
+    .hero__name {
+      inset-block-start: 27.8%;
+      inset-inline-start: 3.9%;
+    }
+
+    .hero__portrait {
+      inset-block-end: -24px;
+      inset-inline-start: calc(50% + 2.9vw);
+    }
+
+    .hero__role {
+      inset-block: auto var(--space-10);
+      /* Right edge on the content gutter (x 1372 in the 1440 frame). */
+      inset-inline: auto var(--container-gutter);
+      font-size: clamp(1.875rem, 3.2vw, 2.875rem);
+      line-height: 1.02;
+      /* Reads black on the white hero and white on the hoodie. */
+      color: var(--color-bg-white);
+      mix-blend-mode: difference;
+    }
+
+    .hero__socials {
+      inset-block: auto var(--space-12);
+      inset-inline-start: var(--container-gutter);
+      flex-direction: column;
+      gap: 0;
+      font-size: var(--text-nav);
+    }
+
+    .hero__socials a {
+      min-height: 28px;
+    }
+  }
+</style>

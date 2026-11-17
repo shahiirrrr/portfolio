@@ -1,0 +1,455 @@
+---
+/**
+ * "Start a project" form card (Figma: Form Card).
+ *
+ * The site is static, so the form posts to `SITE.contactEndpoint` (a
+ * Formspree-style URL). Without JS it submits natively; with JS it validates
+ * inline, sends with fetch and swaps the card to a thank-you message. While
+ * the endpoint is empty it opens the visitor's mail client instead.
+ */
+import Button from '@/components/common/Button.astro';
+import Chip from '@/components/common/Chip.astro';
+import { SITE } from '@/config/site';
+import {
+  CONTACT_ENGAGEMENTS,
+  CONTACT_FORM,
+  CONTACT_FORM_STATUS,
+  CONTACT_NEEDS,
+} from '@/data/contact';
+
+const endpoint = SITE.contactEndpoint;
+const [noteTop, noteBottom] = CONTACT_FORM.note;
+---
+
+<div class="contact-card" data-contact-card>
+  <div class="contact-card__body" data-contact-body>
+    <h2 class="text-h3">{CONTACT_FORM.title}</h2>
+
+    <form
+      class="contact-form"
+      action={endpoint || undefined}
+      method="post"
+      data-contact-form
+      data-endpoint={endpoint}
+      data-email={SITE.email}
+    >
+      <div class="contact-form__row">
+        <div class="contact-form__field">
+          <label class="text-label text-secondary" for="contact-name">
+            {CONTACT_FORM.nameLabel}
+          </label>
+          <input
+            class="contact-form__input"
+            id="contact-name"
+            name="name"
+            type="text"
+            autocomplete="name"
+            placeholder={CONTACT_FORM.namePlaceholder}
+            required
+            aria-required="true"
+          />
+          <p class="contact-form__error" id="contact-name-error" hidden></p>
+        </div>
+        <div class="contact-form__field">
+          <label class="text-label text-secondary" for="contact-email">
+            {CONTACT_FORM.emailLabel}
+          </label>
+          <input
+            class="contact-form__input"
+            id="contact-email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            inputmode="email"
+            placeholder={CONTACT_FORM.emailPlaceholder}
+            required
+            aria-required="true"
+          />
+          <p class="contact-form__error" id="contact-email-error" hidden></p>
+        </div>
+      </div>
+
+      <fieldset class="contact-form__group">
+        <legend class="text-label text-secondary">{CONTACT_FORM.needsLabel}</legend>
+        <div class="contact-form__chips">
+          {CONTACT_NEEDS.map((label) => (
+            <Chip as="checkbox" name="need" label={label} />
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset class="contact-form__group">
+        <legend class="text-label text-secondary">{CONTACT_FORM.engagementLabel}</legend>
+        <div class="contact-form__chips">
+          {CONTACT_ENGAGEMENTS.map((label) => (
+            <Chip as="radio" name="engagement" label={label} />
+          ))}
+        </div>
+      </fieldset>
+
+      <div class="contact-form__field">
+        <label class="text-label text-secondary" for="contact-message">
+          {CONTACT_FORM.messageLabel}
+        </label>
+        <textarea
+          class="contact-form__input contact-form__textarea"
+          id="contact-message"
+          name="message"
+          rows="5"
+          placeholder={CONTACT_FORM.messagePlaceholder}
+        ></textarea>
+      </div>
+
+      <!-- Spam honeypot: hidden from people, filled in by bots. -->
+      <div class="contact-form__trap" aria-hidden="true">
+        <label for="contact-gotcha">Leave this field empty</label>
+        <input id="contact-gotcha" type="text" name="_gotcha" tabindex="-1" autocomplete="off" />
+      </div>
+
+      <div class="contact-form__submit-row">
+        <p class="text-body-sm text-secondary">
+          {noteTop}
+          <br />
+          {noteBottom}
+        </p>
+        <Button label={CONTACT_FORM.submit} variant="accent" type="submit" />
+      </div>
+
+      <p
+        class="contact-form__status text-body-sm"
+        role="status"
+        aria-live="polite"
+        data-contact-status
+      ></p>
+    </form>
+  </div>
+
+  <div class="contact-card__thanks" data-contact-thanks hidden>
+    <h2 class="text-h3" tabindex="-1" data-contact-thanks-title>
+      {CONTACT_FORM_STATUS.thanksTitle}
+    </h2>
+    <p class="text-body text-secondary">{CONTACT_FORM_STATUS.thanksBody}</p>
+  </div>
+</div>
+
+<script>
+  import { CONTACT_FORM_STATUS as COPY } from '@/data/contact';
+
+  const card = document.querySelector<HTMLElement>('[data-contact-card]');
+  const form = card?.querySelector<HTMLFormElement>('[data-contact-form]');
+
+  if (card && form) initContactForm(card, form);
+
+  function initContactForm(card: HTMLElement, form: HTMLFormElement): void {
+    const endpoint = form.dataset.endpoint ?? '';
+    const email = form.dataset.email ?? '';
+    const status = form.querySelector<HTMLElement>('[data-contact-status]');
+    const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+    const nameInput = form.querySelector<HTMLInputElement>('#contact-name');
+    const emailInput = form.querySelector<HTMLInputElement>('#contact-email');
+    if (!status || !button || !nameInput || !emailInput) return;
+
+    // JS takes over validation so errors render inline instead of as browser bubbles.
+    form.noValidate = true;
+
+    const fieldError = (input: HTMLInputElement): string => {
+      const value = input.value.trim();
+      if (input === nameInput) return value ? '' : COPY.nameRequired;
+      if (!value) return COPY.emailRequired;
+      return input.validity.typeMismatch ? COPY.emailInvalid : '';
+    };
+
+    const showError = (input: HTMLInputElement, message: string): void => {
+      const error = document.getElementById(`${input.id}-error`);
+      if (!error) return;
+      error.textContent = message;
+      error.hidden = message === '';
+      if (message) {
+        input.setAttribute('aria-invalid', 'true');
+        input.setAttribute('aria-describedby', error.id);
+      } else {
+        input.removeAttribute('aria-invalid');
+        input.removeAttribute('aria-describedby');
+      }
+    };
+
+    // Email is checked on blur (only once something has been typed).
+    emailInput.addEventListener('blur', () => {
+      if (emailInput.value.trim()) showError(emailInput, fieldError(emailInput));
+    });
+    // Clear an error as soon as the field becomes valid.
+    for (const input of [nameInput, emailInput]) {
+      input.addEventListener('input', () => {
+        if (input.hasAttribute('aria-invalid') && !fieldError(input)) showError(input, '');
+      });
+    }
+
+    const setStatus = (message: string, withLink = false): void => {
+      status.replaceChildren(message);
+      if (withLink) {
+        const link = document.createElement('a');
+        link.href = `mailto:${email}`;
+        link.textContent = email;
+        status.append(' ', link, '.');
+      }
+    };
+
+    const setLoading = (loading: boolean): void => {
+      button.disabled = loading;
+      button.dataset.state = loading ? 'loading' : 'idle';
+      button.setAttribute('aria-busy', String(loading));
+      // Disabling the focused button drops focus to <body>; put it back.
+      if (!loading) button.focus();
+    };
+
+    const showThanks = (): void => {
+      const body = card.querySelector<HTMLElement>('[data-contact-body]');
+      const thanks = card.querySelector<HTMLElement>('[data-contact-thanks]');
+      const title = card.querySelector<HTMLElement>('[data-contact-thanks-title]');
+      if (body) body.hidden = true;
+      if (thanks) thanks.hidden = false;
+      title?.focus();
+    };
+
+    const openMailClient = (data: FormData): void => {
+      const list = (key: string): string => data.getAll(key).map(String).join(', ') || '—';
+      const name = String(data.get('name') ?? '').trim();
+      const lines = [
+        `Name: ${name}`,
+        `Email: ${String(data.get('email') ?? '').trim()}`,
+        `What do you need?: ${list('need')}`,
+        `Engagement: ${list('engagement')}`,
+        '',
+        String(data.get('message') ?? '').trim(),
+      ];
+      const subject = `New enquiry from ${name}`;
+      window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lines.join('\n'))}`;
+      setStatus(COPY.mailtoOpened, true);
+    };
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      setStatus('');
+
+      const invalid = [nameInput, emailInput].filter((input) => {
+        const message = fieldError(input);
+        showError(input, message);
+        return message !== '';
+      });
+      if (invalid[0]) {
+        invalid[0].focus();
+        return;
+      }
+
+      const data = new FormData(form);
+      // Honeypot filled: a bot. Pretend it worked without sending anything.
+      if (String(data.get('_gotcha') ?? '') !== '') {
+        showThanks();
+        return;
+      }
+
+      if (!endpoint) {
+        openMailClient(data);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          body: data,
+          headers: { Accept: 'application/json' },
+        });
+        setLoading(false);
+        if (res.ok) showThanks();
+        else setStatus(COPY.error, true);
+      } catch {
+        setLoading(false);
+        setStatus(COPY.error, true);
+      }
+    });
+  }
+</script>
+
+<style>
+  .contact-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: var(--space-6);
+    background-color: var(--color-bg-raised);
+    border-radius: var(--radius-card);
+  }
+
+  .contact-card__body,
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .contact-card [hidden] {
+    display: none;
+  }
+
+  .contact-card__thanks {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .contact-card__thanks h2:focus {
+    outline: none;
+  }
+
+  .contact-form {
+    container-type: inline-size;
+  }
+
+  .contact-form__row {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  @container (min-width: 30rem) {
+    .contact-form__row {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .contact-form__field {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .contact-form__input {
+    width: 100%;
+    min-height: 58px;
+    padding-inline: var(--space-5);
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+    color: var(--color-text);
+    background-color: var(--color-bg);
+    border: var(--border-strong);
+    border-radius: var(--space-4);
+    transition: border-color var(--duration-fast) ease-out;
+  }
+
+  .contact-form__input::placeholder {
+    color: var(--color-text-muted);
+    opacity: 1;
+  }
+
+  /* Input Field / State=Focus: 1.5px brand border. */
+  .contact-form__input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: inset 0 0 0 0.5px var(--color-accent);
+  }
+
+  .contact-form__input[aria-invalid='true'] {
+    border-color: var(--color-error);
+  }
+
+  .contact-form__textarea {
+    display: block;
+    height: 168px;
+    padding-block: 18px;
+    resize: vertical;
+  }
+
+  .contact-form__error {
+    font-size: var(--text-sm);
+    line-height: var(--leading-body-sm);
+    color: var(--color-error);
+  }
+
+  .contact-form__group {
+    min-width: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .contact-form__group legend {
+    padding: 0;
+    margin-block-end: var(--space-3);
+  }
+
+  .contact-form__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .contact-form__trap {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .contact-form__submit-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+
+  .contact-form__status:empty {
+    display: none;
+  }
+
+  .contact-form__status a {
+    color: var(--color-text);
+    text-decoration: underline;
+  }
+
+  /* Loading state of the shared Button: a spinner replaces the arrow. */
+  .contact-form :global(.btn[data-state='loading'] .btn__icon) {
+    position: relative;
+  }
+
+  .contact-form :global(.btn[data-state='loading'] .btn__icon img) {
+    opacity: 0;
+  }
+
+  .contact-form :global(.btn[data-state='loading'] .btn__icon::after) {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border: 2px solid var(--color-text);
+    border-inline-end-color: transparent;
+    border-radius: var(--radius-full);
+    animation: contact-spin 0.8s linear infinite;
+  }
+
+  @keyframes contact-spin {
+    to {
+      rotate: 1turn;
+    }
+  }
+
+  @media (min-width: 48em) {
+    .contact-card {
+      padding: var(--space-10);
+      border-radius: calc(2 * var(--radius-md)); /* 40 */
+    }
+
+    .contact-card__body,
+    .contact-form {
+      gap: var(--space-7);
+    }
+
+    .contact-form__submit-row {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+    }
+  }
+</style>

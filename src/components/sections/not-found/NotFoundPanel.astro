@@ -1,0 +1,170 @@
+---
+/**
+ * 404 panel (Figma: Final / 404 — Panel): animated "404" numeral, headline,
+ * message and two actions. The numeral is decorative; the headline is the h1.
+ */
+import Button from '@/components/common/Button.astro';
+---
+
+<section class="not-found" aria-labelledby="not-found-title">
+  <div class="not-found__panel">
+    <div class="not-found__content">
+      <div class="not-found__numeral" aria-hidden="true" data-numeral data-intro>
+        <span class="not-found__glow" data-zero-glow></span>
+        <span class="not-found__digit not-found__digit--left" data-digit="left">
+          4
+        </span>
+        <span class="not-found__digit not-found__digit--zero" data-digit="zero">
+          0
+        </span>
+        <span class="not-found__digit not-found__digit--right" data-digit="right">
+          4
+        </span>
+      </div>
+
+      <h1 class="not-found__title" id="not-found-title">
+        Lost in the render tree.
+      </h1>
+      <p class="not-found__text">
+        The page you're looking for was moved, deleted — or never shipped.
+      </p>
+
+      <div class="not-found__actions">
+        <Button label="Back to home" href="/" />
+        <Button label="View work" href="/work/" variant="ghost" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initNotFoundNumeral } from '@/scripts/animations/not-found-numeral';
+
+  const numeral = document.querySelector<HTMLElement>('[data-numeral]');
+  if (numeral) initNotFoundNumeral(numeral);
+</script>
+
+<style>
+  .not-found {
+    padding: var(--panel-gutter);
+  }
+
+  .not-found__panel {
+    display: flex;
+    min-height: calc(100svh - 2 * var(--panel-gutter));
+    max-width: 1400px;
+    margin-inline: auto;
+    /* Header (overlaid) on top, content centred in the rest. */
+    padding: var(--header-offset) var(--space-5) var(--space-8);
+    overflow: hidden;
+    background-color: var(--color-bg);
+    background-image: radial-gradient(
+      ellipse 71.43% 55.56% at 50% 44.44%,
+      #363636 0%,
+      #202020 30%,
+      #151515 49%,
+      var(--color-bg) 68%
+    );
+    border-radius: var(--radius-panel);
+  }
+
+  .not-found__content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: var(--space-4);
+    min-width: 0;
+  }
+
+  /* All numeral geometry is in em so it scales with the font size (Figma: 640×380 at 300px). */
+  .not-found__numeral {
+    position: relative;
+    flex-shrink: 0;
+    width: 2.1333em;
+    height: 1.2667em;
+    font-family: var(--font-numeric);
+    font-size: clamp(7.5rem, 38vw, 18.75rem); /* 120 → 300 */
+    font-weight: var(--weight-bold);
+    line-height: 0.9;
+    color: var(--color-text);
+  }
+
+  .not-found__digit,
+  .not-found__glow {
+    position: absolute;
+    inset-block-start: 0.1333em;
+  }
+
+  .not-found__digit--left {
+    inset-inline-start: 0.0667em;
+  }
+
+  .not-found__digit--zero {
+    inset-inline-start: 0.7667em;
+  }
+
+  .not-found__digit--right {
+    inset-inline-start: 1.4667em;
+  }
+
+  /* Figma "Glow": a 300px blurred circle behind the 0, invisible at rest. */
+  .not-found__glow {
+    inset-inline-start: 0.5667em;
+    width: 1em;
+    height: 1em;
+    background-color: var(--color-text);
+    border-radius: var(--radius-full);
+    filter: blur(0.15em);
+    opacity: 0;
+  }
+
+  .not-found__title {
+    font-size: var(--text-headline);
+    font-weight: var(--weight-bold);
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+  }
+
+  .not-found__text {
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+    opacity: 0.8;
+  }
+
+  .not-found__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    padding-block-start: var(--space-3);
+  }
+
+  @media (min-width: 48em) {
+    .not-found__panel {
+      padding-inline: var(--space-12);
+      padding-block-end: var(--space-14);
+    }
+
+    .not-found__content {
+      align-items: center;
+      gap: var(--space-5);
+      text-align: center;
+    }
+
+    .not-found__title {
+      line-height: var(--leading-display);
+      letter-spacing: var(--tracking-h1);
+    }
+
+    .not-found__text {
+      font-size: var(--text-lg);
+      line-height: var(--leading-body-sm);
+    }
+
+    .not-found__actions {
+      justify-content: center;
+      padding-block-start: var(--space-5);
+    }
+  }
+</style>

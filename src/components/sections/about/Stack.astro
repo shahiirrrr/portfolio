@@ -1,0 +1,415 @@
+---
+/**
+ * Stack index table (Figma: 03 Stack — Swiss Grid). 12-column grid, hairline
+ * rules, no cards. Desktop: NO. | DISCIPLINE | four tool cells per row.
+ * Mobile: index + discipline + tool count on one line, tools in two columns.
+ * Semantics: an ordered list of disciplines, each with a list of tools; the
+ * column labels are visual only. Motion lives in `about-stack.ts`.
+ */
+import { STACK, STACK_INTRO } from '@/data/about';
+import { padIndex } from '@/utils/helpers';
+
+const toolCount = STACK.reduce((sum, discipline) => sum + discipline.tools.length, 0);
+
+let toolNumber = 0;
+const rows = STACK.map((discipline, i) => ({
+  index: padIndex(i + 1),
+  title: discipline.title,
+  count: padIndex(discipline.tools.length),
+  tools: discipline.tools.map((tool) => {
+    toolNumber += 1;
+    // The Figma icons are 28px glyphs, except four drawn in a 24px frame at the top-left.
+    const size = tool.icon && tool.icon.width < 28 ? tool.icon.width : 28;
+    return { ...tool, number: `T${padIndex(toolNumber)}`, size };
+  }),
+}));
+---
+
+<section class="stack container" id="stack" aria-labelledby="stack-heading" data-stack>
+  <div class="stack__heading">
+    <h2 class="text-h1" id="stack-heading">
+      The stack
+    </h2>
+    <div class="stack__aside">
+      <p class="text-body text-secondary">{STACK_INTRO}</p>
+      <p class="stack__totals text-mono">
+        <span data-count>{padIndex(toolCount)}</span> TOOLS — {padIndex(STACK.length)} DISCIPLINES
+      </p>
+    </div>
+  </div>
+
+  <div class="stack-table" data-stack-table>
+    <div class="stack-table__labels text-mono" aria-hidden="true">
+      <span>NO.</span>
+      <span>DISCIPLINE</span>
+      <span>TOOLS</span>
+      <span class="rule rule--strong" data-rule></span>
+    </div>
+
+    <ol class="stack-table__rows" role="list">
+      {rows.map((row) => (
+        <li class="stack-row" data-stack-row>
+          <span class="stack-row__index text-mono mask">
+            <span class="line" data-line>
+              {row.index}
+            </span>
+          </span>
+          <div class="stack-row__discipline">
+            <h3 class="stack-row__title mask">
+              <span class="line" data-line>
+                {row.title}
+              </span>
+            </h3>
+            <p class="stack-row__count text-mono">{row.count} TOOLS</p>
+          </div>
+          <ul class="stack-row__tools" role="list" aria-label={`${row.title} tools`}>
+            {row.tools.map((tool) => (
+              <li class="tool-cell" data-tool-cell>
+                <span class="tool-cell__no text-mono">
+                  <span class="visually-hidden">{tool.number}</span>
+                  <span aria-hidden="true" data-tool-no>
+                    {tool.number}
+                  </span>
+                </span>
+                <span class="tool-cell__logo">
+                  <span class="tool-cell__icon">
+                    {tool.icon && (
+                      <img src={tool.icon.src} width={tool.size} height={tool.size} alt="" />
+                    )}
+                    {tool.tile && (
+                      <span
+                        class="tool-cell__tile"
+                        style={`--tile-bg:${tool.tile.background};--tile-fg:${tool.tile.color}`}
+                      >
+                        {tool.tile.text}
+                      </span>
+                    )}
+                  </span>
+                  <span class="tool-cell__name mask">
+                    <span class="line" data-line>
+                      {tool.name}
+                    </span>
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+          <span class="rule" data-rule />
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<script>
+  import { initAboutStack } from '@/scripts/animations/about-stack';
+
+  const stack = document.querySelector<HTMLElement>('[data-stack]');
+  if (stack) initAboutStack(stack);
+</script>
+
+<style>
+  .stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-10);
+    padding-block-end: var(--space-18);
+  }
+
+  .stack__heading {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .stack__aside {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .stack__totals {
+    color: var(--color-accent);
+  }
+
+  /* ---- Table ---- */
+  .stack-table {
+    border-block-start: var(--border-strong);
+  }
+
+  .stack-table__labels {
+    display: none;
+  }
+
+  /* Hairline rules are elements so they can draw (scaleX) on enter. */
+  .rule {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 0;
+    height: var(--border-width);
+    background-color: var(--color-border);
+  }
+
+  .rule--strong {
+    background-color: var(--color-border-strong);
+  }
+
+  /* Clip vertically only: the lines rise out of the mask, and `clip` (unlike
+     `hidden`) keeps the text baseline usable for baseline alignment. */
+  .mask {
+    display: block;
+    overflow-x: visible;
+    overflow-y: clip;
+  }
+
+  .line {
+    display: block;
+  }
+
+  .stack-row {
+    --row-fg: var(--color-text);
+    --row-accent: var(--color-accent);
+
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-5) var(--space-3);
+    padding-block: var(--space-6);
+    color: var(--row-fg);
+    transition:
+      opacity var(--duration-base) ease,
+      color var(--duration-base) ease;
+  }
+
+  /* White fill that sweeps in from the left behind the row on hover. */
+  .stack-row::before {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    content: '';
+    background-color: var(--color-text);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--duration-slow) var(--ease-in-out);
+  }
+
+  .stack-row__index {
+    grid-area: 1 / 1;
+    align-self: baseline;
+    min-width: 2ch;
+    color: var(--row-accent);
+  }
+
+  .stack-row__discipline {
+    display: flex;
+    grid-area: 1 / 2;
+    align-self: baseline;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .stack-row__title {
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-h4);
+    letter-spacing: var(--tracking-normal);
+  }
+
+  .stack-row__count {
+    flex-shrink: 0;
+    color: var(--color-text-muted);
+  }
+
+  .stack-row__tools {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-5) var(--space-3);
+  }
+
+  .tool-cell {
+    --rule: 1;
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-inline-start: var(--space-3);
+  }
+
+  /* Left hairline; GSAP tweens --rule to draw it top → bottom. */
+  .tool-cell::before {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: var(--border-width);
+    content: '';
+    background-color: var(--color-border);
+    transform: scaleY(var(--rule));
+    transform-origin: top;
+  }
+
+  .tool-cell__no {
+    color: var(--color-text-muted);
+  }
+
+  .tool-cell__logo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .tool-cell__icon {
+    position: relative;
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    opacity: 0.5;
+    transition: opacity var(--duration-base) ease;
+  }
+
+  .tool-cell__icon img {
+    width: auto;
+    max-width: none;
+  }
+
+  /* Figma JS tile: a 20px square at (2,2) with the letters in its lower right. */
+  .tool-cell__tile {
+    position: absolute;
+    inset: 2px;
+    padding: 9px 0 0 9px;
+    font-size: 9px;
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-snug);
+    color: var(--tile-fg);
+    background-color: var(--tile-bg);
+    border-radius: var(--radius-sm);
+  }
+
+  .tool-cell__name {
+    /* Wrap between words, never inside one ("BigCommerce"). */
+    overflow-wrap: normal;
+    font-size: var(--text-md);
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-h4);
+  }
+
+  /* Touch: no hover, so icons brighten as each row scrolls into view. */
+  .stack-row.is-in .tool-cell__icon {
+    opacity: 1;
+  }
+
+  @media (hover: hover) {
+    .stack-row:hover {
+      --row-fg: var(--color-text-inverse);
+      --row-accent: var(--color-text-inverse);
+    }
+
+    .stack-row:hover::before {
+      transform: scaleX(1);
+    }
+
+    .stack-table:hover .stack-row:not(:hover) {
+      opacity: 0.3;
+    }
+
+    .stack-row:hover .tool-cell__icon {
+      opacity: 1;
+    }
+  }
+
+  @media (min-width: 48em) {
+    .stack {
+      gap: var(--space-16);
+      padding-block-end: var(--space-35);
+    }
+
+    .stack__heading {
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: var(--space-6);
+    }
+
+    .stack__aside {
+      flex: 0 1 418px;
+      gap: var(--space-4);
+    }
+
+    .stack-table {
+      border-block-start: 0;
+    }
+
+    .stack-table__labels,
+    .stack-row {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--space-6);
+    }
+
+    .stack-table__labels {
+      position: relative;
+      padding-block-end: var(--space-4);
+      color: var(--color-text-muted);
+    }
+
+    .stack-table__labels > span:nth-child(1),
+    .stack-row__index {
+      grid-column: 1 / span 1;
+    }
+
+    .stack-table__labels > span:nth-child(2),
+    .stack-row__discipline {
+      grid-column: 2 / span 3;
+    }
+
+    .stack-table__labels > span:nth-child(3),
+    .stack-row__tools {
+      grid-column: 5 / span 8;
+    }
+
+    .stack-row {
+      align-items: start;
+      padding-block: var(--space-8);
+    }
+
+    .stack-row__index {
+      grid-row: 1;
+      align-self: start;
+    }
+
+    .stack-row__discipline {
+      grid-row: 1;
+      align-self: start;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 10px;
+      padding-inline-start: 0;
+    }
+
+    .stack-row__title {
+      font-size: var(--text-2xl);
+      line-height: var(--leading-snug);
+      letter-spacing: var(--tracking-h3);
+    }
+
+    .stack-row__tools {
+      grid-row: 1;
+      /* Four cells at 1440 (197px each); fewer per line on narrower desktops. */
+      grid-template-columns: repeat(auto-fill, minmax(11.25rem, 1fr));
+      gap: var(--space-5) var(--space-6);
+    }
+
+    .tool-cell {
+      gap: 14px;
+      padding-inline-start: var(--space-4);
+    }
+
+    .tool-cell__name {
+      font-size: var(--text-lg);
+    }
+  }
+</style>

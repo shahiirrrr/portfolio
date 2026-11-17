@@ -1,0 +1,99 @@
+---
+/**
+ * "Always learning" cards (Figma: 05 Off the clock). Cards rise in with an
+ * 80ms stagger (shared data-reveal-group); images zoom to 1.04 on hover.
+ */
+import { Image } from 'astro:assets';
+
+import { LEARNING, LEARNING_INTRO } from '@/data/about';
+---
+
+<section class="learning container" aria-labelledby="learning-heading">
+  <div class="learning__heading">
+    <h2 class="text-h1" id="learning-heading">
+      Always learning
+    </h2>
+    <p class="text-body text-secondary">{LEARNING_INTRO}</p>
+  </div>
+
+  <ul class="learning__cards" role="list" data-reveal-group>
+    {LEARNING.map(({ title, meta, image }) => (
+      <li class="learning-card" data-reveal-item>
+        <div class="learning-card__media">
+          <Image
+            src={image}
+            alt=""
+            widths={[350, 420, 640, 840, 1280]}
+            sizes="(min-width: 90em) 419px, (min-width: 48em) 30vw, calc(100vw - 2.5rem)"
+          />
+        </div>
+        <h3 class="text-h4">{title}</h3>
+        <p class="text-body-sm text-secondary">{meta}</p>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .learning {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    padding-block-end: var(--space-20);
+  }
+
+  .learning__cards {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .learning-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .learning-card__media {
+    height: 240px;
+    overflow: hidden;
+    border-radius: 24px; /* mobile frame: 24 */
+  }
+
+  .learning-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: scale var(--duration-slow) var(--ease-out);
+  }
+
+  @media (hover: hover) {
+    .learning-card:hover .learning-card__media img {
+      scale: 1.04;
+    }
+  }
+
+  @media (min-width: 48em) {
+    .learning {
+      gap: var(--space-10);
+      padding-block-end: var(--space-35);
+    }
+
+    .learning__heading {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: var(--space-2) var(--space-6);
+    }
+
+    .learning__cards {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-6);
+    }
+
+    .learning-card__media {
+      height: 360px;
+      border-radius: var(--radius-card);
+    }
+  }
+</style>

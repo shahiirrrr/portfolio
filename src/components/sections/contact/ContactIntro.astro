@@ -1,0 +1,174 @@
+---
+/**
+ * Contact intro column (Figma: 01 Contact / Info): display title, intro,
+ * pulsing availability status and the contact details grid.
+ */
+import statusDot from '@/assets/icons/status-dot.svg';
+import { SITE, SOCIAL_LINKS } from '@/config/site';
+import { CONTACT_INTRO } from '@/data/contact';
+
+const [titleTop, titleBottom] = CONTACT_INTRO.title;
+---
+
+<div class="contact-intro">
+  <h1 class="contact-intro__title">
+    {titleTop}
+    <br />
+    {titleBottom}
+  </h1>
+  <p class="contact-intro__body text-secondary">{CONTACT_INTRO.body}</p>
+
+  <p class="contact-intro__status text-mono">
+    <span class="contact-intro__dot">
+      <img src={statusDot.src} width="8" height="8" alt="" />
+    </span>
+    {SITE.availability}
+  </p>
+
+  <dl class="contact-intro__details">
+    <div class="contact-intro__item">
+      <dt class="text-mono text-muted">EMAIL</dt>
+      <dd class="text-h4">
+        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+      </dd>
+    </div>
+    <div class="contact-intro__item">
+      <dt class="text-mono text-muted">PHONE</dt>
+      <dd class="text-h4">
+        <a href={SITE.phone.href}>{SITE.phone.label}</a>
+      </dd>
+    </div>
+    <div class="contact-intro__item">
+      <dt class="text-mono text-muted">BASED IN</dt>
+      <dd class="text-h4">
+        {SITE.location} · {CONTACT_INTRO.timezone}
+      </dd>
+    </div>
+    <div class="contact-intro__item">
+      <dt class="text-mono text-muted">ELSEWHERE</dt>
+      <dd class="text-h4">
+        {SOCIAL_LINKS.map(({ label, href }, i) => (
+          <>
+            {i > 0 && <span aria-hidden="true"> · </span>}
+            <a href={href} target="_blank" rel="noopener">
+              {label}
+            </a>
+          </>
+        ))}
+      </dd>
+    </div>
+  </dl>
+</div>
+
+<style>
+  .contact-intro {
+    container-type: inline-size;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-6);
+    min-width: 0;
+  }
+
+  .contact-intro__title {
+    /* Scales with the column too, so the title never overflows between 768 and 1440. */
+    font-size: min(var(--text-display-lg), 30cqi);
+    font-weight: var(--weight-bold);
+    line-height: 0.9;
+    letter-spacing: -0.06em;
+  }
+
+  .contact-intro__body {
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+  }
+
+  .contact-intro__status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-transform: uppercase;
+  }
+
+  .contact-intro__dot {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  /* Availability pulse: a ring scales 1 → 1.8 and fades, 2s loop. */
+  .contact-intro__dot::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-full);
+    background-color: var(--color-text);
+    animation: contact-pulse 2s var(--ease-out) infinite;
+  }
+
+  @keyframes contact-pulse {
+    from {
+      opacity: 0.6;
+      scale: 1;
+    }
+    to {
+      opacity: 0;
+      scale: 1.8;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .contact-intro__dot::after {
+      animation: none;
+      opacity: 0;
+    }
+  }
+
+  .contact-intro__details {
+    display: grid;
+    gap: var(--space-6);
+    width: 100%;
+  }
+
+  .contact-intro__item {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-block-start: var(--space-5);
+    border-block-start: var(--border-strong);
+  }
+
+  .contact-intro__item dd {
+    overflow-wrap: anywhere;
+  }
+
+  .contact-intro__item a {
+    text-underline-offset: 0.2em;
+  }
+
+  @media (hover: hover) {
+    .contact-intro__item a:hover {
+      text-decoration: underline;
+    }
+  }
+
+  @media (min-width: 48em) {
+    .contact-intro {
+      gap: calc(var(--space-8) + var(--space-1)); /* 36 */
+    }
+
+    .contact-intro__title {
+      letter-spacing: var(--tracking-display);
+      line-height: var(--leading-display);
+    }
+
+    .contact-intro__body {
+      font-size: var(--text-lg);
+      line-height: var(--leading-body-sm);
+    }
+
+    .contact-intro__details {
+      /* Two 262px columns at 1440; one column when the intro is narrower (768–1279). */
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 16.375rem), 16.375rem));
+    }
+  }
+</style>

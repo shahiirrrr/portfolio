@@ -1,0 +1,145 @@
+---
+/**
+ * Playground (Figma: Work / 04 Playground): side experiments, each linking
+ * to its GitHub repo in a new tab. Cards rise in with an 80ms stagger.
+ */
+import { Image } from 'astro:assets';
+
+import { EXPERIMENTS } from '@/data/work';
+---
+
+<section class="playground container" aria-labelledby="playground-heading">
+  <div class="playground__head">
+    <h2 class="text-h1" id="playground-heading">
+      Playground
+    </h2>
+    <p class="text-body text-secondary">
+      Small experiments and side builds.
+      <br />
+      Open source on GitHub.
+    </p>
+  </div>
+
+  <ul class="playground__grid" role="list" data-reveal-group data-stagger="0.08">
+    {EXPERIMENTS.map((experiment) => (
+      <li data-reveal-item>
+        <a class="experiment" href={experiment.href} target="_blank" rel="noopener">
+          <div class="experiment__media">
+            <Image
+              src={experiment.image}
+              alt={experiment.alt}
+              widths={[400, 640, 880, 1280]}
+              sizes="(min-width: 48em) 30vw, 100vw"
+            />
+          </div>
+          <div class="experiment__meta">
+            <h3 class="experiment__name text-h4">
+              {experiment.name}
+              <span class="visually-hidden">(GitHub, opens in a new tab)</span>
+            </h3>
+            <p class="text-mono text-secondary">{experiment.stack}</p>
+          </div>
+        </a>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .playground {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    padding-block-end: var(--space-20);
+  }
+
+  .playground__head {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .playground__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+
+  .experiment {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .experiment__media {
+    height: 240px;
+    overflow: hidden;
+    border-radius: var(--radius-media);
+  }
+
+  .experiment__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: scale var(--duration-slow) var(--ease-out);
+  }
+
+  .experiment__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .experiment__name {
+    text-decoration-line: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 0.2em;
+    transition: text-decoration-color var(--duration-fast) ease-out;
+  }
+
+  .experiment:focus-visible .experiment__name {
+    text-decoration-color: currentColor;
+  }
+
+  @media (hover: hover) {
+    .experiment:hover .experiment__media img {
+      scale: 1.04;
+    }
+
+    .experiment:hover .experiment__name {
+      text-decoration-color: currentColor;
+    }
+  }
+
+  @media (min-width: 48em) {
+    .playground {
+      gap: var(--space-10);
+      padding-block-end: var(--space-35);
+    }
+
+    .playground__head {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: var(--space-4) var(--space-8);
+    }
+
+    .playground__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-6);
+    }
+
+    .experiment__media {
+      height: 320px;
+      border-radius: var(--radius-card);
+    }
+
+    .experiment__meta {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--space-2) var(--space-4);
+    }
+  }
+</style>

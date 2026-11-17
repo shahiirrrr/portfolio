@@ -1,0 +1,65 @@
+---
+/** Before / after image pair (Figma: 05 Media — Before / After). */
+import { Image } from 'astro:assets';
+
+interface Props {
+  media: { src: ImageMetadata; alt: string }[];
+}
+
+const { media } = Astro.props;
+---
+
+<div class="cs-media container" data-cs-media>
+  {media.map((item) => (
+    <div class="cs-media__frame" data-cs-wipe>
+      <Image
+        src={item.src}
+        alt={item.alt}
+        widths={[400, 640, 960, 1280]}
+        sizes="(min-width: 90em) 640px, (min-width: 48em) 45vw, 90vw"
+      />
+    </div>
+  ))}
+</div>
+
+<script>
+  import { initCaseStudyMedia } from '@/scripts/animations/case-study-media';
+
+  document.querySelectorAll<HTMLElement>('[data-cs-media]').forEach(initCaseStudyMedia);
+</script>
+
+<style>
+  .cs-media {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+    padding-block: var(--space-10) var(--space-20);
+  }
+
+  .cs-media__frame {
+    height: 260px;
+    overflow: hidden;
+    border-radius: var(--space-6);
+  }
+
+  .cs-media__frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media (min-width: 48em) {
+    .cs-media {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-6);
+      padding-block: var(--space-16) 140px;
+    }
+
+    .cs-media__frame {
+      height: auto;
+      max-height: 460px;
+      aspect-ratio: 640 / 460;
+      border-radius: var(--radius-lg);
+    }
+  }
+</style>

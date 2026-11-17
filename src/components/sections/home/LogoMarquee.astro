@@ -1,0 +1,163 @@
+---
+/**
+ * Stack logo band under the hero (Figma: Logo Band / Stack Slider).
+ * Scrolls left forever; the list is rendered twice so the loop is seamless.
+ * Slows to 20% on hover. Reduced motion / no JS: static, logos wrap onto rows.
+ */
+import { MARQUEE_TECH } from '@/data/home';
+---
+
+<section class="marquee" aria-label="Tech stack" data-marquee>
+  <div class="marquee__track" data-marquee-track>
+    {[false, true].map((isClone) => (
+      <ul class="marquee__group" role="list" aria-hidden={isClone ? 'true' : undefined}>
+        {MARQUEE_TECH.map(({ name, icon, tile }) => (
+          <li class="marquee__item">
+            {icon && <img class="marquee__icon" src={icon.src} width="32" height="32" alt="" />}
+            {tile && (
+              <span class="marquee__icon">
+                <span
+                  class="marquee__tile"
+                  style={`background-color:${tile.background};color:${tile.color}`}
+                >
+                  {tile.text}
+                </span>
+              </span>
+            )}
+            {name}
+          </li>
+        ))}
+      </ul>
+    ))}
+  </div>
+</section>
+
+<script>
+  import { gsap, MOTION_OK } from '@/scripts/animations/core';
+
+  const band = document.querySelector<HTMLElement>('[data-marquee]');
+  const track = band?.querySelector<HTMLElement>('[data-marquee-track]');
+
+  if (band && track) {
+    const mm = gsap.matchMedia();
+    mm.add(MOTION_OK, () => {
+      band.classList.add('is-looping');
+      const loop = gsap.to(track, { xPercent: -50, ease: 'none', duration: 30, repeat: -1 });
+      const slow = () => loop.timeScale(0.2);
+      const resume = () => loop.timeScale(1);
+      band.addEventListener('mouseenter', slow);
+      band.addEventListener('mouseleave', resume);
+
+      return () => {
+        band.classList.remove('is-looping');
+        band.removeEventListener('mouseenter', slow);
+        band.removeEventListener('mouseleave', resume);
+      };
+    });
+  }
+</script>
+
+<style>
+  .marquee {
+    --marquee-gap: var(--space-10);
+    --icon-size: 28px;
+
+    position: relative;
+    padding-block: var(--space-7);
+    overflow: hidden;
+    background-color: var(--color-bg);
+  }
+
+  /* Static fallback: one copy, wrapped onto rows. */
+  .marquee__track {
+    padding-inline: var(--container-gutter);
+  }
+
+  .marquee__group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4) var(--marquee-gap);
+  }
+
+  .marquee__group[aria-hidden='true'] {
+    display: none;
+  }
+
+  /* Looping: a single line, two copies, no wrapping. */
+  .marquee.is-looping .marquee__track {
+    display: flex;
+    width: max-content;
+    padding-inline: 0;
+  }
+
+  .marquee.is-looping .marquee__group {
+    display: flex;
+    flex-wrap: nowrap;
+    padding-inline-end: var(--marquee-gap);
+  }
+
+  .marquee__item {
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-h4);
+    white-space: nowrap;
+  }
+
+  .marquee__icon {
+    position: relative;
+    flex-shrink: 0;
+    width: var(--icon-size);
+    height: var(--icon-size);
+  }
+
+  /* "TS" / "JS" tiles are drawn, not images, in the design. */
+  .marquee__tile {
+    position: absolute;
+    inset: 7.14%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    padding: 0 4.5% 4.5% 0;
+    font-size: calc(var(--icon-size) * 0.3214);
+    font-weight: var(--weight-bold);
+    line-height: 1.1;
+    border-radius: 14.3%;
+  }
+
+  @media (min-width: 48em) {
+    .marquee {
+      --marquee-gap: var(--space-18);
+      --icon-size: 32.2px;
+
+      padding-block: 50px;
+    }
+
+    .marquee__item {
+      font-size: 1.4375rem;
+    }
+
+    /* Static edge fades. */
+    .marquee.is-looping::before,
+    .marquee.is-looping::after {
+      position: absolute;
+      inset-block: 0;
+      z-index: var(--z-raised);
+      width: 200px;
+      content: '';
+      pointer-events: none;
+    }
+
+    .marquee.is-looping::before {
+      inset-inline-start: 0;
+      background: linear-gradient(to left, rgb(11 11 11 / 0), var(--color-bg));
+    }
+
+    .marquee.is-looping::after {
+      inset-inline-end: 0;
+      background: linear-gradient(to right, rgb(11 11 11 / 0), var(--color-bg));
+    }
+  }
+</style>

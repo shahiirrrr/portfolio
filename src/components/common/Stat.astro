@@ -1,0 +1,36 @@
+---
+/** Big numeral + label (Figma: Stat). Numeric values count up on scroll. */
+import type { StatItem } from '@/types';
+
+type Props = StatItem;
+
+const { value, label, labelShort } = Astro.props;
+---
+
+<div class="stat">
+  <dt class="stat__label text-body text-secondary">
+    {labelShort ? (
+      <>
+        <span class="mobile-only">{labelShort}</span>
+        <span class="desktop-only">{label}</span>
+      </>
+    ) : (
+      label
+    )}
+  </dt>
+  <dd class="stat__value text-stat" data-count>
+    {value}
+  </dd>
+</div>
+
+<style>
+  .stat {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: var(--space-3);
+  }
+
+  .stat__label {
+    white-space: nowrap;
+  }
+</style>

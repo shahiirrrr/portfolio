@@ -1,0 +1,132 @@
+---
+/**
+ * About hero (Figma: 01 Hero). Desktop: copy on the left, portrait on the
+ * right, bottom-aligned. Mobile: the portrait sits between title and intro.
+ */
+import { Image } from 'astro:assets';
+
+import portrait from '@/assets/images/portrait.png';
+import Button from '@/components/common/Button.astro';
+import { SITE } from '@/config/site';
+import { ABOUT_HERO } from '@/data/about';
+---
+
+<section class="about-hero container" aria-labelledby="about-hero-title" data-about-hero>
+  <p class="about-hero__eyebrow" data-about-rise data-intro>
+    {ABOUT_HERO.eyebrow}
+  </p>
+  <h1 class="about-hero__title" id="about-hero-title" data-about-rise data-intro>
+    {ABOUT_HERO.title}
+  </h1>
+
+  <div class="about-hero__portrait" data-about-portrait data-intro>
+    <Image
+      src={portrait}
+      alt={`Portrait of ${SITE.name}, arms crossed, wearing a black hoodie`}
+      widths={[350, 480, 700, 960, 1052]}
+      sizes="(min-width: 48em) min(34vw, 480px), calc(100vw - 2.5rem)"
+      loading="eager"
+      fetchpriority="high"
+    />
+  </div>
+
+  <p class="about-hero__intro" data-word-reveal data-start="top 75%" data-end="bottom 45%">
+    {ABOUT_HERO.intro}
+  </p>
+
+  <div class="about-hero__actions">
+    <Button
+      label={ABOUT_HERO.primaryCta.label}
+      href={ABOUT_HERO.primaryCta.href}
+      variant="accent"
+    />
+    <Button label={ABOUT_HERO.cvCta.label} href={SITE.cvPath} variant="ghost" download />
+  </div>
+</section>
+
+<script>
+  import { initAboutHero } from '@/scripts/animations/about-hero';
+
+  const hero = document.querySelector<HTMLElement>('[data-about-hero]');
+  if (hero) initAboutHero(hero);
+</script>
+
+<style>
+  .about-hero {
+    display: grid;
+    gap: var(--space-5);
+    padding-block: var(--space-14) var(--space-18);
+  }
+
+  .about-hero__eyebrow {
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-h4);
+    color: var(--color-accent);
+  }
+
+  .about-hero__title {
+    font-size: var(--text-hero);
+    line-height: var(--leading-tight);
+  }
+
+  .about-hero__portrait {
+    height: 420px;
+    overflow: hidden;
+    border-radius: var(--radius-card);
+  }
+
+  .about-hero__portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .about-hero__intro {
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-h4);
+  }
+
+  .about-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-4);
+  }
+
+  @media (min-width: 48em) {
+    .about-hero {
+      grid-template-columns: minmax(0, 1fr) min(36.81%, 480px);
+      /* The first row absorbs spare height so the copy stays bottom-aligned with the portrait. */
+      grid-template-rows: 1fr auto auto auto;
+      gap: var(--space-8) clamp(var(--space-8), 5.56vw, var(--space-20));
+      padding-block: calc(var(--space-24) + var(--space-2)) var(--space-35);
+    }
+
+    .about-hero__eyebrow {
+      align-self: end;
+      font-size: var(--text-2xl);
+      line-height: var(--leading-snug);
+      letter-spacing: var(--tracking-h3);
+    }
+
+    .about-hero__title {
+      line-height: 0.96;
+    }
+
+    .about-hero__portrait {
+      grid-area: 1 / 2 / -1 / 3;
+      align-self: end;
+      height: auto;
+      aspect-ratio: 480 / 600;
+      border-radius: 40px;
+    }
+
+    .about-hero__intro {
+      font-size: var(--text-2xl);
+      line-height: var(--leading-snug);
+      letter-spacing: var(--tracking-h3);
+    }
+  }
+</style>

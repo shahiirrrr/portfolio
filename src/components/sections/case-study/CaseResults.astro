@@ -1,0 +1,102 @@
+---
+/**
+ * "At a glance" stats (Figma: 03 Results). Values fade up with a stagger and
+ * numeric ones count up (shared `data-reveal-group` / `data-count`).
+ *
+ * Uses its own <dt>/<dd> markup instead of the shared Stat component: on mobile
+ * the design sets non-numeric values in the mono face, lets labels wrap and
+ * needs a per-item reveal hook, none of which Stat exposes.
+ */
+import type { StatItem } from '@/types';
+
+interface Props {
+  stats: StatItem[];
+}
+
+const { stats } = Astro.props;
+
+const isNumeric = (value: string): boolean => /^\d/.test(value);
+---
+
+<section class="cs-results container" aria-labelledby="cs-results-heading">
+  <h2 class="text-h2 cs-results__heading" id="cs-results-heading">
+    At a glance
+  </h2>
+  <dl class="cs-results__stats" data-reveal-group data-y="24">
+    {stats.map((stat) => (
+      <div class="cs-results__stat" data-reveal-item>
+        <dt class="text-body text-secondary">{stat.label}</dt>
+        <dd
+          class:list={[
+            'cs-results__value',
+            'text-stat',
+            { 'cs-results__value--text': !isNumeric(stat.value) },
+          ]}
+          data-count
+        >
+          {stat.value}
+        </dd>
+      </div>
+    ))}
+  </dl>
+</section>
+
+<style>
+  .cs-results {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-7);
+    padding-block: var(--space-14) var(--space-6);
+  }
+
+  .cs-results__heading {
+    line-height: 1.12;
+  }
+
+  .cs-results__stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-7) var(--space-5);
+    padding-block-start: var(--space-6);
+    border-block-start: var(--border-strong);
+  }
+
+  .cs-results__stat {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    min-width: 0;
+  }
+
+  @media (max-width: 47.99em) {
+    /* Mobile: 40px values; words ("B2B", "React") are set in the mono face. */
+    .cs-results__value {
+      font-size: 2.5rem;
+    }
+
+    .cs-results__value--text {
+      font-family: var(--font-mono);
+      font-weight: var(--weight-medium);
+      letter-spacing: -0.04em;
+    }
+  }
+
+  @media (min-width: 48em) {
+    .cs-results {
+      gap: var(--space-12);
+      padding-block: var(--space-24) var(--space-12);
+    }
+
+    .cs-results__heading {
+      line-height: var(--leading-tight);
+    }
+
+    .cs-results__stats {
+      display: flex;
+      justify-content: space-between;
+      gap: var(--space-6);
+      padding-block-start: var(--space-10);
+    }
+  }
+</style>

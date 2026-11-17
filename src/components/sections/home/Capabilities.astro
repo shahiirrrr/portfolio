@@ -1,0 +1,75 @@
+---
+/** Home capabilities: three folder panels and the stat row (Figma: 05 Capabilities). */
+import Stat from '@/components/common/Stat.astro';
+import FolderPanel from '@/components/ui/FolderPanel.astro';
+import { CAPABILITIES, HOME_STATS } from '@/data/home';
+---
+
+<section class="capabilities container" aria-labelledby="capabilities-heading">
+  <h2 class="capabilities__heading text-h2" id="capabilities-heading" data-reveal>
+    Code that carries <br class="desktop-only" />
+    the whole product.
+  </h2>
+
+  <div class="capabilities__panels" data-reveal-group>
+    {CAPABILITIES.map((item, i) => (
+      <FolderPanel index={i + 1} {...item} />
+    ))}
+  </div>
+
+  <dl class="capabilities__stats">
+    {HOME_STATS.map((stat) => (
+      <Stat {...stat} />
+    ))}
+  </dl>
+</section>
+
+<style>
+  .capabilities {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    padding-block: var(--space-10) var(--space-24);
+  }
+
+  .capabilities__heading {
+    line-height: 1.12;
+  }
+
+  .capabilities__panels {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  .capabilities__stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-8) var(--space-5);
+    padding-block-start: var(--space-8);
+    border-block-start: var(--border-strong);
+  }
+
+  @media (min-width: 48em) {
+    .capabilities {
+      gap: var(--space-18);
+      padding-block-end: var(--space-40);
+    }
+
+    .capabilities__heading {
+      line-height: var(--leading-tight);
+    }
+
+    .capabilities__panels {
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: var(--space-4);
+    }
+
+    .capabilities__stats {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: var(--space-8);
+      padding-block-start: var(--space-10);
+    }
+  }
+</style>

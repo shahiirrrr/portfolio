@@ -1,0 +1,115 @@
+---
+/**
+ * Pill CTA with a circular arrow (Figma: Button).
+ * Renders an <a> when `href` is set, otherwise a <button>.
+ * Hover: the circle rotates 45° and slides right 4px.
+ */
+import arrowLight from '@/assets/icons/arrow-up-right-light.svg';
+import { isExternalUrl } from '@/utils/helpers';
+
+interface Props {
+  label: string;
+  href?: string;
+  /** primary/accent = light pill, ghost = outlined pill on dark. */
+  variant?: 'primary' | 'accent' | 'ghost';
+  /** Adds the download attribute (for the CV). */
+  download?: boolean;
+  type?: 'button' | 'submit';
+  class?: string;
+}
+
+const {
+  label,
+  href,
+  variant = 'primary',
+  download = false,
+  type = 'button',
+  class: className,
+} = Astro.props;
+
+const classes = ['btn', `btn--${variant}`, className];
+const external = href !== undefined && isExternalUrl(href);
+---
+
+{href !== undefined ? (
+  <a
+    class:list={classes}
+    href={href}
+    download={download || undefined}
+    target={external ? '_blank' : undefined}
+    rel={external ? 'noopener' : undefined}
+  >
+    <span class="btn__label">{label}</span>
+    <span class="btn__icon">
+      <img src={arrowLight.src} width="16" height="16" alt="" />
+    </span>
+  </a>
+) : (
+  <button class:list={classes} type={type}>
+    <span class="btn__label">{label}</span>
+    <span class="btn__icon">
+      <img src={arrowLight.src} width="16" height="16" alt="" />
+    </span>
+  </button>
+)}
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-4);
+    min-height: var(--control-height);
+    padding: 6px 6px 6px var(--space-6);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-snug);
+    white-space: nowrap;
+    color: var(--color-text-inverse);
+    background-color: var(--color-bg-cream);
+    border-radius: var(--radius-full);
+  }
+
+  .btn--accent {
+    background-color: var(--color-accent);
+  }
+
+  .btn--ghost {
+    color: var(--color-text);
+    background-color: transparent;
+    box-shadow: inset 0 0 0 var(--border-width) var(--color-border-strong);
+  }
+
+  .btn__icon {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: var(--icon-circle);
+    height: var(--icon-circle);
+    background-color: var(--color-bg);
+    border-radius: var(--radius-full);
+    transition: transform var(--duration-fast) ease-out;
+  }
+
+  .btn--ghost .btn__icon {
+    background-color: var(--color-bg-raised);
+  }
+
+  @media (hover: hover) {
+    .btn:hover .btn__icon {
+      transform: translateX(4px) rotate(45deg);
+    }
+  }
+
+  .btn:focus-visible .btn__icon {
+    transform: translateX(4px) rotate(45deg);
+  }
+
+  .btn[data-state='loading'] {
+    cursor: progress;
+  }
+
+  .btn:disabled {
+    opacity: 0.6;
+  }
+</style>

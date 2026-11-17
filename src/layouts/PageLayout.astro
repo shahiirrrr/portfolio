@@ -1,0 +1,62 @@
+---
+/**
+ * Standard page chrome: skip link, fixed header, <main> landmark and footer.
+ * Every regular page uses this layout.
+ *
+ * `hero="overlay"` is for pages whose first section sits underneath the
+ * header (Home); other pages get top padding equal to the header's height.
+ */
+import Footer from '@/components/layout/Footer.astro';
+import Header from '@/components/layout/Header.astro';
+import type { LayoutProps } from '@/types';
+
+import BaseLayout from './BaseLayout.astro';
+
+interface Props extends LayoutProps {
+  headerTheme?: 'dark' | 'light';
+  hero?: 'offset' | 'overlay';
+}
+
+const { headerTheme = 'dark', hero = 'offset', ...layoutProps } = Astro.props;
+---
+
+<BaseLayout {...layoutProps}>
+  <a class="skip-link" href="#main">
+    Skip to main content
+  </a>
+  <Header theme={headerTheme} />
+  <main id="main" tabindex="-1" class:list={{ 'main--offset': hero === 'offset' }}>
+    <slot />
+  </main>
+  <Footer />
+</BaseLayout>
+
+<script>
+  import '@/scripts/animations/reveal';
+</script>
+
+<style>
+  .skip-link {
+    position: absolute;
+    inset-block-start: var(--space-2);
+    inset-inline-start: var(--space-2);
+    z-index: var(--z-modal);
+    padding: var(--space-2) var(--space-4);
+    color: var(--color-text-inverse);
+    background-color: var(--color-bg-cream);
+    border-radius: var(--radius-sm);
+    transform: translateY(-200%);
+  }
+
+  .skip-link:focus-visible {
+    transform: translateY(0);
+  }
+
+  main:focus {
+    outline: none;
+  }
+
+  .main--offset {
+    padding-block-start: var(--header-offset);
+  }
+</style>

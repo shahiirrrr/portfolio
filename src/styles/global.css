@@ -1,0 +1,165 @@
+/*
+ * Global stylesheet entry — imported once, in BaseLayout.astro.
+ * Cascade layers keep specificity predictable: scoped component styles are
+ * unlayered, so they always win over everything declared here.
+ */
+@layer reset, tokens, base, utilities;
+
+@import './variables.css' layer(tokens);
+@import './utilities.css' layer(utilities);
+
+@layer reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  * {
+    margin: 0;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scrollbar-gutter: stable;
+  }
+
+  img,
+  picture,
+  video,
+  canvas,
+  svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
+  input,
+  button,
+  textarea,
+  select {
+    font: inherit;
+    color: inherit;
+  }
+
+  ul[role='list'],
+  ol[role='list'] {
+    padding: 0;
+    list-style: none;
+  }
+}
+
+@layer base {
+  html {
+    scroll-padding-block-start: var(--header-offset);
+  }
+
+  body {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    font-weight: var(--weight-regular);
+    line-height: var(--leading-normal);
+    color: var(--color-text);
+    background-color: var(--color-bg);
+    overflow-x: clip;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  main {
+    flex: 1;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-snug);
+  }
+
+  h1 {
+    font-size: var(--text-h1);
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--tracking-h1);
+  }
+
+  h2 {
+    font-size: var(--text-h2);
+    letter-spacing: var(--tracking-h2);
+  }
+
+  h3 {
+    font-size: var(--text-2xl);
+    letter-spacing: var(--tracking-h3);
+  }
+
+  h4 {
+    font-size: var(--text-lg);
+  }
+
+  p,
+  li {
+    overflow-wrap: break-word;
+  }
+
+  button {
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+
+  address {
+    font-style: normal;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+    text-decoration-thickness: from-font;
+    text-underline-position: from-font;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 3px;
+  }
+
+  code,
+  kbd,
+  pre {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+  }
+
+  ::selection {
+    color: var(--color-text-inverse);
+    background-color: var(--color-accent);
+  }
+
+  /* Elements that take part in an on-load intro stay hidden until the
+     animation script has set their start state (prevents a flash of the
+     final frame). `motion-ready` is always added — by the script, or by the
+     failsafe in BaseLayout if the script never runs. */
+  html.js:not(.motion-ready) [data-intro] {
+    visibility: hidden;
+  }
+
+  /* Safety net: neutralise CSS motion for users who ask for less of it.
+     JS/GSAP animations must check the same preference themselves. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

@@ -1,0 +1,25 @@
+---
+import ContactCta from '@/components/sections/ContactCta.astro';
+import Experience from '@/components/sections/about/Experience.astro';
+import Hero from '@/components/sections/about/Hero.astro';
+import Learning from '@/components/sections/about/Learning.astro';
+import Principles from '@/components/sections/about/Principles.astro';
+import Stack from '@/components/sections/about/Stack.astro';
+import PageLayout from '@/layouts/PageLayout.astro';
+import { personSchema, profilePageSchema } from '@/utils/seo';
+
+const description =
+  'Shahir is a frontend developer from Wayanad, Kerala: his experience, the stack he knows deeply, and how he thinks about performance, accessibility and motion.';
+---
+
+<PageLayout
+  seo={{ title: 'About', description, type: 'profile' }}
+  jsonLd={[profilePageSchema(Astro.url.pathname), personSchema()]}
+>
+  <Hero />
+  <Experience />
+  <Stack />
+  <Principles />
+  <Learning />
+  <ContactCta />
+</PageLayout>

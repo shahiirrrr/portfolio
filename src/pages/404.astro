@@ -1,0 +1,14 @@
+---
+import NotFoundPanel from '@/components/sections/not-found/NotFoundPanel.astro';
+import PageLayout from '@/layouts/PageLayout.astro';
+
+const seo = {
+  title: '404',
+  description: 'The page you were looking for does not exist or has been moved.',
+  noindex: true,
+};
+---
+
+<PageLayout seo={seo} hero="overlay">
+  <NotFoundPanel />
+</PageLayout>

@@ -1,0 +1,21 @@
+---
+import ContactCta from '@/components/sections/ContactCta.astro';
+import AboutIntro from '@/components/sections/home/AboutIntro.astro';
+import Capabilities from '@/components/sections/home/Capabilities.astro';
+import Hero from '@/components/sections/home/Hero.astro';
+import LogoMarquee from '@/components/sections/home/LogoMarquee.astro';
+import ProcessDial from '@/components/sections/home/ProcessDial.astro';
+import SelectedWork from '@/components/sections/home/SelectedWork.astro';
+import PageLayout from '@/layouts/PageLayout.astro';
+import { personSchema, websiteSchema } from '@/utils/seo';
+---
+
+<PageLayout headerTheme="light" hero="overlay" jsonLd={[websiteSchema(), personSchema()]}>
+  <Hero />
+  <LogoMarquee />
+  <AboutIntro />
+  <SelectedWork />
+  <ProcessDial />
+  <Capabilities />
+  <ContactCta />
+</PageLayout>

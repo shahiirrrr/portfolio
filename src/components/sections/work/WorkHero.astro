@@ -1,0 +1,84 @@
+---
+/**
+ * Work page hero (Figma: Work / 01 Hero): display title, project count and intro.
+ * The count is a live region — the filter script rewrites it.
+ */
+import { WORK_INTRO } from '@/data/work';
+import { padIndex } from '@/utils/helpers';
+
+interface Props {
+  total: number;
+}
+
+const { total } = Astro.props;
+---
+
+<section class="work-hero container" aria-labelledby="work-title">
+  <h1 class="work-hero__title" id="work-title">
+    All work
+    <br />& experiments.
+  </h1>
+  <div class="work-hero__intro">
+    <p class="work-hero__count text-mono" aria-live="polite" data-work-count>
+      ( {padIndex(total)} PROJECTS )
+    </p>
+    <p class="work-hero__lead">{WORK_INTRO}</p>
+  </div>
+</section>
+
+<style>
+  .work-hero {
+    padding-block: var(--space-14) var(--space-8);
+  }
+
+  .work-hero__title {
+    font-size: var(--text-display-work);
+    font-weight: var(--weight-bold);
+    line-height: 0.9;
+    letter-spacing: -0.06em;
+    color: var(--color-text);
+  }
+
+  .work-hero__intro {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .work-hero__count {
+    color: var(--color-accent);
+    white-space: nowrap;
+  }
+
+  .work-hero__lead {
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+    color: var(--color-text-secondary);
+  }
+
+  @media (min-width: 48em) {
+    /* The intro row overlaps the hero's fixed height in the design, so it sits
+       directly under the title. */
+    .work-hero {
+      padding-block: calc(var(--space-24) + var(--space-2)) var(--space-3);
+    }
+
+    .work-hero__title {
+      line-height: var(--leading-display);
+      letter-spacing: var(--tracking-display);
+    }
+
+    .work-hero__intro {
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--space-8);
+    }
+
+    .work-hero__lead {
+      max-width: 30rem; /* 480 */
+      font-size: var(--text-lg);
+      line-height: var(--leading-body-sm);
+    }
+  }
+</style>

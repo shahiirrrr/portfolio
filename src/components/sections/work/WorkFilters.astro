@@ -1,0 +1,98 @@
+---
+/**
+ * Work filters (Figma: Work / 02 Filters): single-select tag chips and the
+ * LIST / GRID view toggle (desktop only). Behaviour lives in work-filter.ts.
+ */
+import Chip from '@/components/common/Chip.astro';
+import { WORK_FILTERS, tagSlug } from '@/data/work';
+---
+
+<div class="work-filters container">
+  <div
+    class="work-filters__chips"
+    role="group"
+    aria-label="Filter projects by technology"
+    data-work-filters
+  >
+    <Chip label="All" value="all" active />
+    {WORK_FILTERS.map((label) => (
+      <Chip label={label} value={tagSlug(label)} />
+    ))}
+  </div>
+
+  <div class="view-toggle text-mono" role="group" aria-label="Project layout">
+    <button class="view-toggle__option" type="button" aria-pressed="true" data-view-option="list">
+      LIST
+    </button>
+    <span class="view-toggle__divider" aria-hidden="true">
+      /
+    </span>
+    <button class="view-toggle__option" type="button" aria-pressed="false" data-view-option="grid">
+      GRID
+    </button>
+  </div>
+</div>
+
+<script>
+  import { initWorkFilter } from '@/scripts/animations/work-filter';
+
+  initWorkFilter();
+</script>
+
+<style>
+  .work-filters {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-6);
+    padding-block-end: var(--space-6);
+  }
+
+  .work-filters__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .view-toggle {
+    display: none;
+  }
+
+  @media (min-width: 48em) {
+    .work-filters {
+      padding-block-end: var(--space-10);
+    }
+
+    .view-toggle {
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      gap: var(--space-4);
+    }
+  }
+
+  .view-toggle__option {
+    font: inherit;
+    letter-spacing: inherit;
+    color: var(--color-text-muted);
+    transition: color var(--duration-fast) ease-out;
+  }
+
+  .view-toggle__option[aria-pressed='true'] {
+    color: var(--color-text);
+  }
+
+  .view-toggle__divider {
+    color: var(--color-text-muted);
+  }
+
+  @media (hover: hover) {
+    .view-toggle__option:hover {
+      color: var(--color-text-secondary);
+    }
+
+    .view-toggle__option[aria-pressed='true']:hover {
+      color: var(--color-text);
+    }
+  }
+</style>

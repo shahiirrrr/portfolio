@@ -1,0 +1,190 @@
+---
+/**
+ * Folder-tab project card for the Home rail (Figma: Project Card, 432×540;
+ * scaled to 75% on mobile). The whole card is one link.
+ * Hover: the cover scales 1.04 and the folder lifts 8px.
+ */
+import { Image } from 'astro:assets';
+
+import folderShape from '@/assets/images/shapes/folder-card.svg';
+import { padIndex } from '@/utils/helpers';
+import { formatStack, projectPath, type FeaturedProject } from '@/utils/projects';
+
+interface Props {
+  project: FeaturedProject;
+  /** 1-based position in the rail. */
+  index: number;
+}
+
+const { project, index } = Astro.props;
+const { title, stack, year, card } = project.data;
+const href = projectPath(project);
+const Tag = href ? 'a' : 'article';
+---
+
+<Tag class="project-card" href={href} data-rail-item>
+  <span class="project-card__cover">
+    <Image
+      src={card.image}
+      alt=""
+      widths={[309, 412, 618, 824]}
+      sizes="(min-width: 48em) 412px, 309px"
+    />
+  </span>
+  <span class="project-card__category">
+    {card.category.map((line, i) => (
+      <>
+        {i > 0 && <br />}
+        {line}
+      </>
+    ))}
+  </span>
+
+  <span class="project-card__folder">
+    <img class="project-card__shape" src={folderShape.src} width="412" height="320" alt="" />
+    <span class="project-card__content">
+      <span class="project-card__head">
+        <span class="project-card__title">{title}</span>
+        <span class="project-card__stack">{formatStack(card.stack ?? stack)}</span>
+      </span>
+      <span class="project-card__foot">
+        <span class="project-card__index">
+          <span class="project-card__number">{padIndex(index)}</span>
+          <span class="project-card__stack">Case</span>
+        </span>
+        {year && <span class="project-card__year">{year}</span>}
+      </span>
+    </span>
+  </span>
+</Tag>
+
+<style>
+  .project-card {
+    /* One design pixel. The mobile card is the desktop card at 75%. */
+    --u: 0.75px;
+
+    position: relative;
+    display: block;
+    flex: 0 0 auto;
+    width: calc(432 * var(--u));
+    height: calc(540 * var(--u));
+    overflow: hidden;
+    color: var(--color-text);
+    background-color: var(--color-bg);
+    border-radius: calc(52 * var(--u));
+    scroll-snap-align: start;
+  }
+
+  .project-card__cover {
+    position: absolute;
+    inset: calc(10 * var(--u)) calc(10 * var(--u)) auto;
+    height: calc(330 * var(--u));
+    overflow: hidden;
+    border-radius: calc(44 * var(--u));
+  }
+
+  .project-card__cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: scale var(--duration-base) var(--ease-out);
+  }
+
+  .project-card__category {
+    position: absolute;
+    inset-block-start: calc(36 * var(--u));
+    inset-inline-end: calc(40 * var(--u));
+    font-size: calc(20 * var(--u));
+    font-weight: var(--weight-semibold);
+    line-height: 1.3;
+    text-align: end;
+    white-space: nowrap;
+    color: #121212; /* label drawn on the light cover photo */
+  }
+
+  .project-card__folder {
+    position: absolute;
+    inset: calc(210 * var(--u)) calc(10 * var(--u)) calc(10 * var(--u));
+    transition: translate var(--duration-base) var(--ease-out);
+  }
+
+  .project-card__shape {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+  }
+
+  .project-card__content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: calc(22 * var(--u)) calc(24 * var(--u)) calc(24 * var(--u));
+  }
+
+  .project-card__head {
+    display: flex;
+    flex-direction: column;
+    gap: calc(4 * var(--u));
+  }
+
+  .project-card__title {
+    font-size: calc(20 * var(--u));
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-h4);
+  }
+
+  .project-card__stack {
+    font-size: calc(16 * var(--u));
+    line-height: var(--leading-normal);
+    color: var(--color-text-secondary);
+  }
+
+  .project-card__foot {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .project-card__index {
+    display: flex;
+    align-items: baseline;
+    gap: calc(8 * var(--u));
+  }
+
+  .project-card__number {
+    font-family: var(--font-numeric);
+    font-size: calc(88 * var(--u));
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-none);
+  }
+
+  .project-card__year {
+    font-size: calc(14 * var(--u));
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-snug);
+  }
+
+  @media (hover: hover) {
+    .project-card:hover .project-card__cover img {
+      scale: 1.04;
+    }
+
+    .project-card:hover .project-card__folder {
+      translate: 0 -8px;
+    }
+  }
+
+  .project-card:focus-visible {
+    outline-offset: 4px;
+  }
+
+  @media (min-width: 48em) {
+    .project-card {
+      --u: 1px;
+    }
+  }
+</style>

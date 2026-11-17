@@ -1,0 +1,10 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="412" height="320" viewBox="0 0 412 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Folder Shape" clip-path="url(#clip0_0_349)">
+<path id="Vector" d="M0 24C0 10.745 10.745 0 24 0H156C163 0 169 3 173 9L186 31C190 37 196 40 203 40H388C401.255 40 412 50.745 412 64V284C412 303.882 395.882 320 376 320H36C16.118 320 0 303.882 0 284V24Z" fill="#1E1E1E"/>
+</g>
+<defs>
+<clipPath id="clip0_0_349">
+<rect width="412" height="320" fill="white"/>
+</clipPath>
+</defs>
+</svg>

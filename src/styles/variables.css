@@ -1,0 +1,162 @@
+/*
+ * Design tokens — extracted from the Figma file "shahir-exp" (page "08 Final").
+ * The single source of truth for every visual value. Components consume these
+ * tokens, never raw values. Figma variable names are noted where they differ.
+ *
+ * The design is drawn at two widths: mobile 390 and desktop 1440. Fluid tokens
+ * interpolate linearly between those two frames and clamp outside them.
+ *
+ * Breakpoints (custom properties can't be used in media queries, so these are
+ * the canonical values — always mobile-first `min-width`, in em):
+ *   sm  30em  (480px)  large mobile
+ *   md  48em  (768px)  tablet — THE design breakpoint: below it the mobile
+ *                      frames apply, from it up the desktop frames apply
+ *   lg  64em  (1024px) laptop
+ *   xl  80em  (1280px) desktop
+ *   2xl 96em  (1536px) wide
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* ---- Color (Figma: bg/*, text/*, border/*, brand/*) ---- */
+  --color-bg: #0b0b0b; /* bg/canvas */
+  --color-bg-raised: #1e1e1e; /* bg/raised */
+  --color-bg-cream: #f5f5f5; /* bg/cream */
+  --color-bg-white: #ffffff; /* home hero */
+  --color-ember: #262626; /* brand/ember */
+  --color-text: #f5f5f5; /* text/primary */
+  --color-text-secondary: #a3a3a3; /* text/secondary */
+  --color-text-muted: #5c5c5c; /* text/muted — decorative/meta only, below AA for body copy */
+  --color-text-inverse: #0b0b0b; /* text/inverse */
+  --color-text-dim: rgb(245 243 238 / 0.16); /* un-revealed statement text */
+  --color-accent: #f5f5f5; /* brand/orange (monochrome in the final design) */
+  --color-border: #2a2a2a; /* border/default */
+  --color-border-strong: #3b3b3b; /* border/strong */
+  --color-overlay: rgb(10 10 10 / 0.55); /* pills over imagery */
+  --color-scrim: rgb(10 10 10 / 0.88); /* legibility gradient end */
+  --color-header-solid: rgb(11 11 11 / 0.72); /* blurred header background */
+  --color-focus: var(--color-accent);
+  --color-error: #ff6b5b; /* Input Field error helper text */
+
+  /* ---- Typography: families (font files are configured in astro.config.ts) ---- */
+  --font-sans: var(--font-manrope), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+  --font-numeric: var(--font-antonio), Impact, sans-serif;
+  --font-wordmark: var(--font-unbounded), system-ui, sans-serif; /* footer wordmark only */
+
+  /* ---- Typography: sizes. Fluid values run 390px → 1440px. ---- */
+  --text-mono: 0.8125rem; /* 13 — Mono/Index */
+  --text-sm: 0.875rem; /* 14 — Body/S, Label/M */
+  --text-nav: 0.9375rem; /* 15 — header links */
+  --text-base: 1rem; /* 16 — Body/M */
+  --text-md: 1.125rem; /* 18 — About stack tool names on mobile */
+  --text-lg: 1.25rem; /* 20 — Body/L, Heading/H4 */
+  --text-xl: 1.5rem; /* 24 */
+  --text-2xl: 1.75rem; /* 28 — Heading/H3 */
+  --text-h2: clamp(2rem, 1.629rem + 1.524vw, 3rem); /* 32 → 48 — Heading/H2 */
+  --text-h1: clamp(2.5rem, 1.757rem + 3.048vw, 4.5rem); /* 40 → 72 — Heading/H1 */
+  --text-hero: clamp(2.5rem, 1.2rem + 5.333vw, 6rem); /* 40 → 96 — About hero title */
+  --text-display: clamp(4rem, 1.4rem + 10.667vw, 11rem); /* 64 → 176 — Display/XL */
+  --text-display-lg: clamp(4.75rem, 2.429rem + 9.524vw, 11rem); /* 76 → 176 — Contact display */
+  --text-headline: clamp(2.5625rem, 1.611rem + 3.905vw, 5.125rem); /* 41 → 82 — 404 headline */
+  --text-display-work: clamp(3.25rem, 0.371rem + 11.81vw, 11rem); /* 52 → 176 — Work hero title */
+  --text-stat: clamp(2.75rem, 1.729rem + 4.19vw, 5.5rem); /* 44 → 88 — Numeric/Stat */
+  --text-numeral: clamp(7.5rem, 5.643rem + 7.619vw, 12.5rem); /* 120 → 200 — Numeric/Numeral */
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-extrabold: 800;
+
+  --leading-none: 1;
+  --leading-display: 0.92;
+  --leading-tight: 1.08;
+  --leading-snug: 1.2;
+  --leading-h4: 1.3;
+  --leading-body-sm: 1.5;
+  --leading-normal: 1.6;
+
+  --tracking-display: -0.05em; /* Display/XL: -8.8px @ 176px */
+  --tracking-h1: -0.03em; /* -2.16px @ 72px */
+  --tracking-h2: -0.02em; /* -0.96px @ 48px */
+  --tracking-h3: -0.01em; /* -0.28px @ 28px */
+  --tracking-normal: 0;
+  --tracking-mono: 0.04em; /* 0.52px @ 13px */
+
+  /* ---- Spacing: 4px base (name = px / 4) ---- */
+  --space-1: 0.25rem; /* 4 */
+  --space-2: 0.5rem; /* 8 */
+  --space-3: 0.75rem; /* 12 */
+  --space-4: 1rem; /* 16 */
+  --space-5: 1.25rem; /* 20 */
+  --space-6: 1.5rem; /* 24 */
+  --space-7: 1.75rem; /* 28 */
+  --space-8: 2rem; /* 32 */
+  --space-10: 2.5rem; /* 40 */
+  --space-12: 3rem; /* 48 */
+  --space-14: 3.5rem; /* 56 */
+  --space-16: 4rem; /* 64 */
+  --space-18: 4.5rem; /* 72 */
+  --space-20: 5rem; /* 80 */
+  --space-24: 6rem; /* 96 */
+  --space-28: 7rem; /* 112 */
+  --space-32: 8rem; /* 128 */
+  --space-35: 8.75rem; /* 140 */
+  --space-40: 10rem; /* 160 */
+  /* Vertical padding of a standard section: 96px in both frames. */
+  --space-section: var(--space-24);
+
+  /* ---- Layout ---- */
+  --container-default: 81.5rem; /* 1304 — content width at 1440 */
+  --container-gutter: clamp(1.25rem, 0.136rem + 4.571vw, 4.25rem); /* 20 → 68 */
+  --panel-gutter: clamp(
+    0.75rem,
+    0.564rem + 0.762vw,
+    1.25rem
+  ); /* 12 → 20: inset of full-bleed panels */
+  --header-height: 3rem; /* 48 mobile */
+  --header-offset: 4.25rem; /* 68 — space the fixed header occupies above page content */
+
+  /* ---- Shape ---- */
+  --radius-sm: 0.25rem; /* 4 */
+  --radius-md: 1.25rem; /* 20 */
+  --radius-card: 1.75rem; /* 28 */
+  --radius-media: 1.5rem; /* 24 — Work previews, mobile playground cards */
+  --radius-lg: 2rem; /* 32 — radius/lg */
+  --radius-xl: 3rem; /* 48 — radius/xl */
+  --radius-panel: clamp(2rem, 1.629rem + 1.524vw, 3rem); /* 32 → 48 */
+  --radius-full: 999px;
+
+  --border-width: 1px;
+  --border-default: var(--border-width) solid var(--color-border);
+  --border-strong: var(--border-width) solid var(--color-border-strong);
+  --shadow-float: 0 24px 48px rgb(0 0 0 / 0.5); /* Work row hover preview */
+
+  /* ---- Controls ---- */
+  --control-height: 3.25rem; /* 52 — minimum button height */
+  --icon-circle: 2.5rem; /* 40 */
+  --tap-min: 2.75rem; /* 44 */
+
+  /* ---- Motion (shared by CSS transitions and GSAP) ---- */
+  --duration-fast: 200ms;
+  --duration-base: 300ms;
+  --duration-medium: 350ms;
+  --duration-slow: 500ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.7, 0, 0.2, 1);
+
+  /* ---- Layering ---- */
+  --z-raised: 1;
+  --z-header: 100;
+  --z-overlay: 200;
+  --z-modal: 300;
+}
+
+@media (min-width: 48em) {
+  :root {
+    --header-height: 3.25rem; /* 52 */
+    --header-offset: 5.25rem; /* 84 */
+  }
+}

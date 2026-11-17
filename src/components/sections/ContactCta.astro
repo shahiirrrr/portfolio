@@ -1,0 +1,124 @@
+---
+/**
+ * "Let's build something real." call-to-action panel (Figma: 06 Contact / CTA Panel).
+ * Closes the Home, Work and About pages.
+ */
+import Button from '@/components/common/Button.astro';
+import { SITE } from '@/config/site';
+---
+
+<section class="cta" aria-labelledby="cta-heading">
+  <div class="cta__panel">
+    <h2 class="cta__headline text-display" id="cta-heading">
+      Let’s build <br class="desktop-only" />
+      something real.
+    </h2>
+
+    <div class="cta__row">
+      <p class="cta__email">
+        <span class="text-mono">DROP A LINE</span>
+        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+      </p>
+      <Button label="Start a project" href="/contact/" />
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta {
+    padding-inline: var(--panel-gutter);
+  }
+
+  .cta__panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: 1400px;
+    margin-inline: auto;
+    padding: var(--space-10) var(--space-6) var(--space-8);
+    overflow: hidden;
+    background-color: var(--color-bg);
+    background-image: radial-gradient(
+      ellipse 62.5% 71.43% at 25% 21.43%,
+      #363636 0%,
+      #202020 30%,
+      #151515 50%,
+      var(--color-bg) 70%
+    );
+    border-radius: var(--radius-panel);
+  }
+
+  .cta__headline {
+    position: relative;
+    letter-spacing: -0.06em;
+    line-height: 0.9;
+  }
+
+  .cta__row {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-6);
+    margin-block-start: 120px;
+  }
+
+  .cta__email {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .cta__email a {
+    font-size: clamp(1.25rem, 6.15vw, var(--text-xl));
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-h3);
+    text-decoration: underline;
+  }
+
+  @media (min-width: 48em) {
+    .cta__panel {
+      min-height: 760px;
+      justify-content: space-between;
+      padding: var(--space-18) var(--space-12) var(--space-16) var(--space-10);
+      background-image: none;
+    }
+
+    /* Desktop: the gradient layer sits at 45% opacity in the design. */
+    .cta__panel::before {
+      position: absolute;
+      inset: 0;
+      content: '';
+      background-image: radial-gradient(
+        ellipse 83.33% 41.67% at -8.33% 20.83%,
+        #363636 0%,
+        #202020 30%,
+        #151515 47.5%,
+        var(--color-bg) 65%
+      );
+      opacity: 0.45;
+    }
+
+    .cta__headline {
+      letter-spacing: var(--tracking-display);
+      line-height: var(--leading-display);
+    }
+
+    .cta__row {
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: space-between;
+      align-self: stretch;
+      margin-block-start: var(--space-16);
+      padding-inline-start: var(--space-2);
+    }
+
+    .cta__email a {
+      font-size: var(--text-h2);
+      line-height: var(--leading-tight);
+      letter-spacing: var(--tracking-h2);
+    }
+  }
+</style>

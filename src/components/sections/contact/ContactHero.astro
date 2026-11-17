@@ -1,0 +1,37 @@
+---
+/**
+ * Contact page first section (Figma: 01 Contact): intro + details beside the
+ * form card on desktop, stacked above it on mobile.
+ */
+import ContactForm from './ContactForm.astro';
+import ContactIntro from './ContactIntro.astro';
+---
+
+<section class="contact-hero container" aria-label="Contact">
+  <ContactIntro />
+  <ContactForm />
+</section>
+
+<style>
+  .contact-hero {
+    display: grid;
+    gap: var(--space-10);
+    padding-block: var(--space-14) var(--space-20);
+  }
+
+  @media (min-width: 48em) {
+    .contact-hero {
+      /* 584 : 640 at 1440, scaling down proportionally on smaller screens. */
+      grid-template-columns: minmax(0, 73fr) minmax(0, 80fr);
+      align-items: start;
+      padding-block: var(--space-24) 140px;
+      padding-block-start: calc(var(--space-24) + var(--space-2)); /* 104 */
+    }
+  }
+
+  @media (min-width: 80em) {
+    .contact-hero {
+      gap: var(--space-20);
+    }
+  }
+</style>
