@@ -15,7 +15,7 @@ import { isActivePath, padIndex } from '@/utils/helpers';
 const { pathname } = Astro.url;
 ---
 
-<dialog class="menu" id="mobile-menu" aria-label="Menu" data-menu>
+<dialog class="menu" id="mobile-menu" aria-label="Menu" data-menu data-lenis-prevent>
   <img class="menu__glow" src={glow.src} width="800" height="800" alt="" />
 
   <div class="menu__top">
@@ -65,6 +65,7 @@ const { pathname } = Astro.url;
 
 <script>
   import { gsap, MOTION_OK } from '@/scripts/animations/core';
+  import { lockScroll, unlockScroll } from '@/scripts/animations/smooth-scroll';
 
   const menu = document.querySelector<HTMLDialogElement>('[data-menu]');
   const openButton = document.querySelector<HTMLButtonElement>('[data-menu-open]');
@@ -98,7 +99,7 @@ const { pathname } = Astro.url;
     const open = () => {
       menu.showModal();
       openButton.setAttribute('aria-expanded', 'true');
-      document.documentElement.style.overflow = 'hidden';
+      lockScroll();
       timeline?.timeScale(1).play(0);
     };
 
@@ -120,7 +121,7 @@ const { pathname } = Astro.url;
 
     menu.addEventListener('close', () => {
       openButton.setAttribute('aria-expanded', 'false');
-      document.documentElement.style.overflow = '';
+      unlockScroll();
       // Safari does not focus buttons on click, so the dialog has nothing to restore.
       if (!menu.contains(document.activeElement) && document.activeElement !== openButton) {
         openButton.focus({ preventScroll: true });
@@ -130,6 +131,12 @@ const { pathname } = Astro.url;
     // A link tap navigates; close immediately so same-page links (e.g. Home on /) reveal the page.
     menu.querySelectorAll('[data-menu-link]').forEach((link) => {
       link.addEventListener('click', () => menu.close());
+    });
+
+    // Leaving the page with the menu open (e.g. via its CTA) would restore it
+    // open and scroll-locked from the back/forward cache.
+    window.addEventListener('pagehide', () => {
+      if (menu.open) menu.close();
     });
 
     // Leaving the mobile breakpoint with the menu open would strand it.
@@ -149,6 +156,7 @@ const { pathname } = Astro.url;
     max-height: none;
     padding: var(--space-8) var(--space-5);
     overflow: hidden auto;
+    overscroll-behavior: contain;
     color: var(--color-text);
     background-color: var(--color-bg);
     border: 0;

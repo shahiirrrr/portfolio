@@ -134,6 +134,7 @@ const [noteTop, noteBottom] = CONTACT_FORM.note;
 
 <script>
   import { CONTACT_FORM_STATUS as COPY } from '@/data/contact';
+  import { refreshScroll } from '@/scripts/animations/smooth-scroll';
 
   const card = document.querySelector<HTMLElement>('[data-contact-card]');
   const form = card?.querySelector<HTMLFormElement>('[data-contact-form]');
@@ -208,6 +209,7 @@ const [noteTop, noteBottom] = CONTACT_FORM.note;
       const title = card.querySelector<HTMLElement>('[data-contact-thanks-title]');
       if (body) body.hidden = true;
       if (thanks) thanks.hidden = false;
+      refreshScroll();
       title?.focus();
     };
 
