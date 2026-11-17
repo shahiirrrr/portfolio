@@ -34,6 +34,7 @@ const projects = await getFeaturedProjects();
     <div
       class="work__rail"
       data-rail-track
+      data-lenis-prevent-horizontal
       tabindex="0"
       role="group"
       aria-label="Selected projects"
@@ -119,11 +120,6 @@ const projects = await getFeaturedProjects();
     overflow-x: auto;
     scroll-padding-inline: var(--container-gutter);
     scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-  }
-
-  .work__rail::-webkit-scrollbar {
-    display: none;
   }
 
   .work__controls,

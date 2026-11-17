@@ -7,11 +7,13 @@
  *  - The view is remembered in localStorage (desktop only; CSS ignores the
  *    grid below 768px).
  *  - Changes animate with Flip; with reduced motion they apply instantly.
+ *    Either way scroll positions are re-measured once the layout settles.
  * Without JavaScript the page shows the full list.
  */
 import { Flip } from 'gsap/Flip';
 
 import { gsap, MOTION_OK } from './core.ts';
+import { refreshScroll } from './smooth-scroll.ts';
 
 gsap.registerPlugin(Flip);
 
@@ -74,7 +76,10 @@ export function initWorkFilter(): () => void {
         absolute: true,
         onEnter: (els) => gsap.fromTo(els, { opacity: 0 }, { opacity: 1 }),
         onLeave: (els) => gsap.to(els, { opacity: 0 }),
+        onComplete: refreshScroll,
       });
+    } else {
+      refreshScroll();
     }
   }
 
@@ -92,7 +97,16 @@ export function initWorkFilter(): () => void {
     if (list?.dataset.view === view) return;
     const state = withMotion ? Flip.getState(items) : null;
     if (list) list.dataset.view = view;
-    if (state) Flip.from(state, { duration: 0.6, ease: 'power3.inOut', scale: true });
+    if (state) {
+      Flip.from(state, {
+        duration: 0.6,
+        ease: 'power3.inOut',
+        scale: true,
+        onComplete: refreshScroll,
+      });
+    } else {
+      refreshScroll();
+    }
   }
 
   const onChipClick = (event: Event): void => {

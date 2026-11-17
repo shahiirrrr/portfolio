@@ -4,7 +4,8 @@
  * step, snaps to each step and swaps the active numeral / copy / index item.
  * Scrolling up reverses it. Reduced motion: no pin — the plain step list stays.
  */
-import { gsap, ScrollTrigger } from './core.ts';
+import { gsap } from './core.ts';
+import { refreshScroll, scrollToY, SMOOTH_SCROLL } from './smooth-scroll.ts';
 
 interface DialOptions {
   /** ScrollTrigger end, e.g. "+=400%". */
@@ -39,14 +40,19 @@ export function initProcessDial(root: HTMLElement): () => void {
     root.classList.add('is-enhanced');
     setActive(0);
 
+    // Lenis already smooths wheel input, so scrub directly and wait for its
+    // glide tail before snapping. Native (touch) scrolling keeps the scrub lag.
+    const lenis = window.matchMedia(SMOOTH_SCROLL).matches;
+    const snap = { snapTo: 1 / lastStep, ease: 'power2.inOut' };
+
     const timeline = gsap.timeline({
       scrollTrigger: {
         trigger: root,
         pin: true,
         start: 'top top',
         end,
-        scrub: 0.6,
-        snap: { snapTo: 1 / lastStep, ease: 'power2.inOut' },
+        scrub: lenis ? true : 0.6,
+        snap: lenis ? { ...snap, delay: 0.3, duration: { min: 0.2, max: 0.5 } } : snap,
         onUpdate: (self) => setActive(Math.round(self.progress * lastStep)),
       },
     });
@@ -57,7 +63,7 @@ export function initProcessDial(root: HTMLElement): () => void {
       const onClick = () => {
         if (!trigger) return;
         const target = trigger.start + ((trigger.end - trigger.start) * i) / lastStep;
-        window.scrollTo({ top: target, behavior: 'smooth' });
+        scrollToY(target);
       };
       button.addEventListener('click', onClick);
       return () => button.removeEventListener('click', onClick);
@@ -76,7 +82,7 @@ export function initProcessDial(root: HTMLElement): () => void {
   mm.add(`(min-width: 768px) and ${motion}`, () => buildDial({ end: '+=400%', angle: 50 }));
 
   // The pin changes page height; keep later triggers accurate.
-  ScrollTrigger.refresh();
+  refreshScroll();
 
   return () => mm.revert();
 }
