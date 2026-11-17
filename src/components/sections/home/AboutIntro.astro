@@ -38,7 +38,14 @@ const cards = EXPERIENCE.filter(
 
   <div class="about__experience">
     <h3 class="visually-hidden">Experience</h3>
-    <div class="about__cards" data-reveal-group tabindex="0" role="group" aria-label="Experience">
+    <div
+      class="about__cards"
+      data-reveal-group
+      data-lenis-prevent-horizontal
+      tabindex="0"
+      role="group"
+      aria-label="Experience"
+    >
       {cards.map((item) => (
         <ExperienceCard item={item} />
       ))}
@@ -96,11 +103,6 @@ const cards = EXPERIENCE.filter(
     overflow-x: auto;
     scroll-padding-inline: var(--container-gutter);
     scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-  }
-
-  .about__cards::-webkit-scrollbar {
-    display: none;
   }
 
   @media (min-width: 48em) {

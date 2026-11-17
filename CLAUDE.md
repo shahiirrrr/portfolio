@@ -39,6 +39,7 @@ case-study content for every project except Nextbase.
 | Astro Fonts API (Fontsource)                          | Self-hosted web fonts          | Manrope, JetBrains Mono, Antonio, Unbounded — configured in astro.config |
 | Astro Content Collections                             | Projects + case studies        | Schema in `src/content.config.ts`                                        |
 | GSAP 3 (ScrollTrigger, SplitText, Flip, ScrambleText) | Animation                      | Shared setup in `src/scripts/animations/core.ts`                         |
+| Lenis 1.3                                             | Smooth scrolling               | One instance in `src/scripts/animations/smooth-scroll.ts` (see §13)      |
 | `@astrojs/sitemap`                                    | Sitemap                        | Only integration installed                                               |
 | Prettier + `prettier-plugin-astro`                    | Formatting                     | No ESLint — `astro check` covers correctness                             |
 | Vercel                                                | Hosting                        | Static deploy; `vercel.json` only enforces trailing slashes              |
@@ -57,8 +58,8 @@ src/
 ├── content/projects/    one Markdown file per project (filename = slug)
 ├── assets/              icons/ (+ icons/tech/), images/ (portrait, experience, projects, shapes, dial, …)
 ├── styles/              global.css (entry, layers), variables.css (tokens), utilities.css
-├── scripts/animations/  core.ts (GSAP setup), reveal.ts (declarative scroll effects), <page>-<effect>.ts
-├── layouts/             BaseLayout (document shell, fonts) → PageLayout (header/main/footer, reveal.ts)
+├── scripts/animations/  core.ts (GSAP setup), smooth-scroll.ts (Lenis + scroll helpers), reveal.ts (declarative scroll effects), <page>-<effect>.ts
+├── layouts/             BaseLayout (document shell, fonts) → PageLayout (header/main/footer, smooth-scroll.ts + reveal.ts)
 ├── components/
 │   ├── common/          Seo, Button, Chip, Stat
 │   ├── layout/          Header (fixed), MobileMenu (<dialog>), Footer
@@ -137,6 +138,7 @@ Do not create empty folders or placeholder files "for later".
 - Class naming: BEM-style scoped to the component (`.site-header__nav`, `.btn--ghost`); global utilities are single-purpose (`.container`, `.section`, `.flow`, `.visually-hidden`, `.mobile-only`, `.desktop-only`).
 - Hover effects only inside `@media (hover: hover)`. When GSAP animates an element (it owns `transform`), hover movement uses the individual `translate`/`scale`/`rotate` properties.
 - Logical properties. No horizontal page scroll at any width. Verify 390, 768, 1024, 1440 and 1920.
+- Scrollbars are hidden site-wide in `global.css` (owner decision; restored under `forced-colors`). Don't re-add per-component scrollbar rules, and never set `scroll-behavior: smooth` — Lenis owns smoothing.
 
 ## 10. SEO hierarchy
 
@@ -180,6 +182,7 @@ Motion is specified per section in the Figma "Dev Notes" frames — implement wh
 - **Shared setup:** import `gsap`, `ScrollTrigger`, `SplitText` and the media-query constants (`MOTION_OK`, `MOTION_REDUCED`, `DESKTOP`, `MOBILE`, `CAN_HOVER`) from `src/scripts/animations/core.ts`, which registers the plugins. Extra plugins (Flip, ScrambleText) are registered in the module that uses them.
 - **Declarative effects first** (`reveal.ts`, loaded on every page by `PageLayout`): `data-reveal`, `data-reveal-group` + `data-reveal-item` (`data-y`, `data-stagger`), `data-word-reveal` (`data-start`, `data-end`), `data-line-reveal` (`="load"` for on-load), `data-count`.
 - **Bespoke effects** live in `src/scripts/animations/<page>-<effect>.ts`, export an init function scoped to a root element, and are imported from the owning component's `<script>` — never from a layout.
+- **Smooth scrolling** (owner-requested, the one global exception to "implement nothing more"): `smooth-scroll.ts` is loaded by `PageLayout` and runs a single Lenis instance on GSAP's ticker, only for mouse/trackpad devices with motion allowed — touch devices and reduced motion scroll natively. Never call `window.scrollTo`/`scrollBy` on the page, set `style.overflow` or create another Lenis; use its helpers: `scrollToY()`, `lockScroll()`/`unlockScroll()` (modals), `refreshScroll()` (after anything changes page height; never call `ScrollTrigger.refresh()` directly). Tune scroll-linked effects per input with the exported `SMOOTH_SCROLL` query (Lenis active → `scrub: true`; native/touch → keep a numeric scrub). Inner scroll areas opt out with `data-lenis-prevent` (or `-horizontal` for horizontal rails); a modal that scrolls itself must have `data-lenis-prevent`, because a stopped Lenis cancels all wheel/touch events otherwise.
 - Always `gsap.matchMedia()`: everything inside `MOTION_OK`; reduced motion = static or a plain fade; return cleanup (`mm.revert()`).
 - **On-load intros** mark their elements `data-intro`: CSS hides them only while `html.js:not(.motion-ready)`. The script calls `markMotionReady()` after setting start states, on every code path; `BaseLayout` adds `motion-ready` after 2.5s as a failsafe.
 - Progressive enhancement: without JS (or with reduced motion) everything is visible and usable — e.g. the process dial falls back to a plain step list, the marquee to wrapped rows, filters to the full list.
@@ -196,6 +199,7 @@ Motion is specified per section in the Figma "Dev Notes" frames — implement wh
 - pnpm only; commit `pnpm-lock.yaml`. Run `pnpm peers check` after adding anything.
 - Before adding a package, confirm that (1) Astro, CSS or the web platform can't already do it, (2) it's actively maintained, (3) its client-side weight is justified. State this reasoning to the owner.
 - Never add: UI frameworks (React, Vue, …), state libraries (Redux, Zustand, …), CSS-in-JS, jQuery, lodash, moment, icon-font packs, or a second animation library.
+- Approved exceptions: `lenis` (smooth scrolling; ~5 kB gzip; CSS can't smooth wheel input; GSAP ScrollSmoother was rejected because it fakes the scroll position and needs a wrapper). Stay on 1.3.x until 2.0 is stable.
 - Icons: inline SVG files in `src/assets/icons/`, not an icon package.
 - Don't upgrade TypeScript to 7 until `@astrojs/check` supports it.
 

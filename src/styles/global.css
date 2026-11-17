@@ -22,7 +22,6 @@
   html {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
-    scrollbar-gutter: stable;
   }
 
   img,
@@ -53,6 +52,35 @@
 @layer base {
   html {
     scroll-padding-block-start: var(--header-offset);
+  }
+
+  /* No visible scrollbars anywhere (owner decision). Scrolling itself is
+     unchanged. Never set `scroll-behavior: smooth` — Lenis owns smoothing. */
+  * {
+    scrollbar-width: none;
+  }
+
+  @supports not (scrollbar-width: none) {
+    *::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  /* Windows high-contrast users get their scrollbars back. */
+  @media (forced-colors: active) {
+    * {
+      scrollbar-width: auto;
+    }
+  }
+
+  /* Lenis (smooth-scroll.ts) adds these classes to <html>. */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+
+  html.lenis.lenis-stopped {
+    overflow: clip;
   }
 
   body {
