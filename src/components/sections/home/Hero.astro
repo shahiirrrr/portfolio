@@ -1,8 +1,12 @@
 ---
 /**
  * Home hero (Figma: Hero — Editorial). White, fills the first screen. The giant name
- * sits BEHIND the portrait cut-out; the role uses mix-blend-mode: difference
- * on desktop so it reads black on white and white on the hoodie.
+ * sits BEHIND the portrait cut-out; the role and socials use mix-blend-mode:
+ * difference so they read black on white and white on the hoodie or the ink.
+ * Motion (home-hero.ts): the "Negative" ink canvas (owner-approved exception,
+ * CLAUDE.md §13) opens the hero with a white ink drop on the dark ground, then
+ * inverts what the pointer paints; the scroll flood never inverts the photo. While motion is allowed the
+ * hero starts on the dark ground (`::after`) until the intro takes over.
  */
 import { Image } from 'astro:assets';
 
@@ -32,6 +36,13 @@ import { SITE, SOCIAL_LINKS } from '@/config/site';
       fetchpriority="high"
     />
   </div>
+
+  <canvas
+    class="hero__ink"
+    aria-hidden="true"
+    data-hero-ink
+    data-hero-mask={portraitMask.src}
+  ></canvas>
 
   <ul class="hero__socials" role="list" aria-label="Social profiles" data-hero-fade data-intro>
     {SOCIAL_LINKS.map(({ label, href }) => (
@@ -72,10 +83,68 @@ import { SITE, SOCIAL_LINKS } from '@/config/site';
     --portrait-w: min(112.8vw, calc((var(--hero-h) - 210px) * 0.8));
 
     position: relative;
+    isolation: isolate;
     height: var(--hero-h);
     overflow: hidden;
     color: var(--color-text-inverse);
     background-color: var(--color-bg-white);
+  }
+
+  /* The ink field (home-hero-negative.ts). Negative mode: drawn in
+     white-minus-ground above the portrait, so `difference` turns the white
+     ground and the name dark and the pointer trail paints the photo in
+     negative; the scroll flood is kept off the photo by its silhouette (in
+     the shader). Cover mode (the load intro): on top of everything, painting
+     the dark ground. */
+  .hero__ink {
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-raised);
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    mix-blend-mode: difference;
+  }
+
+  .hero__ink[data-cover] {
+    z-index: 3;
+    mix-blend-mode: normal;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* Start state of the develop intro: the dark ground, matching the canvas'
+       first fully inked frame. Lifted when home-hero.ts marks the hero
+       `data-hero-ready` (fading out if the classic intro runs instead), or by
+       the CSS failsafe below if the script never runs. A hero-local marker:
+       other sections set the global `motion-ready` much earlier. */
+    .hero::after {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+      visibility: hidden;
+      content: '';
+      background-color: var(--color-bg);
+      opacity: 0;
+      transition:
+        opacity var(--duration-slow) var(--ease-out),
+        visibility 0s linear var(--duration-slow);
+    }
+
+    :global(html.js) .hero:not([data-hero-ready])::after {
+      visibility: visible;
+      opacity: 1;
+      transition: none;
+      /* Same 2.5s failsafe as BaseLayout's `motion-ready`. */
+      animation: hero-start-failsafe 0s linear 2.5s forwards;
+    }
+  }
+
+  @keyframes hero-start-failsafe {
+    to {
+      visibility: hidden;
+      opacity: 0;
+    }
   }
 
   .hero__name {
@@ -129,6 +198,9 @@ import { SITE, SOCIAL_LINKS } from '@/config/site';
     inset-inline-start: var(--space-5);
     z-index: 2;
     font-size: 1.875rem;
+    /* Reads black on the white hero and white on the hoodie and the ink. */
+    color: var(--color-bg-white);
+    mix-blend-mode: difference;
     font-weight: var(--weight-semibold);
     line-height: 1.05;
     letter-spacing: var(--tracking-h1);
@@ -141,6 +213,8 @@ import { SITE, SOCIAL_LINKS } from '@/config/site';
     inset-inline-start: var(--space-5);
     z-index: 2;
     display: flex;
+    color: var(--color-bg-white);
+    mix-blend-mode: difference;
     gap: 0.8em;
     font-size: var(--text-mono);
     font-weight: var(--weight-medium);
@@ -187,9 +261,6 @@ import { SITE, SOCIAL_LINKS } from '@/config/site';
       inset-inline: auto var(--container-gutter);
       font-size: clamp(1.875rem, 3.2vw, 2.875rem);
       line-height: 1.02;
-      /* Reads black on the white hero and white on the hoodie. */
-      color: var(--color-bg-white);
-      mix-blend-mode: difference;
     }
 
     .hero__socials {
