@@ -1,12 +1,12 @@
 ---
 title: Headless Store
-order: 6
+order: 7
 stack: [React, Headless, CMS]
 year: 2024
 card:
-  order: 3
+  order: 4
   category: [Composable, Commerce]
   image: ../../assets/images/projects/headless-store-card.png
 caseStudy:
-  index: 4
+  index: 5
 ---

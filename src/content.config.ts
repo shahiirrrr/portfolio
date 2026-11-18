@@ -70,6 +70,8 @@ const projects = defineCollection({
                     title: z.string(),
                     body: z.string(),
                     tags: z.array(z.string()).default([]),
+                    /** Optional live example of this product, e.g. a public profile. */
+                    link: z.object({ label: z.string(), url: z.url() }).optional(),
                     image: image(),
                     alt: z.string().min(1),
                   }),
