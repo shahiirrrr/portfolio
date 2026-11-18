@@ -5,7 +5,11 @@
  * Baseline (no JS, or prefers-reduced-motion): a plain numbered list of steps.
  * Enhanced (`.is-enhanced`, set by the script): the section pins while the
  * user scrolls; progress rotates the dial one notch per step, snaps to each
- * step and cross-fades the big numeral, the step copy and the right-hand index.
+ * step, rolls the big numeral like an odometer (one reel per digit) and swaps
+ * the step copy and the right-hand index.
+ *
+ * Desktop: the dial fills the left side top to bottom; the heading sits on the
+ * right, above the step copy.
  *
  * Geometry is expressed in design pixels × `--u`, relative to the dial centre
  * (`--cx`, `--cy`), so the composition scales with the viewport.
@@ -17,6 +21,12 @@ import ringInner from '@/assets/images/dial/ring-inner.png';
 import ring from '@/assets/images/dial/ring.svg';
 import { PROCESS_STEPS } from '@/data/home';
 import { padIndex } from '@/utils/helpers';
+
+// One reel per digit position: reel 0 holds every step's tens digit, reel 1 the ones.
+const numerals = PROCESS_STEPS.map((_, i) => padIndex(i + 1));
+const reels = Array.from({ length: numerals[0]?.length ?? 0 }, (_, d) =>
+  numerals.map((numeral) => numeral.charAt(d)),
+);
 ---
 
 <section class="process" aria-labelledby="process-heading" data-process>
@@ -44,9 +54,11 @@ import { padIndex } from '@/utils/helpers';
     <img class="process__active-dot" src={activeDot.src} width="12" height="12" alt="" />
     <span class="process__tick desktop-only"></span>
     <div class="process__numerals">
-      {PROCESS_STEPS.map((_, i) => (
-        <span class="process__numeral" data-process-numeral>
-          {padIndex(i + 1)}
+      {reels.map((digits) => (
+        <span class="process__reel" data-process-reel>
+          {digits.map((digit) => (
+            <span class="process__digit">{digit}</span>
+          ))}
         </span>
       ))}
     </div>
@@ -63,9 +75,11 @@ import { padIndex } from '@/utils/helpers';
     {PROCESS_STEPS.map(({ title, body, bodyShort }, i) => (
       <li class="process__step" data-process-step>
         <span class="process__step-number text-mono text-muted">{padIndex(i + 1)}</span>
-        <h3 class="text-h3">{title}</h3>
+        <h3 class="text-h3" data-process-title>
+          {title}
+        </h3>
         {body && (
-          <p class="text-body">
+          <p class="text-body" data-process-body>
             {bodyShort ? (
               <>
                 <span class="mobile-only">{bodyShort}</span>
@@ -182,7 +196,8 @@ import { padIndex } from '@/utils/helpers';
   }
 
   .process__ring--inner {
-    width: calc(580 * var(--u));
+    /* 580 / 760 of the outer ring, so it scales with the full-height dial. */
+    width: calc(var(--radius) * 1.526);
   }
 
   .process__dial {
@@ -213,7 +228,7 @@ import { padIndex } from '@/utils/helpers';
   }
 
   .process__notch-number,
-  .process__numeral {
+  .process__numerals {
     font-family: var(--font-numeric);
     font-weight: var(--weight-bold);
     line-height: var(--leading-none);
@@ -235,27 +250,35 @@ import { padIndex } from '@/utils/helpers';
     height: auto;
   }
 
+  /*
+   * Odometer window: one line tall (1.5em — Antonio's digits sit low in the em
+   * box and must clear the faded edges); each reel is a column of digits the
+   * script slides vertically.
+   */
   .process__numerals {
     position: absolute;
     inset-block-start: var(--cy);
     inset-inline-start: calc(150 * var(--u));
+    display: flex;
+    /* Reels keep their full height (stretching would shrink the roll distance). */
+    align-items: flex-start;
+    height: 1.5em;
+    overflow: clip;
     font-size: calc(120 * var(--u));
+    font-variant-numeric: tabular-nums;
+    mask-image: linear-gradient(transparent, black 12%, black 88%, transparent);
     translate: 0 -50%;
   }
 
-  .process__numeral {
+  .process__reel {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .process__digit {
     display: block;
-    opacity: 0;
-    transition: opacity var(--duration-medium) ease-out;
-  }
-
-  .process__numeral + .process__numeral {
-    position: absolute;
-    inset: 0 auto auto 0;
-  }
-
-  .process__numeral.is-active {
-    opacity: 1;
+    height: 1.5em;
+    line-height: 1.5;
   }
 
   .is-enhanced .process__steps {
@@ -266,19 +289,14 @@ import { padIndex } from '@/utils/helpers';
     padding-block: 0;
   }
 
+  /* Visibility of the stacked steps is driven by the script. */
   .is-enhanced .process__step {
     gap: var(--space-2);
-    opacity: 0;
-    transition: opacity var(--duration-medium) ease-out;
   }
 
   .is-enhanced .process__step + .process__step {
     position: absolute;
     inset-block-start: 0;
-  }
-
-  .is-enhanced .process__step.is-active {
-    opacity: 1;
   }
 
   .is-enhanced .process__step-number {
@@ -289,9 +307,15 @@ import { padIndex } from '@/utils/helpers';
     .process.is-enhanced {
       /* Desktop frame: 1440 wide, dial centre at (40, 690), radius 380, 25° per step. */
       --u: min(0.069444vw, 1px);
-      --cx: calc(40 * var(--u));
-      --cy: calc(100% - 334px);
-      --radius: calc(380 * var(--u));
+      /*
+       * The dial fills the left side: centred vertically, the radius grows with
+       * the viewport height (425px = 56% of the 760px min-height), and the
+       * centre shifts left so the ring's right edge stays at x 420, where the
+       * active dot, tick and numeral line up.
+       */
+      --cy: 50%;
+      --radius: max(calc(380 * var(--u)), 56vh, 425px);
+      --cx: calc(420 * var(--u) - var(--radius));
       --step-angle: 25deg;
 
       height: 100vh;
@@ -300,6 +324,10 @@ import { padIndex } from '@/utils/helpers';
 
     .is-enhanced .process__stage {
       inset-inline: max(0px, (100% - 90rem) / 2);
+    }
+
+    .is-enhanced .process__heading {
+      text-align: end;
     }
 
     .process__glow {
@@ -370,7 +398,7 @@ import { padIndex } from '@/utils/helpers';
     }
 
     .is-enhanced .process__steps {
-      padding-inline-end: calc(var(--container-gutter) + 140px);
+      padding-inline-end: calc(var(--container-gutter) + 180px);
     }
   }
 
