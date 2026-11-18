@@ -104,6 +104,8 @@ jobs:
 
           prompt="$(printf 'Pull request: #%s\nBase ref: origin/%s\nReview directory: %s\n\n' \
             "$PR" "$BASE" "$REVIEW_DIR"; cat .github/claude-review.md)"
+          result="$RUNNER_TEMP/claude-result.json"
+          status=0
           claude -p "$prompt" \
             --add-dir "$REVIEW_DIR" \
             --permission-mode acceptEdits \
@@ -111,11 +113,14 @@ jobs:
               "Bash(git diff *)" "Bash(git log *)" "Bash(git show *)" "Bash(git status)" \
               "Bash(pnpm validate)" "Bash(pnpm check)" "Bash(pnpm format)" "Bash(pnpm build)" \
             --max-budget-usd 5 \
-            --output-format json > "$RUNNER_TEMP/claude-result.json"
+            --output-format json > "$result" || status=$?
 
-          if ! jq -e '.is_error == false and .subtype == "success"' "$RUNNER_TEMP/claude-result.json" > /dev/null; then
-            echo "::error::Claude did not complete the review."
-            jq '{subtype, is_error}' "$RUNNER_TEMP/claude-result.json" || true
+          # Surface the reason (usage limit, auth, budget…) as a visible annotation.
+          if [ "$status" -ne 0 ] || ! jq -e '.is_error == false and .subtype == "success"' "$result" > /dev/null 2>&1; then
+            reason="$(jq -r '[.subtype, (.result // "" | tostring)] | join(": ")' "$result" 2> /dev/null || head -c 300 "$result")"
+            reason="${reason//$'\n'/ }"
+            reason="${reason:0:300}"
+            echo "::error::Claude did not complete the review (exit $status): ${reason:-no output}"
             exit 1
           fi
           if [ ! -s "$REVIEW_DIR/summary.md" ]; then
