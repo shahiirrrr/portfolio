@@ -112,6 +112,8 @@ const Tag = href ? 'a' : 'article';
   }
 
   .project-card__title {
+    /* The folder tab is ~150 design px wide at the title's height: longer titles wrap below it. */
+    max-width: calc(150 * var(--u));
     font-size: calc(20 * var(--u));
     font-weight: var(--weight-semibold);
     line-height: var(--leading-h4);

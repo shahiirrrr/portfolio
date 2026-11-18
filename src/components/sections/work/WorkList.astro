@@ -25,7 +25,7 @@ const rows = projects.map((project) => {
     stack: formatStack(stack),
     year,
     href: projectPath(project),
-    // Only Topbar Suite has a preview in the design; others reuse their Home card image.
+    // Projects without their own Work preview reuse their Home card image.
     thumbnail: thumbnail ?? card?.image,
     tags,
   };

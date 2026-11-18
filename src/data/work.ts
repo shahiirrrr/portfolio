@@ -7,14 +7,15 @@ export const WORK_INTRO =
   'Client builds, product work and side projects from the last two years — from headless storefronts to computer vision.';
 
 /**
- * Filter chips, in design order. A project matches a chip when one of its
- * `stack` entries starts with the chip label. `all` is the default.
+ * Filter chips. A project matches a chip when one of its `stack` entries
+ * starts with the chip label; every chip must match at least one project.
+ * `all` is the default.
  */
 export const WORK_FILTERS = [
   'React',
+  'Next.js',
   'BigCommerce',
   'Python',
-  'Headless',
   'Tailwind',
   'Computer Vision',
 ] as const;
