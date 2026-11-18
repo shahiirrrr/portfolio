@@ -38,6 +38,7 @@ const Tag = href ? 'a' : 'article';
       <span class="project-card__head">
         <span class="project-card__title">{title}</span>
         <span class="project-card__stack">{formatStack(card.stack ?? stack)}</span>
+        {card.description && <span class="project-card__desc">{card.description}</span>}
       </span>
       <span class="project-card__foot">
         <span class="project-card__index">
@@ -125,6 +126,14 @@ const Tag = href ? 'a' : 'article';
     color: var(--color-text-secondary);
   }
 
+  .project-card__desc {
+    max-width: calc(340 * var(--u));
+    margin-block-start: calc(12 * var(--u));
+    font-size: calc(14 * var(--u));
+    line-height: var(--leading-body-sm);
+    color: var(--color-text-secondary);
+  }
+
   .project-card__foot {
     display: flex;
     align-items: flex-end;
@@ -164,9 +173,10 @@ const Tag = href ? 'a' : 'article';
     outline-offset: 4px;
   }
 
+  /* Full size (540 tall) when the rail allows it; shrinks to fit a shorter viewport. */
   @media (min-width: 48em) {
     .project-card {
-      --u: 1px;
+      --u: min(1px, 100cqb / 540);
     }
   }
 </style>

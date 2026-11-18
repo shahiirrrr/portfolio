@@ -7,6 +7,7 @@ card:
   order: 2
   category: [BigCommerce B2B, Storefront]
   image: ../../assets/images/projects/nextbase-card.png
+  description: A BigCommerce B2B Edition storefront, made headless with React and Storefront APIs.
 caseStudy:
   index: 2
   subtitle: A BigCommerce B2B Edition storefront for Nextbase — customised, made headless with React and Storefront APIs, and wired into the systems behind it.

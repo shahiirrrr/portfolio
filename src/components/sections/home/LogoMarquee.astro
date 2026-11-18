@@ -42,7 +42,9 @@ import { MARQUEE_TECH } from '@/data/home';
     const mm = gsap.matchMedia();
     mm.add(MOTION_OK, () => {
       band.classList.add('is-looping');
-      const loop = gsap.to(track, { xPercent: -50, ease: 'none', duration: 30, repeat: -1 });
+      // 30s per 12 logos (the design's speed); longer lists take proportionally longer.
+      const duration = (30 / 12) * track.querySelectorAll('ul:first-child > li').length;
+      const loop = gsap.to(track, { xPercent: -50, ease: 'none', duration, repeat: -1 });
       const slow = () => loop.timeScale(0.2);
       const resume = () => loop.timeScale(1);
       band.addEventListener('mouseenter', slow);

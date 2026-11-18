@@ -8,6 +8,7 @@ card:
   order: 1
   category: [Healthcare, Appointments]
   image: ../../assets/images/projects/ealzo-hospital-admin.jpg
+  description: A doctor-appointment platform launching in Kerala — patient portal, admin dashboard and doctor panel.
 caseStudy:
   index: 1
   subtitle: A doctor-appointment platform launching in Kerala — patient portal, hospital admin dashboard, doctor panel and landing page, built at Noviindus.

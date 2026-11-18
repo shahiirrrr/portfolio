@@ -1,13 +1,15 @@
 ---
 /**
- * Experience card (Figma: Experience Card): artwork, period pill, company and
- * role. Hover: the arrow rotates 45°. (The component note also mentions lifting a
- * desaturation on hover, but the final frames show the artwork at full colour
+ * Experience card (Figma: Experience Card): artwork, company, role and period
+ * (moved from the top pill to the foot at the owner's request). Hover: the
+ * arrow rotates 45°. (The component note also mentions lifting a desaturation
+ * on hover, but the final frames show the artwork at full colour
  * at rest — the Synnefo logo is orange — so no filter is applied.)
  */
 import { Image } from 'astro:assets';
 
 import arrowDark from '@/assets/icons/arrow-up-right-dark.svg';
+import arrowLight from '@/assets/icons/arrow-up-right-light.svg';
 import type { ExperienceItem } from '@/types';
 
 interface Props {
@@ -15,31 +17,43 @@ interface Props {
 }
 
 const { item } = Astro.props;
+const isLight = item.cardTheme === 'light';
+const arrow = isLight ? arrowLight : arrowDark;
 ---
 
-<article class="xp-card" data-reveal-item>
+<article class:list={['xp-card', { 'xp-card--light': isLight }]} data-reveal-item>
   <Image
     class="xp-card__image"
     src={item.image}
     alt=""
     widths={[290, 420, 580, 840]}
-    sizes="(min-width: 48em) 30vw, 290px"
+    sizes="(min-width: 80em) 22vw, (min-width: 48em) 340px, 290px"
   />
   <div class="xp-card__content">
     <div class="xp-card__top">
-      <p class="xp-card__period text-mono">{item.periodShort}</p>
       <span class="xp-card__arrow">
-        <img src={arrowDark.src} width="16" height="16" alt="" />
+        <img src={arrow.src} width="16" height="16" alt="" />
       </span>
     </div>
     <div class="xp-card__bottom">
-      <h3 class="text-h3">
-        <span class="mobile-only">{item.shortName}</span>
-        <span class="desktop-only">{item.company}</span>
+      <h3 class="text-h4">
+        {item.url ? (
+          <a class="xp-card__link" href={item.url} target="_blank" rel="noopener">
+            <span class="mobile-only">{item.shortName}</span>
+            <span class="desktop-only">{item.company}</span>
+            <span class="visually-hidden">(opens in a new tab)</span>
+          </a>
+        ) : (
+          <>
+            <span class="mobile-only">{item.shortName}</span>
+            <span class="desktop-only">{item.company}</span>
+          </>
+        )}
       </h3>
       <p class="text-body-sm">
         {item.role} · {item.location}
       </p>
+      <p class="xp-card__period text-mono">{item.periodShort}</p>
     </div>
   </div>
 </article>
@@ -82,17 +96,12 @@ const { item } = Astro.props;
 
   .xp-card__top {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
   }
 
   .xp-card__period {
-    white-space: nowrap;
-    padding: var(--space-2) 14px;
-    background-color: var(--color-overlay);
-    border-radius: var(--radius-full);
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
+    margin-block-start: var(--space-1);
+    color: var(--color-text-secondary);
   }
 
   .xp-card__arrow {
@@ -104,6 +113,33 @@ const { item } = Astro.props;
     background-color: var(--color-text);
     border-radius: var(--radius-full);
     transition: rotate var(--duration-base) var(--ease-out);
+  }
+
+  /* Stretched link: the whole card is clickable; the focus ring outlines the card. */
+  .xp-card__link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .xp-card__link::after {
+    position: absolute;
+    inset: 0;
+    content: '';
+    border-radius: var(--radius-card);
+  }
+
+  .xp-card__link:focus-visible {
+    outline: none;
+  }
+
+  .xp-card__link:focus-visible::after {
+    outline: 2px solid var(--color-focus);
+    outline-offset: -2px;
+  }
+
+  /* Light artwork: dark arrow button so it stays visible. */
+  .xp-card--light .xp-card__arrow {
+    background-color: var(--color-text-inverse);
   }
 
   .xp-card__bottom {
@@ -118,15 +154,16 @@ const { item } = Astro.props;
     }
   }
 
+  /* Desktop: stretches to the rail height set by AboutIntro (340–440px). */
   @media (min-width: 48em) {
     .xp-card {
       flex-basis: 340px;
-      height: 440px;
+      height: auto;
     }
   }
 
-  /* Three across from 1024px; narrower screens keep the swipe rail. */
-  @media (min-width: 64em) {
+  /* Four across from 1280px; narrower screens keep the swipe rail. */
+  @media (min-width: 80em) {
     .xp-card {
       flex: 1 1 0;
       min-width: 0;

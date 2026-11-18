@@ -3,7 +3,8 @@
  * Folder-shaped numbered panel (Figma: Folder Panel). Used for the Home
  * capabilities and the About principles. Hover: lifts 4px.
  * Mobile height can be overridden by a parent with `--folder-panel-height`
- * (Home 320px, About 300px in the mobile frames).
+ * (Home 320px, About 300px in the mobile frames). `compact` is a smaller
+ * variant (340px desktop, smaller index, title and body) for the Home row.
  */
 import arrowLarge from '@/assets/icons/arrow-up-right-lg.svg';
 import folderPanel from '@/assets/images/shapes/folder-panel.svg';
@@ -15,21 +16,25 @@ interface Props extends PanelItem {
   index: number;
   /** Heading level for the title, so page hierarchy stays valid. */
   headingLevel?: 'h3' | 'h4';
+  /** Smaller panel, index and type. */
+  compact?: boolean;
 }
 
-const { index, title, body, headingLevel: Heading = 'h3' } = Astro.props;
+const { index, title, body, headingLevel: Heading = 'h3', compact = false } = Astro.props;
+const titleClass = compact ? 'text-h4' : 'text-h3';
+const bodyClass = compact ? 'text-body-sm' : 'text-body';
 ---
 
-<article class="folder-panel" data-reveal-item>
+<article class:list={['folder-panel', { 'folder-panel--compact': compact }]} data-reveal-item>
   <img class="folder-panel__shape" src={folderPanel.src} width="424" height="400" alt="" />
   <div class="folder-panel__content">
     <div class="folder-panel__top">
       <p class="folder-panel__index">{padIndex(index)}</p>
-      <img src={arrowLarge.src} width="40" height="40" alt="" />
+      <img class="folder-panel__arrow" src={arrowLarge.src} width="40" height="40" alt="" />
     </div>
     <div class="folder-panel__text">
-      <Heading class="text-h3">{title}</Heading>
-      <p class="text-body text-secondary">{body}</p>
+      <Heading class={titleClass}>{title}</Heading>
+      <p class:list={[bodyClass, 'text-secondary']}>{body}</p>
     </div>
   </div>
 </article>
@@ -96,6 +101,38 @@ const { index, title, body, headingLevel: Heading = 'h3' } = Astro.props;
 
     .folder-panel__index {
       font-size: 4rem;
+    }
+  }
+
+  /* Compact: same shape, about three quarters of the size. */
+  .folder-panel--compact {
+    height: var(--folder-panel-height, 280px);
+  }
+
+  .folder-panel--compact .folder-panel__content {
+    gap: var(--space-4);
+  }
+
+  .folder-panel--compact .folder-panel__text {
+    gap: var(--space-2);
+  }
+
+  .folder-panel--compact .folder-panel__arrow {
+    width: var(--space-8);
+    height: var(--space-8);
+  }
+
+  @media (min-width: 48em) {
+    .folder-panel--compact {
+      height: 340px; /* compact desktop height */
+    }
+
+    .folder-panel--compact .folder-panel__content {
+      padding: var(--space-6) var(--space-8) var(--space-8);
+    }
+
+    .folder-panel--compact .folder-panel__index {
+      font-size: 3rem;
     }
   }
 </style>
