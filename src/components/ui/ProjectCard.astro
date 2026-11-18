@@ -3,10 +3,13 @@
  * Folder-tab project card for the Home rail (Figma: Project Card, 432×540;
  * scaled to 75% on mobile). The whole card is one link.
  * Hover: the cover scales 1.04 and the folder lifts 8px.
+ * Cards with a case study carry the full-screen image renditions for the
+ * card → case study transition (home-card-transition.ts).
  */
-import { Image } from 'astro:assets';
+import { getImage, Image } from 'astro:assets';
 
 import folderShape from '@/assets/images/shapes/folder-card.svg';
+import { CARD_STAGE_WIDTHS } from '@/scripts/animations/card-stage';
 import { padIndex } from '@/utils/helpers';
 import { formatStack, projectPath, type FeaturedProject } from '@/utils/projects';
 
@@ -20,10 +23,24 @@ const { project, index } = Astro.props;
 const { title, stack, year, card } = project.data;
 const href = projectPath(project);
 const Tag = href ? 'a' : 'article';
+
+// Full-screen renditions for the card transition; only fetched when a card is pressed.
+const stageImage = (width: number) =>
+  getImage({ src: card.image, width: Math.min(width, card.image.width), format: 'webp' });
+const [stageSm, stageLg] = href
+  ? await Promise.all([stageImage(CARD_STAGE_WIDTHS.sm), stageImage(CARD_STAGE_WIDTHS.lg)])
+  : [];
 ---
 
-<Tag class="project-card" href={href} data-rail-item>
-  <span class="project-card__cover">
+<Tag
+  class="project-card"
+  href={href}
+  data-rail-item
+  data-card-transition={href ? '' : undefined}
+  data-stage-sm={stageSm?.src}
+  data-stage-lg={stageLg?.src}
+>
+  <span class="project-card__cover" data-card-cover>
     <Image
       src={card.image}
       alt=""
@@ -32,7 +49,7 @@ const Tag = href ? 'a' : 'article';
     />
   </span>
 
-  <span class="project-card__folder">
+  <span class="project-card__folder" data-card-folder>
     <img class="project-card__shape" src={folderShape.src} width="412" height="320" alt="" />
     <span class="project-card__content">
       <span class="project-card__head">

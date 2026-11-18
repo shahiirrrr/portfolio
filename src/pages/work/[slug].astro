@@ -2,8 +2,8 @@
 import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
 import { getImage } from 'astro:assets';
 
-import CaseCover from '@/components/sections/case-study/CaseCover.astro';
 import CaseHero from '@/components/sections/case-study/CaseHero.astro';
+import CaseIntro from '@/components/sections/case-study/CaseIntro.astro';
 import CaseMedia from '@/components/sections/case-study/CaseMedia.astro';
 import CaseNext from '@/components/sections/case-study/CaseNext.astro';
 import CaseOverview from '@/components/sections/case-study/CaseOverview.astro';
@@ -20,24 +20,29 @@ export const getStaticPaths = (async () => {
     // "Next project" wraps from the last case study back to the first.
     const next = caseStudies[(position + 1) % caseStudies.length];
     if (!next) return [];
-    return [{ params: { slug: project.id }, props: { project, next, total: caseStudies.length } }];
+    return [{ params: { slug: project.id }, props: { project, next } }];
   });
 }) satisfies GetStaticPaths;
 
 type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 
-const { project, next, total } = Astro.props;
+const { project, next } = Astro.props;
 const { title, stack, year, card } = project.data;
 const study = project.data.caseStudy;
 const stackLabel = formatStack(stack);
 
-// Without a dedicated cover the Home card image stands in (no invented copy: the alt is title + category).
-const cover =
-  study.cover ??
-  (card ? { src: card.image, alt: `${title} — ${card.category.join(' ')}` } : undefined);
+// The hero shows the Home card's image, so the card → case study transition
+// lands on the same picture (no invented copy: the alt is title + category).
+// Without a card, the dedicated cover stands in.
+const hero = card
+  ? { src: card.image, alt: `${title} — ${card.category.join(', ')}` }
+  : study.cover;
 
-// Social preview: a 1200px-wide JPEG rendition of the cover instead of the full-size source.
-const ogImage = cover ? await getImage({ src: cover.src, width: 1200, format: 'jpg' }) : undefined;
+// Social preview: the dedicated cover when there is one, as a 1200px-wide JPEG rendition.
+const social = study.cover ?? hero;
+const ogImage = social
+  ? await getImage({ src: social.src, width: 1200, format: 'jpg' })
+  : undefined;
 
 const timeline = study.timeline ?? (year ? String(year) : undefined);
 const meta = [
@@ -62,11 +67,12 @@ const nextHref = projectPath(next) ?? '/work/';
 ---
 
 <PageLayout
+  hero="overlay"
   seo={{
     title,
     description,
     type: 'article',
-    ...(cover && ogImage && { image: { src: ogImage.src, alt: cover.alt } }),
+    ...(social && ogImage && { image: { src: ogImage.src, alt: social.alt } }),
   }}
   jsonLd={[
     projectSchema({
@@ -80,8 +86,8 @@ const nextHref = projectPath(next) ?? '/work/';
   ]}
 >
   <article class:list={{ 'cs-article--short': short }}>
-    <CaseHero title={title} subtitle={subtitle} index={study.index} total={total} meta={meta} />
-    {cover && <CaseCover {...cover} />}
+    <CaseHero title={title} cover={hero} />
+    <CaseIntro subtitle={subtitle} meta={meta} />
     {study.overview && <CaseOverview {...study.overview} />}
     {study.stats.length > 0 && <CaseResults stats={study.stats} />}
     {study.showcase && <CaseShowcase {...study.showcase} />}

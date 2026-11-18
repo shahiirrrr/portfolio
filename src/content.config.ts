@@ -8,7 +8,7 @@ import { z } from 'astro/zod';
  *
  * Every project appears in the Work list. A project only gets a case-study
  * page when it has a `caseStudy` block; the case studies form a cycle ordered
- * by `caseStudy.index` ("01 / 04", next project wraps to the first).
+ * by `caseStudy.index` (the "Next project" link wraps to the first).
  */
 const projects = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/projects' }),

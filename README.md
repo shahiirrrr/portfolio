@@ -16,7 +16,8 @@ implemented from a Figma design.
 - **Accessibility:** semantic landmarks, a skip link, visible focus styles, keyboard-operable
   controls, a native `<dialog>` mobile menu, and a reduced-motion version of every animation.
 - **Motion:** GSAP ScrollTrigger and SplitText animations, including a pinned process dial, word
-  reveals and parallax. Every effect has a reduced-motion fallback, and all content is visible
+  reveals, parallax and a card-to-case-study transition (the card expands to full screen and settles
+  into the case study's full-screen cover hero). Every effect has a reduced-motion fallback, and all content is visible
   without JavaScript.
 - **Smooth scrolling:** Lenis on mouse and trackpad devices, synced to GSAP's ticker. Touch devices
   and reduced-motion users keep native scrolling.

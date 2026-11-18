@@ -1,0 +1,123 @@
+---
+/**
+ * Case study intro under the full-screen hero: the subtitle and the
+ * ROLE / STACK / TIMELINE / LIVE facts (Figma "01 Hero" content, moved below
+ * the cover for the card transition). Only facts that exist are rendered.
+ * Both rise in as they scroll into view.
+ */
+interface MetaItem {
+  label: string;
+  value: string;
+  /** External URL: the value becomes a link that opens in a new tab. */
+  href?: string;
+}
+
+interface Props {
+  subtitle?: string | undefined;
+  meta: MetaItem[];
+}
+
+const { subtitle, meta } = Astro.props;
+---
+
+<section class="cs-intro container" aria-label="Project summary">
+  {subtitle && (
+    <p class="cs-intro__subtitle text-h2" data-reveal>
+      {subtitle}
+    </p>
+  )}
+
+  {meta.length > 0 && (
+    <dl class="cs-intro__meta" data-reveal-group data-y="20" data-stagger="0.06">
+      {meta.map((item) => (
+        <div class="cs-intro__meta-item" data-reveal-item>
+          <dt class="text-mono">{item.label}</dt>
+          <dd class="text-h4">
+            {item.href ? (
+              <a class="cs-intro__live" href={item.href} target="_blank" rel="noopener">
+                {item.value}{' '}
+                <span class="cs-intro__live-arrow" aria-hidden="true">
+                  &#x2197;&#xFE0E;
+                </span>
+                <span class="visually-hidden">(opens in a new tab)</span>
+              </a>
+            ) : (
+              item.value
+            )}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  )}
+</section>
+
+<style>
+  .cs-intro {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    padding-block: var(--space-14) var(--space-10);
+  }
+
+  .cs-intro__subtitle {
+    line-height: 1.12;
+  }
+
+  .cs-intro__meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-5) var(--space-4);
+  }
+
+  .cs-intro__meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-block-start: var(--space-5);
+    border-block-start: var(--border-strong);
+  }
+
+  .cs-intro__meta-item dt {
+    color: var(--color-text-muted);
+  }
+
+  .cs-intro__meta-item dd {
+    overflow-wrap: break-word;
+  }
+
+  .cs-intro__live {
+    text-decoration: underline transparent;
+    transition: text-decoration-color var(--duration-fast) ease-out;
+  }
+
+  .cs-intro__live-arrow {
+    font-variant-emoji: text;
+  }
+
+  .cs-intro__live:focus-visible {
+    text-decoration-color: currentcolor;
+  }
+
+  @media (hover: hover) {
+    .cs-intro__live:hover {
+      text-decoration-color: currentcolor;
+    }
+  }
+
+  @media (min-width: 48em) {
+    .cs-intro {
+      gap: var(--space-10);
+      padding-block: 104px var(--space-18);
+    }
+
+    .cs-intro__subtitle {
+      max-width: 1000px;
+      line-height: var(--leading-tight);
+    }
+
+    .cs-intro__meta {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--space-6);
+    }
+  }
+</style>

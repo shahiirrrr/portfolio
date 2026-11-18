@@ -7,6 +7,7 @@
 import chevronLeft from '@/assets/icons/chevron-left-dark.svg';
 import chevronRight from '@/assets/icons/chevron-right-light.svg';
 import Button from '@/components/common/Button.astro';
+import CardStage from '@/components/ui/CardStage.astro';
 import ProjectCard from '@/components/ui/ProjectCard.astro';
 import { padIndex } from '@/utils/helpers';
 import { getFeaturedProjects } from '@/utils/projects';
@@ -16,7 +17,7 @@ const projects = await getFeaturedProjects();
 
 <section class="work" aria-labelledby="work-heading" data-rail>
   <div class="work__inner">
-    <header class="work__header">
+    <header class="work__header" data-card-fade>
       <h2 class="text-h1" id="work-heading" data-reveal>
         Work that ships, <br class="desktop-only" />
         stories that stick.
@@ -44,7 +45,7 @@ const projects = await getFeaturedProjects();
       ))}
     </div>
 
-    <div class="work__controls">
+    <div class="work__controls" data-card-fade>
       <div class="work__progress">
         <p class="text-mono" data-rail-count aria-live="polite">
           01 / {padIndex(projects.length)}
@@ -73,10 +74,18 @@ const projects = await getFeaturedProjects();
   </div>
 </section>
 
+<!-- Outside the section: its overflow and radius must not clip the full-screen stage. -->
+<CardStage mode="home" frame />
+
 <script>
+  import { initCardTransition } from '@/scripts/animations/home-card-transition';
   import { initRail } from '@/scripts/animations/rail';
 
   document.querySelectorAll<HTMLElement>('[data-rail]').forEach((rail) => initRail(rail));
+
+  const work = document.querySelector<HTMLElement>('[data-rail]');
+  const stage = document.querySelector<HTMLElement>('[data-card-stage="home"]');
+  if (work && stage) initCardTransition(work, stage);
 </script>
 
 <style>
