@@ -27,9 +27,8 @@ export const MARQUEE_TECH: TechItem[] = [
 ];
 
 /**
- * The five process steps. Only step 01 has body copy in the Figma frames (the
- * other variants live on a component page the design tools could not read) —
- * add `body` / `bodyShort` to steps 02–05 when the copy is available.
+ * The five process steps. Step 01 copy is from Figma; steps 02–05 were written
+ * with the owner for a frontend workflow. `bodyShort` is the mobile variant.
  */
 export const PROCESS_STEPS: ProcessStep[] = [
   {
@@ -37,10 +36,26 @@ export const PROCESS_STEPS: ProcessStep[] = [
     body: 'Goals, constraints and success metrics agreed before a line of code — scope that survives contact with reality.',
     bodyShort: 'Goals, constraints and success metrics agreed before a line of code.',
   },
-  { title: 'Architect', body: '' },
-  { title: 'Build', body: '' },
-  { title: 'Animate', body: '' },
-  { title: 'Ship', body: '' },
+  {
+    title: 'Architect',
+    body: 'Component APIs, data flow and rendering strategy mapped out — static, server or island, chosen per page rather than by habit.',
+    bodyShort: 'Component APIs, data flow and rendering strategy mapped out first.',
+  },
+  {
+    title: 'Build',
+    body: 'Typed, accessible components on a shared token system — semantic HTML first, checked at every breakpoint and in every browser.',
+    bodyShort: 'Typed, accessible components on a shared token system.',
+  },
+  {
+    title: 'Animate',
+    body: 'Motion that guides attention instead of competing for it — smooth on mid-range devices, calm when reduced motion is on.',
+    bodyShort: 'Motion that guides attention, calm when reduced motion is on.',
+  },
+  {
+    title: 'Ship',
+    body: 'Core Web Vitals, accessibility audits and CI checks green before every deploy — then measured and refined in production.',
+    bodyShort: 'Web Vitals, audits and CI checks green before every deploy.',
+  },
 ];
 
 export const CAPABILITIES: PanelItem[] = [
