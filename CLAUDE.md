@@ -23,10 +23,9 @@ Pages: Home `/`, Work `/work/`, case studies `/work/<slug>/`, About `/about/` (S
 `/about/#stack`), Contact `/contact/`, 404.
 
 Open owner inputs (marked `PLACEHOLDER` in code — never fill them with invented values):
-production URL (`SITE.url`), GitHub/LinkedIn/Instagram profile URLs (`SOCIAL_LINKS`), contact form
-endpoint (`SITE.contactEndpoint`), the CV PDF (`public/Shahir-CV.pdf`), Playground repo URLs
-(`src/data/work.ts`), the social preview image, process steps 02–05 copy (`src/data/home.ts`) and
-case-study content for every project except Nextbase.
+contact form endpoint (`SITE.contactEndpoint`), the CV PDF (`public/Shahir-CV.pdf`), Playground
+repo URLs (`src/data/work.ts`), the social preview image and case-study content for every project
+except Nextbase.
 
 ## 2. Technology stack
 

@@ -24,8 +24,8 @@ interface SiteConfig {
 }
 
 export const SITE: SiteConfig = {
-  /** PLACEHOLDER — production origin, no trailing slash. Not specified in the design. */
-  url: 'https://example.com',
+  /** Production origin, no trailing slash. */
+  url: 'https://shahir.in',
   name: 'Shahir',
   jobTitle: 'Frontend Engineer',
   description:
@@ -48,13 +48,10 @@ export const SITE: SiteConfig = {
   contactEndpoint: '',
 };
 
-/**
- * Order matches the design. PLACEHOLDER — the GitHub, LinkedIn and Instagram
- * profile URLs are not in the design; replace the bare domains with real profiles.
- */
+/** Order matches the design. Profiles supplied by the owner. */
 export const SOCIAL_LINKS: SocialLink[] = [
-  { label: 'GitHub', href: 'https://github.com/' },
-  { label: 'LinkedIn', href: 'https://www.linkedin.com/' },
-  { label: 'Instagram', href: 'https://www.instagram.com/' },
+  { label: 'GitHub', href: 'https://github.com/shahiirrrr' },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/shahiirrrr/' },
+  { label: 'Instagram', href: 'https://www.instagram.com/shahiirrrr' },
   { label: 'WhatsApp', href: 'https://wa.me/918891873321' },
 ];
