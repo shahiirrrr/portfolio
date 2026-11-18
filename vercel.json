@@ -1,4 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "trailingSlash": true
+  "trailingSlash": true,
+  "redirects": [
+    { "source": "/work/topbar-suite/", "destination": "/work/", "permanent": true },
+    { "source": "/work/headless-store/", "destination": "/work/", "permanent": true }
+  ]
 }

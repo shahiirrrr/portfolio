@@ -24,8 +24,7 @@ Pages: Home `/`, Work `/work/`, case studies `/work/<slug>/`, About `/about/` (S
 
 Open owner inputs (marked `PLACEHOLDER` in code — never fill them with invented values):
 contact form endpoint (`SITE.contactEndpoint`), the CV PDF (`public/Shahir-CV.pdf`), Playground
-repo URLs (`src/data/work.ts`), the social preview image and case-study content for every project
-except Nextbase.
+repo URLs (`src/data/work.ts`) and the social preview image.
 
 ## 2. Technology stack
 
@@ -41,7 +40,7 @@ except Nextbase.
 | Lenis 1.3                                             | Smooth scrolling               | One instance in `src/scripts/animations/smooth-scroll.ts` (see §13)      |
 | `@astrojs/sitemap`                                    | Sitemap                        | Only integration installed                                               |
 | Prettier + `prettier-plugin-astro`                    | Formatting                     | No ESLint — `astro check` covers correctness                             |
-| Vercel                                                | Hosting                        | Static deploy; `vercel.json` only enforces trailing slashes              |
+| Vercel                                                | Hosting                        | Static deploy; `vercel.json` enforces trailing slashes + redirects       |
 | GitHub Actions                                        | CI/CD                          | Validate, auto-PR, Claude review → auto-merge (see §18)                  |
 
 ## 3. Architecture overview
@@ -321,7 +320,7 @@ After UI changes also verify in the browser against the Figma frame (screenshot 
 1. Create `src/content/projects/<slug>.md` (kebab-case; the slug becomes `/work/<slug>/`). Required: `title`, `order`, `stack`; add `year` and `thumbnail` when known.
 2. To feature it on Home, add a `card` block. To give it a page, add a `caseStudy` block with the next free `index` — "Next project" ordering and the "01 / 04" count follow automatically.
 3. Put images in `src/assets/images/projects/` and reference them relative to the Markdown file; write real `alt` text.
-4. `pnpm validate`. Do not rename a published file (it changes the URL) without adding a redirect in `vercel.json`.
+4. `pnpm validate`. Do not rename or delete a published case study (it changes or removes a URL) without adding a redirect in `vercel.json` (removed ones point to `/work/`).
 
 ## 23. Never
 
