@@ -31,14 +31,6 @@ const Tag = href ? 'a' : 'article';
       sizes="(min-width: 48em) 412px, 309px"
     />
   </span>
-  <span class="project-card__category">
-    {card.category.map((line, i) => (
-      <>
-        {i > 0 && <br />}
-        {line}
-      </>
-    ))}
-  </span>
 
   <span class="project-card__folder">
     <img class="project-card__shape" src={folderShape.src} width="412" height="320" alt="" />
@@ -88,18 +80,6 @@ const Tag = href ? 'a' : 'article';
     height: 100%;
     object-fit: cover;
     transition: scale var(--duration-base) var(--ease-out);
-  }
-
-  .project-card__category {
-    position: absolute;
-    inset-block-start: calc(36 * var(--u));
-    inset-inline-end: calc(40 * var(--u));
-    font-size: calc(20 * var(--u));
-    font-weight: var(--weight-semibold);
-    line-height: 1.3;
-    text-align: end;
-    white-space: nowrap;
-    color: #121212; /* label drawn on the light cover photo */
   }
 
   .project-card__folder {

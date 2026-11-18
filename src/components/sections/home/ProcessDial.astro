@@ -52,7 +52,7 @@ const reels = Array.from({ length: numerals[0]?.length ?? 0 }, (_, d) =>
       ))}
     </div>
     <img class="process__active-dot" src={activeDot.src} width="12" height="12" alt="" />
-    <span class="process__tick desktop-only"></span>
+    <span class="process__tick"></span>
     <div class="process__numerals">
       {reels.map((digits) => (
         <span class="process__reel" data-process-reel>
@@ -148,10 +148,10 @@ const reels = Array.from({ length: numerals[0]?.length ?? 0 }, (_, d) =>
 
   /* ---------- Enhanced: pinned dial ---------- */
   .process.is-enhanced {
-    /* Mobile frame: 390 wide, dial centre at (-150, 560), radius 260, 20° per step. */
+    /* Mobile frame: 390 wide, dial centre x -150, radius 260, 20° per step. */
     --u: min(0.25641vw, 1.3px);
     --cx: calc(-150 * var(--u));
-    --cy: calc(100% - 460px);
+    --cy: 50%;
     --radius: calc(260 * var(--u));
     --step-angle: 20deg;
 
@@ -250,6 +250,16 @@ const reels = Array.from({ length: numerals[0]?.length ?? 0 }, (_, d) =>
     height: auto;
   }
 
+  /* Links the active dot to the big numeral. */
+  .process__tick {
+    position: absolute;
+    inset-block-start: var(--cy);
+    inset-inline-start: calc(122 * var(--u));
+    width: calc(34 * var(--u));
+    height: 1px;
+    background-color: var(--color-accent);
+  }
+
   /*
    * Odometer window: one line tall (1.5em — Antonio's digits sit low in the em
    * box and must clear the faded edges); each reel is a column of digits the
@@ -258,7 +268,7 @@ const reels = Array.from({ length: numerals[0]?.length ?? 0 }, (_, d) =>
   .process__numerals {
     position: absolute;
     inset-block-start: var(--cy);
-    inset-inline-start: calc(150 * var(--u));
+    inset-inline-start: calc(168 * var(--u));
     display: flex;
     /* Reels keep their full height (stretching would shrink the roll distance). */
     align-items: flex-start;
@@ -283,8 +293,6 @@ const reels = Array.from({ length: numerals[0]?.length ?? 0 }, (_, d) =>
 
   .is-enhanced .process__steps {
     position: absolute;
-    inset-block-start: calc(var(--cy) + 290 * var(--u));
-    inset-inline: 0;
     display: block;
     padding-block: 0;
   }
@@ -303,17 +311,67 @@ const reels = Array.from({ length: numerals[0]?.length ?? 0 }, (_, d) =>
     display: none;
   }
 
+  /*
+   * Mobile: heading, dial and step copy stack in three rows, so nothing
+   * overlaps at any phone height. The dial is centred in the middle row and
+   * dissolves at the row's edges instead of running under the heading or
+   * clipping at the screen edge. The steps share one grid cell, so the row is
+   * as tall as the longest step and the copy never shifts.
+   */
+  @media (max-width: 47.99em) {
+    .process.is-enhanced {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      min-height: 500px;
+    }
+
+    .is-enhanced .process__heading {
+      grid-row: 1;
+    }
+
+    .is-enhanced .process__stage {
+      position: relative;
+      inset: auto;
+      grid-row: 2;
+      /* Lets the numeral scale down when short phones squeeze this row. */
+      container-type: size;
+      mask-image: linear-gradient(transparent, black 22%, black 78%, transparent);
+    }
+
+    .process__numerals {
+      font-size: min(calc(120 * var(--u)), 40cqh);
+    }
+
+    .process__glow {
+      inset-inline-start: calc(220 * var(--u));
+    }
+
+    .is-enhanced .process__steps {
+      position: relative;
+      inset: auto;
+      grid-row: 3;
+      display: grid;
+      width: 100%;
+      padding-block: 0 var(--space-12);
+    }
+
+    .is-enhanced .process__step,
+    .is-enhanced .process__step + .process__step {
+      position: static;
+      grid-area: 1 / 1;
+    }
+  }
+
   @media (min-width: 48em) {
     .process.is-enhanced {
       /* Desktop frame: 1440 wide, dial centre at (40, 690), radius 380, 25° per step. */
       --u: min(0.069444vw, 1px);
       /*
-       * The dial fills the left side: centred vertically, the radius grows with
-       * the viewport height (425px = 56% of the 760px min-height), and the
-       * centre shifts left so the ring's right edge stays at x 420, where the
-       * active dot, tick and numeral line up.
+       * The dial fills the left side: the radius grows with the viewport
+       * height (425px = 56% of the 760px min-height), and the centre shifts
+       * left so the ring's right edge stays at x 420, where the active dot,
+       * tick and numeral line up.
        */
-      --cy: 50%;
       --radius: max(calc(380 * var(--u)), 56vh, 425px);
       --cx: calc(420 * var(--u) - var(--radius));
       --step-angle: 25deg;
@@ -354,12 +412,8 @@ const reels = Array.from({ length: numerals[0]?.length ?? 0 }, (_, d) =>
     }
 
     .process__tick {
-      position: absolute;
-      inset-block-start: var(--cy);
       inset-inline-start: calc(432 * var(--u));
       width: calc(56 * var(--u));
-      height: 1px;
-      background-color: var(--color-accent);
     }
 
     .process__numerals {
