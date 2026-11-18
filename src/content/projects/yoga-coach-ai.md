@@ -8,7 +8,8 @@ card:
   order: 4
   category: [Computer Vision, Health]
   stack: [Python, MediaPipe, Android]
-  image: ../../assets/images/projects/yoga-coach-ai-card.png
+  image: ../../assets/images/projects/yoga-pose-correction.jpg
+  description: An online yoga coaching platform — Flask web panels, an Android app and AI pose correction.
 caseStudy:
   index: 4
   subtitle: An online yoga coaching platform linking an admin, trainers and learners — Flask web panels, a Java Android app and camera-based AI pose correction.

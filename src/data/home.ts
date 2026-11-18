@@ -1,11 +1,15 @@
 import astroIcon from '@/assets/icons/tech/astro.svg';
+import bigcommerceIcon from '@/assets/icons/tech/bigcommerce-logo.svg';
 import css3Icon from '@/assets/icons/tech/css3.svg';
 import framerMotionIcon from '@/assets/icons/tech/framer-motion.svg';
+import graphqlIcon from '@/assets/icons/tech/graphql.svg';
 import gsapIcon from '@/assets/icons/tech/gsap.svg';
+import handlebarsIcon from '@/assets/icons/tech/handlebars.svg';
 import html5Icon from '@/assets/icons/tech/html5.svg';
 import nextjsIcon from '@/assets/icons/tech/nextjs.svg';
-import nodejsIcon from '@/assets/icons/tech/nodejs.svg';
 import reactIcon from '@/assets/icons/tech/react.svg';
+import sassIcon from '@/assets/icons/tech/sass.svg';
+import shopifyIcon from '@/assets/icons/tech/shopify.svg';
 import tailwindIcon from '@/assets/icons/tech/tailwind.svg';
 import threejsIcon from '@/assets/icons/tech/threejs.svg';
 import type { PanelItem, ProcessStep, StatItem, TechItem } from '@/types';
@@ -21,7 +25,12 @@ export const MARQUEE_TECH: TechItem[] = [
   { name: 'Astro', icon: astroIcon },
   { name: 'HTML5', icon: html5Icon },
   { name: 'CSS3', icon: css3Icon },
-  { name: 'Node.js', icon: nodejsIcon },
+  { name: 'SCSS', icon: sassIcon },
+  { name: 'Shopify', icon: shopifyIcon },
+  { name: 'BigCommerce', icon: bigcommerceIcon },
+  { name: 'Stencil', tile: { text: 'St', background: '#f5f5f5', color: '#0b0b0b' } },
+  { name: 'Handlebars', icon: handlebarsIcon },
+  { name: 'GraphQL', icon: graphqlIcon },
   { name: 'Framer Motion', icon: framerMotionIcon },
   { name: 'Three.js', icon: threejsIcon },
 ];
@@ -60,12 +69,12 @@ export const PROCESS_STEPS: ProcessStep[] = [
 
 export const CAPABILITIES: PanelItem[] = [
   {
-    title: 'Headless commerce',
-    body: 'Composable storefronts with React, Storefront APIs and micro frontends that scale.',
+    title: 'Agentic workflow',
+    body: 'AI agents in the daily build loop — scoped tasks, automated reviews and CI checks on every change.',
   },
   {
-    title: 'Experience ops',
-    body: 'Agile rhythms with product owners, QA and designers — shipping velocity tied to business goals.',
+    title: 'Micro frontends',
+    body: 'Independent apps stitched into one seamless product — integration issues untangled, not papered over.',
   },
   {
     title: 'Performance first',
@@ -74,8 +83,8 @@ export const CAPABILITIES: PanelItem[] = [
 ];
 
 export const HOME_STATS: StatItem[] = [
-  { value: '2+', label: 'Years shipping code', labelShort: 'Years shipping' },
-  { value: '03', label: 'Headless stores built', labelShort: 'Headless stores' },
+  { value: '3+', label: 'Years shipping code', labelShort: 'Years shipping' },
+  { value: '20+', label: 'Projects collaborated on', labelShort: 'Projects' },
   { value: '04', label: 'Teams worked with' },
   { value: '03', label: 'Certifications earned', labelShort: 'Certifications' },
 ];

@@ -8,6 +8,7 @@ card:
   order: 3
   category: [Digital cards, NFC]
   image: ../../assets/images/projects/tiebiss-landing.jpg
+  description: An NFC and QR digital business card platform — landing page, card dashboard and shareable profiles.
 caseStudy:
   index: 3
   subtitle: An NFC and QR digital business card platform for individuals and businesses — landing page, card dashboard and shareable profiles, built at Noviindus.

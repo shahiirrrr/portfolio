@@ -204,7 +204,7 @@ Motion is specified per section in the Figma "Dev Notes" frames — implement wh
 ## 16. Content management
 
 - Projects: one Markdown file per project in `src/content/projects/` (filename = slug), validated by `content.config.ts`. Every project appears in the Work list (`order`, `stack`, `year`, `thumbnail`). Optional blocks:
-  - `card` — puts the project in the Home "Selected work" rail (`order`, `category` (fallback cover alt text only), `image`, optional card-only `stack`).
+  - `card` — puts the project in the Home "Selected work" rail (`order`, `category` (fallback cover alt text only), `image`, optional card-only `stack` and short `description`).
   - `caseStudy` — gives it a page at `/work/<slug>/` (`index` in the 01/04 cycle, `subtitle`, `role`, `timeline`, `live`, `overview`, `stats`, `cover { src, srcMobile?, alt }`, `showcase { heading, items[] }` (one row per product: image, caption, tags, optional live `link` — for multi-product projects), `media`, `teaser`). Sections render only when their data exists.
 - `draft: true` entries render in `pnpm dev` only and are excluded from production builds and the sitemap.
 - Structured page data lives in `src/data/*.ts` with types from `src/types`.

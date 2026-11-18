@@ -35,6 +35,8 @@ const projects = defineCollection({
           category: z.array(z.string()).min(1),
           /** Stack shown on the card when it differs from the Work list. */
           stack: z.array(z.string()).optional(),
+          /** One-line summary under the stack; keep it to ~2 lines on the card. */
+          description: z.string().max(110).optional(),
           image: image(),
         })
         .optional(),

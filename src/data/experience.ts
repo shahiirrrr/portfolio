@@ -2,6 +2,7 @@ import type { ExperienceItem } from '@/types';
 
 import neopraxisImage from '@/assets/images/experience/neopraxis.png';
 import noviindusImage from '@/assets/images/experience/noviindus.png';
+import regionalImage from '@/assets/images/experience/regional.png';
 import synnefoImage from '@/assets/images/experience/synnefo.png';
 
 /** Professional experience, newest first. Used by the Home cards and the About timeline. */
@@ -16,6 +17,7 @@ export const EXPERIENCE: ExperienceItem[] = [
     summary:
       'Building modern web apps with Next.js and Tailwind CSS — performant, scalable frontends for client projects.',
     image: noviindusImage,
+    url: 'https://noviindus.com/',
   },
   {
     company: 'Neopraxis Innovations',
@@ -29,6 +31,7 @@ export const EXPERIENCE: ExperienceItem[] = [
     summaryShort:
       'Delivered the BigCommerce B2B storefront for Nextbase on a headless React architecture, fixed micro-frontend issues and wired PHF into RS Connect, Fetchify and DVLC.',
     image: neopraxisImage,
+    url: 'https://www.neopraxis.in/',
   },
   {
     company: 'Synnefo Solutions',
@@ -40,6 +43,8 @@ export const EXPERIENCE: ExperienceItem[] = [
     summary:
       'Contributed to eCommerce web apps with Python, Django and REST APIs; worked with MySQL and tightened debugging and testing.',
     image: synnefoImage,
+    cardTheme: 'light',
+    url: 'https://synnefo.academy/',
   },
   {
     company: 'Regional Technologies',
@@ -49,5 +54,8 @@ export const EXPERIENCE: ExperienceItem[] = [
     period: 'DEC 2022 — JAN 2023',
     periodShort: '2022 — 2023',
     summary: 'Built a posture-recognition yoga coaching system with Android and web interfaces.',
+    image: regionalImage,
+    cardTheme: 'light',
+    url: 'https://regionaltechnologies.in/',
   },
 ];

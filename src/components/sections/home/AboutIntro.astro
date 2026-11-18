@@ -22,8 +22,8 @@ const cards = EXPERIENCE.filter(
 
     <div class="about__statement">
       <p class="about__lead" data-word-reveal>
-        I'm a frontend developer from Wayanad, Kerala — building headless storefronts, React
-        architectures and design systems that stay maintainable as they scale.
+        I help teams build modern web apps — seamless interfaces on a clean, scalable architecture
+        that stays easy to evolve as the product&nbsp;grows.
       </p>
       <div class="about__cta">
         <p class="text-body-sm text-secondary desktop-only">
@@ -51,7 +51,7 @@ const cards = EXPERIENCE.filter(
       ))}
     </div>
     <p class="text-body-sm text-secondary desktop-only">
-      2+ years across commerce &amp; product teams
+      3+ years building web apps for commerce brands and product teams.
     </p>
     <p class="text-mono text-secondary mobile-only" aria-hidden="true">
       ( EXPERIENCE ) — swipe →
@@ -60,10 +60,12 @@ const cards = EXPERIENCE.filter(
 </section>
 
 <style>
+  /* One viewport tall: on desktop the cards take the height left under the intro. */
   .about {
     display: flex;
     flex-direction: column;
     gap: var(--space-10);
+    min-block-size: 100svh;
     padding-block: var(--space-section);
   }
 
@@ -144,12 +146,22 @@ const cards = EXPERIENCE.filter(
       justify-content: space-between;
     }
 
+    .about__experience {
+      flex: 1 1 0;
+      justify-content: center;
+    }
+
+    /* Cards stretch to this height: 440px (Figma) at most, down to 340px on short screens. */
     .about__cards {
+      flex: 1 1 0;
       gap: var(--space-6);
+      min-block-size: 340px;
+      max-block-size: 440px;
     }
   }
 
-  @media (min-width: 64em) {
+  /* Four across from 1280px; narrower screens keep the swipe rail. */
+  @media (min-width: 80em) {
     .about__cards {
       margin-inline: 0;
       padding-inline: 0;

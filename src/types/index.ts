@@ -66,6 +66,10 @@ export interface ExperienceItem {
   summaryShort?: string;
   /** Card artwork for the Home experience cards. Omit to leave the entry off Home. */
   image?: ImageMetadata;
+  /** Company website; the Home card links to it in a new tab. */
+  url?: string;
+  /** Set to 'light' when the card artwork is light, so the arrow button turns dark. */
+  cardTheme?: 'light';
 }
 
 /** A step of the Home "process" dial. */
