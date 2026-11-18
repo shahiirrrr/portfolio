@@ -57,6 +57,26 @@ const projects = defineCollection({
               alt: z.string().min(1),
             })
             .optional(),
+          /**
+           * Product walkthrough after the stats: one row per product or surface
+           * (showcase image, caption, feature tags). For multi-product projects.
+           */
+          showcase: z
+            .object({
+              heading: z.string(),
+              items: z
+                .array(
+                  z.object({
+                    title: z.string(),
+                    body: z.string(),
+                    tags: z.array(z.string()).default([]),
+                    image: image(),
+                    alt: z.string().min(1),
+                  }),
+                )
+                .min(1),
+            })
+            .optional(),
           /** Before / after pair. */
           media: z.array(z.object({ src: image(), alt: z.string().min(1) })).default([]),
           /** Image shown in the "Next project" panel when this project is the next one. */

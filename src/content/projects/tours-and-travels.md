@@ -1,5 +1,5 @@
 ---
 title: Tours & Travels
-order: 6
+order: 7
 stack: [React, UX, Travel]
 ---

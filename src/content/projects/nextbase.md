@@ -1,14 +1,14 @@
 ---
 title: Nextbase
-order: 1
+order: 2
 stack: [BigCommerce, React, Stencil]
 year: 2025
 card:
-  order: 1
+  order: 2
   category: [BigCommerce B2B, Storefront]
   image: ../../assets/images/projects/nextbase-card.png
 caseStudy:
-  index: 1
+  index: 2
   subtitle: A BigCommerce B2B Edition storefront for Nextbase — customised, made headless with React and Storefront APIs, and wired into the systems behind it.
   role: Software Developer · Neopraxis
   timeline: 2024 — 2025

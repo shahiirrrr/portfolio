@@ -1,0 +1,147 @@
+---
+/**
+ * Product walkthrough for multi-product case studies: one row per product or
+ * surface — a full-width showcase image (wipes in, like the media pair), then
+ * an index, title, caption and static feature tags.
+ * Not in the case-study Figma frames; added at the owner's request for Ealzo.
+ */
+import { Image } from 'astro:assets';
+
+import { padIndex } from '@/utils/helpers';
+import type { Project } from '@/utils/projects';
+
+type Props = NonNullable<NonNullable<Project['data']['caseStudy']>['showcase']>;
+
+const { heading, items } = Astro.props;
+---
+
+<section class="cs-showcase container" aria-labelledby="cs-showcase-heading" data-cs-showcase>
+  <h2 class="text-h2 cs-showcase__heading" id="cs-showcase-heading" data-reveal>
+    {heading}
+  </h2>
+  <div class="cs-showcase__items">
+    {items.map((item, i) => (
+      <article class="cs-showcase__item" aria-labelledby={`cs-showcase-title-${i}`}>
+        <div class="cs-showcase__frame" data-cs-wipe>
+          <Image
+            src={item.image}
+            alt={item.alt}
+            widths={[480, 800, 1200, 1600, 2160]}
+            sizes="(min-width: 90em) 1304px, 92vw"
+          />
+        </div>
+        <div class="cs-showcase__caption" data-reveal>
+          <span class="cs-showcase__index text-mono text-muted">{padIndex(i + 1)}</span>
+          <h3 class="text-h3" id={`cs-showcase-title-${i}`}>
+            {item.title}
+          </h3>
+          <div class="cs-showcase__copy">
+            <p class="cs-showcase__body text-secondary">{item.body}</p>
+            {item.tags.length > 0 && (
+              <ul class="cs-showcase__tags" role="list" aria-label={`${item.title} features`}>
+                {item.tags.map((tag) => (
+                  <li class="cs-showcase__tag text-label">{tag}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </article>
+    ))}
+  </div>
+</section>
+
+<script>
+  import { initCaseStudyMedia } from '@/scripts/animations/case-study-media';
+
+  document.querySelectorAll<HTMLElement>('[data-cs-showcase]').forEach(initCaseStudyMedia);
+</script>
+
+<style>
+  .cs-showcase {
+    padding-block: var(--space-14) var(--space-20);
+  }
+
+  .cs-showcase__heading {
+    margin-block-end: var(--space-8);
+  }
+
+  .cs-showcase__items {
+    display: grid;
+    gap: var(--space-16);
+  }
+
+  .cs-showcase__frame {
+    overflow: hidden;
+    border-radius: var(--radius-media);
+  }
+
+  .cs-showcase__frame img {
+    width: 100%;
+    height: auto;
+  }
+
+  .cs-showcase__caption {
+    display: grid;
+    gap: var(--space-3);
+    padding-block-start: var(--space-6);
+  }
+
+  .cs-showcase__copy {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .cs-showcase__body {
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+  }
+
+  .cs-showcase__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .cs-showcase__tag {
+    padding: var(--space-2) var(--space-4);
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-full);
+    box-shadow: inset 0 0 0 var(--border-width) var(--color-border-strong);
+  }
+
+  @media (min-width: 48em) {
+    .cs-showcase {
+      padding-block: var(--space-24) 140px;
+    }
+
+    .cs-showcase__heading {
+      margin-block-end: var(--space-14);
+    }
+
+    .cs-showcase__items {
+      gap: 120px;
+    }
+
+    .cs-showcase__frame {
+      border-radius: var(--radius-panel);
+    }
+
+    /* Index | title | caption + tags, aligned under the image. */
+    .cs-showcase__caption {
+      grid-template-columns: 120px minmax(0, 1fr) minmax(0, 1.4fr);
+      align-items: start;
+      gap: var(--space-8);
+      padding-block-start: var(--space-8);
+    }
+
+    .cs-showcase__index {
+      padding-block-start: var(--space-2);
+    }
+
+    .cs-showcase__body {
+      font-size: var(--text-lg);
+      line-height: var(--leading-body-sm);
+    }
+  }
+</style>

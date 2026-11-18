@@ -1,14 +1,14 @@
 ---
 title: Topbar Suite
-order: 2
+order: 3
 stack: [BigCommerce, React, Widgets]
 year: 2025
 thumbnail: ../../assets/images/projects/topbar-suite-thumb.png
 card:
-  order: 4
+  order: 5
   category: [BigCommerce, Utilities]
   image: ../../assets/images/projects/topbar-suite-card.png
 caseStudy:
-  index: 2
+  index: 3
   teaser: ../../assets/images/projects/topbar-suite-card.png
 ---
