@@ -28,7 +28,10 @@ const projects = defineCollection({
         .object({
           /** Position in the Home rail. */
           order: z.number().int().positive(),
-          /** Category label over the card image, one entry per line, e.g. ["BigCommerce B2B", "Storefront"]. */
+          /**
+           * Project category, e.g. ["BigCommerce B2B", "Storefront"]. Not shown on
+           * the card; used in the case-study cover's fallback alt text.
+           */
           category: z.array(z.string()).min(1),
           /** Stack shown on the card when it differs from the Work list. */
           stack: z.array(z.string()).optional(),
