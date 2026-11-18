@@ -191,3 +191,51 @@
     }
   }
 }
+
+/* Card → case study transition (CLAUDE.md §13). A cross-document view
+   transition holds the Home card's final full-screen frame on screen until the
+   case study can paint the identical frame, so a slow image never shows as a
+   black cut. Every other navigation skips it (BaseLayout bootstrap). The
+   incoming page stays hidden (up to a 1.2s cap) until case-study-enter.ts adds
+   `card-ready`, then appears in one quick, invisible fade. */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  animation: none;
+}
+
+::view-transition-new(root) {
+  animation: card-hold 1.2s linear both;
+}
+
+html.card-ready::view-transition-new(root) {
+  animation: card-reveal 0.1s linear both;
+}
+
+@keyframes card-hold {
+  0%,
+  90% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes card-reveal {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

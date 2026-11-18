@@ -27,7 +27,7 @@ export async function getProjects(): Promise<Project[]> {
   return projects.sort((a, b) => a.data.order - b.data.order);
 }
 
-/** Projects with a case-study page, in cycle order (01 / 04 …). */
+/** Projects with a case-study page, in cycle order (`caseStudy.index`). */
 export async function getCaseStudies(): Promise<CaseStudy[]> {
   const projects = await getProjects();
   return projects

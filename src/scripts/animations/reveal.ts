@@ -15,7 +15,15 @@
  * With prefers-reduced-motion nothing moves: content is simply visible.
  * Without JavaScript every element is visible as authored.
  */
-import { gsap, markMotionReady, MOTION_OK, MOTION_REDUCED, SplitText } from './core.ts';
+import {
+  gsap,
+  introDelay,
+  markMotionReady,
+  MOTION_OK,
+  MOTION_REDUCED,
+  onIntroReady,
+  SplitText,
+} from './core.ts';
 import { refreshScroll } from './smooth-scroll.ts';
 
 function numberAttr(el: HTMLElement, name: string, fallback: number): number {
@@ -80,14 +88,20 @@ function initLineReveals(): void {
       type: 'lines',
       mask: 'lines',
       autoSplit: true,
-      onSplit: (self) =>
-        gsap.from(self.lines, {
+      onSplit: (self) => {
+        const rise = gsap.from(self.lines, {
           yPercent: 110,
           duration: 0.9,
           stagger: 0.08,
           ease: 'power4.out',
-          ...(onLoad ? {} : { scrollTrigger: { trigger: el, start: 'top 85%', once: true } }),
-        }),
+          ...(onLoad
+            ? { paused: true }
+            : { scrollTrigger: { trigger: el, start: 'top 85%', once: true } }),
+        });
+        // On-load reveals start once the page is actually visible (see onIntroReady).
+        if (onLoad) onIntroReady(() => rise.delay(introDelay()).restart(true));
+        return rise;
+      },
     });
   });
 }

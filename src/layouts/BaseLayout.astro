@@ -31,12 +31,70 @@ const { seo = {}, jsonLd = [] } = Astro.props;
     <Seo seo={seo} jsonLd={jsonLd} />
     <!-- Marks JS as available so on-load intros can hide their start state
          (see `[data-intro]` in global.css). The timeout is a failsafe: content
-         is shown even if the animation script never runs. -->
+         is shown even if the animation script never runs.
+         Card transition (CLAUDE.md §13): when a Home card just navigated here,
+         mark `card-enter` before the first paint so the page opens on the
+         card's full-screen frame (CardStage); the key matches
+         CARD_TRANSITION_KEY in card-stage.ts. The failsafe drops the frame if
+         case-study-enter.ts never takes over. It also limits the browser's
+         page transition (global.css) to that one navigation. -->
     <script is:inline>
-      document.documentElement.classList.add('js');
-      setTimeout(function () {
-        document.documentElement.classList.add('motion-ready');
-      }, 2500);
+      (function () {
+        var html = document.documentElement;
+        html.classList.add('js');
+        try {
+          var saved = sessionStorage.getItem('card-transition');
+          if (saved) {
+            sessionStorage.removeItem('card-transition');
+            var data = JSON.parse(saved);
+            var path = /^\/[\w\-./]+$/;
+            if (
+              data.path === location.pathname &&
+              Date.now() - data.t < 8000 &&
+              path.test(data.img) &&
+              path.test(data.fallback) &&
+              matchMedia('(prefers-reduced-motion: no-preference)').matches
+            ) {
+              html.classList.add('card-enter');
+              html.dataset.cardStage = data.img;
+              html.style.setProperty(
+                '--card-stage-image',
+                'url("' + data.img + '"), url("' + data.fallback + '")',
+              );
+              var preload = document.createElement('link');
+              preload.rel = 'preload';
+              preload.as = 'image';
+              preload.href = data.img;
+              preload.fetchPriority = 'high';
+              document.head.appendChild(preload);
+            }
+          }
+        } catch (error) {
+          // Storage unavailable: normal page load.
+        }
+        // Page transitions: only the card → case study navigation keeps one
+        // (global.css); everything else switches pages as normal.
+        var isCardNavigation = function () {
+          try {
+            var pending = JSON.parse(sessionStorage.getItem('card-transition') || 'null');
+            return Boolean(pending && Date.now() - pending.t < 8000);
+          } catch (error) {
+            return false;
+          }
+        };
+        addEventListener('pageswap', function (event) {
+          if (event.viewTransition && !isCardNavigation()) event.viewTransition.skipTransition();
+        });
+        addEventListener('pagereveal', function (event) {
+          if (event.viewTransition && !html.classList.contains('card-enter')) {
+            event.viewTransition.skipTransition();
+          }
+        });
+        setTimeout(function () {
+          html.classList.add('motion-ready');
+          if (!html.classList.contains('card-entering')) html.classList.remove('card-enter');
+        }, 2500);
+      })();
     </script>
   </head>
   <body>

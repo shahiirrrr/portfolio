@@ -1,0 +1,65 @@
+---
+/**
+ * Full-viewport layer for the Home card → case study transition (owner
+ * request; see CLAUDE.md §13). Decorative, never interactive.
+ *
+ *  - `home`: the expanding card is drawn here (`frame` = the dark card body
+ *    behind the image). Shown while `data-active` is set.
+ *  - `enter`: on a case study, shown from the first paint when BaseLayout's
+ *    bootstrap has marked `html.card-enter`, then settled into the cover.
+ *
+ * The image comes from `--card-stage-image` (set by the scripts / bootstrap).
+ */
+interface Props {
+  mode: 'home' | 'enter';
+  frame?: boolean;
+}
+
+const { mode, frame = false } = Astro.props;
+---
+
+<div class="card-stage" data-card-stage={mode} aria-hidden="true">
+  {frame && <div class="card-stage__frame" data-card-stage-frame />}
+  <div class="card-stage__clip" data-card-stage-clip>
+    <div class="card-stage__image" data-card-stage-image></div>
+  </div>
+</div>
+
+<style>
+  .card-stage {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    display: none;
+    pointer-events: none;
+    contain: strict;
+  }
+
+  .card-stage[data-active] {
+    display: block;
+  }
+
+  /* Arriving from a Home card: visible before any script runs (state set on <html> by BaseLayout). */
+  :global(html.card-enter) .card-stage[data-card-stage='enter'] {
+    display: block;
+  }
+
+  .card-stage__frame,
+  .card-stage__clip,
+  .card-stage__image {
+    position: absolute;
+    inset: 0;
+  }
+
+  .card-stage__frame {
+    background-color: var(--color-bg);
+  }
+
+  .card-stage__image {
+    background-color: var(--color-bg);
+    background-image: var(--card-stage-image);
+    background-position: center;
+    background-size: cover;
+    will-change: transform;
+  }
+</style>
