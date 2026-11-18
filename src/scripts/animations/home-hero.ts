@@ -1,30 +1,24 @@
 /**
- * Home hero intro (once, ≈1.6s): the name's letters rise out of a mask with a
- * 50ms stagger, the portrait rises in front of it, then header, socials and
- * role fade in. On scroll the name drifts up slower than the portrait.
+ * Home hero entry. With motion allowed it loads the "Negative" ink hero
+ * (home-hero-negative.ts) once the portrait and fonts are ready; without
+ * WebGL2 it falls back to the classic intro (letters rise out of a mask, the
+ * portrait rises in front, then header, socials and role fade in). Either way
+ * the name drifts up slower than the portrait on scroll.
  * Reduced motion: a plain fade.
  */
 import { gsap, markMotionReady, MOTION_OK, MOTION_REDUCED, SplitText } from './core.ts';
 
-export function initHero(hero: HTMLElement): () => void {
-  const name = hero.querySelector<HTMLElement>('[data-hero-name]');
-  const nameWrap = hero.querySelector<HTMLElement>('[data-hero-name-wrap]');
-  const portrait = hero.querySelector<HTMLElement>('[data-hero-portrait]');
-  const fades = [
-    document.querySelector<HTMLElement>('[data-site-header]'),
-    ...hero.querySelectorAll<HTMLElement>('[data-hero-fade]'),
-  ].filter((el) => el !== null);
+/** True when this load came from the back/forward buttons (no bfcache). */
+function isHistoryNavigation(): boolean {
+  const entry = performance.getEntriesByType('navigation')[0];
+  return entry instanceof PerformanceNavigationTiming && entry.type === 'back_forward';
+}
 
-  const mm = gsap.matchMedia();
-
-  mm.add(MOTION_OK, () => {
-    if (!name || !nameWrap || !portrait) return;
-
-    const split = SplitText.create(name, { type: 'chars' });
-
+function classicIntro(chars: Element[], portrait: HTMLElement, fades: HTMLElement[]): () => void {
+  const ctx = gsap.context(() => {
     gsap
       .timeline()
-      .from(split.chars, { yPercent: 110, stagger: 0.05, duration: 0.9, ease: 'power4.out' })
+      .from(chars, { yPercent: 110, stagger: 0.05, duration: 0.9, ease: 'power4.out' })
       .from(
         portrait,
         {
@@ -39,16 +33,74 @@ export function initHero(hero: HTMLElement): () => void {
       )
       // clearProps: the header's own hide/show transition uses `transform`.
       .from(fades, { opacity: 0, y: 12, stagger: 0.06, clearProps: 'transform' }, '-=0.5');
+  });
+  markMotionReady();
+  return () => ctx.revert();
+}
 
-    // Depth parallax. Uses `translate` via y on the wrapper, which the intro never touches.
+export function initHero(hero: HTMLElement): () => void {
+  const name = hero.querySelector<HTMLElement>('[data-hero-name]');
+  const nameWrap = hero.querySelector<HTMLElement>('[data-hero-name-wrap]');
+  const portrait = hero.querySelector<HTMLElement>('[data-hero-portrait]');
+  const canvas = hero.querySelector<HTMLCanvasElement>('canvas[data-hero-ink]');
+  const header = document.querySelector<HTMLElement>('[data-site-header]');
+  const fades = [header, ...hero.querySelectorAll<HTMLElement>('[data-hero-fade]')].filter(
+    (el) => el !== null,
+  );
+
+  const mm = gsap.matchMedia();
+
+  mm.add(MOTION_OK, () => {
+    if (!name || !nameWrap || !portrait) {
+      hero.dataset.heroReady = '';
+      markMotionReady();
+      return;
+    }
+
+    // Depth parallax on the wrapper, which no other animation touches.
     gsap.to(nameWrap, {
       yPercent: 12,
       ease: 'none',
       scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true },
     });
 
-    markMotionReady();
-    return () => split.revert();
+    const split = SplitText.create(name, { type: 'chars' });
+    const chars = split.chars.filter((el) => el instanceof HTMLElement);
+    let cancelled = false;
+    let teardown: (() => void) | undefined;
+
+    const begin = (negative: typeof import('./home-hero-negative.ts') | null): void => {
+      if (cancelled) return;
+      // The start overlay's CSS failsafe already showed the static hero: don't hide it again.
+      const shown = getComputedStyle(hero, '::after').visibility === 'hidden';
+      const develop = !shown && !isHistoryNavigation();
+      teardown =
+        (negative && canvas
+          ? negative.initNegative(
+              { hero, canvas, nameWrap, portrait, chars, fades, header },
+              develop,
+            )
+          : null) ?? (shown ? undefined : classicIntro(chars, portrait, fades));
+      // Start states are set: lift the start overlay (Hero.astro).
+      hero.dataset.heroReady = '';
+      markMotionReady();
+    };
+
+    const image = portrait.querySelector('img');
+    Promise.all([
+      import('./home-hero-negative.ts'),
+      image?.decode().catch(() => undefined),
+      document.fonts.ready,
+    ]).then(
+      ([negative]) => begin(negative),
+      () => begin(null),
+    );
+
+    return () => {
+      cancelled = true;
+      teardown?.();
+      split.revert();
+    };
   });
 
   mm.add(MOTION_REDUCED, () => {

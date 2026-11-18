@@ -19,6 +19,11 @@ implemented from a Figma design.
   reveals, parallax and a card-to-case-study transition (the card expands to full screen and settles
   into the case study's full-screen cover hero). Every effect has a reduced-motion fallback, and all content is visible
   without JavaScript.
+- **Hero ink:** a dependency-free WebGL2 ink field. On load a white ink drop splashes onto a dark
+  screen and spreads to reveal the Home hero. After that the ink sits behind the portrait: it follows
+  the pointer as a curling trail and floods the hero into the dark page on scroll, while the photo
+  never changes. The name's letters spring around with the strokes. Without WebGL2 the hero falls
+  back to the GSAP intro.
 - **Smooth scrolling:** Lenis on mouse and trackpad devices, synced to GSAP's ticker. Touch devices
   and reduced-motion users keep native scrolling.
 - **Content collections:** projects and case studies are Markdown files validated by a Zod schema.
