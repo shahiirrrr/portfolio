@@ -73,9 +73,17 @@ type Rgb = [number, number, number];
  */
 function inkColors(): { cover: Rgb; negative: Rgb } | null {
   const styles = getComputedStyle(document.documentElement);
+  // Let the browser normalise the token: production CSS is minified (#ffffff
+  // becomes #fff), and a canvas reads any CSS colour back as #rrggbb.
+  const probe = document.createElement('canvas').getContext('2d');
   const rgb = (token: string): number[] | null => {
-    const match = /^#([0-9a-f]{6})$/i.exec(styles.getPropertyValue(token).trim());
-    if (!match?.[1]) return null;
+    const value = styles.getPropertyValue(token).trim();
+    if (!probe || !value) return null;
+    probe.fillStyle = '#010203';
+    probe.fillStyle = value;
+    const match = /^#([0-9a-f]{6})$/i.exec(probe.fillStyle);
+    // Unparsable values leave the sentinel in place.
+    if (!match?.[1] || (probe.fillStyle === '#010203' && value !== '#010203')) return null;
     const n = Number.parseInt(match[1], 16);
     return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
   };
