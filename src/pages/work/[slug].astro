@@ -8,6 +8,7 @@ import CaseMedia from '@/components/sections/case-study/CaseMedia.astro';
 import CaseNext from '@/components/sections/case-study/CaseNext.astro';
 import CaseOverview from '@/components/sections/case-study/CaseOverview.astro';
 import CaseResults from '@/components/sections/case-study/CaseResults.astro';
+import CaseShowcase from '@/components/sections/case-study/CaseShowcase.astro';
 import { SITE } from '@/config/site';
 import PageLayout from '@/layouts/PageLayout.astro';
 import { formatStack, getCaseStudies, projectPath } from '@/utils/projects';
@@ -52,6 +53,9 @@ const description =
     ? subtitle
     : `${title} — a case study by ${SITE.name}. Stack: ${stack.join(', ')}.`.slice(0, 160);
 
+// Without the media pair or a showcase (each ends with its own spacing), pad the article.
+const short = study.media.length === 0 && !study.showcase;
+
 const nextStudy = next.data.caseStudy;
 const nextImage = nextStudy.teaser ?? nextStudy.cover?.src ?? next.data.card?.image;
 const nextHref = projectPath(next) ?? '/work/';
@@ -75,11 +79,12 @@ const nextHref = projectPath(next) ?? '/work/';
     }),
   ]}
 >
-  <article class:list={{ 'cs-article--short': study.media.length === 0 }}>
+  <article class:list={{ 'cs-article--short': short }}>
     <CaseHero title={title} subtitle={subtitle} index={study.index} total={total} meta={meta} />
     {cover && <CaseCover {...cover} />}
     {study.overview && <CaseOverview {...study.overview} />}
     {study.stats.length > 0 && <CaseResults stats={study.stats} />}
+    {study.showcase && <CaseShowcase {...study.showcase} />}
     {study.media.length > 0 && <CaseMedia media={study.media} />}
   </article>
   <CaseNext
@@ -91,7 +96,7 @@ const nextHref = projectPath(next) ?? '/work/';
 </PageLayout>
 
 <style>
-  /* Without the before / after pair, keep the media section's bottom spacing above the next panel. */
+  /* Without the media pair or showcase, keep their bottom spacing above the next panel. */
   .cs-article--short {
     padding-block-end: var(--space-20);
   }

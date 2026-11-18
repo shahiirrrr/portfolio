@@ -1,4 +1,7 @@
-/** Case study before / after images: left-to-right clip-path wipe when scrolled into view. */
+/**
+ * Case-study images (before / after pair, showcase rows): left-to-right
+ * clip-path wipe on each `[data-cs-wipe]` frame when scrolled into view.
+ */
 import { gsap, MOTION_OK } from './core.ts';
 
 export function initCaseStudyMedia(root: HTMLElement): () => void {
