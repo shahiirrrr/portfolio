@@ -194,6 +194,10 @@ Motion is specified per section in the Figma "Dev Notes" frames — implement wh
   - Back/forward loads skip the develop act. Rendering pauses off-screen and when idle.
   - The page is scroll-locked (holder `home-hero-intro`) from load until the intro has played — the develop act's ground is clear and every letter has risen, or the classic intro has ended — with an 8s failsafe. No lock when the load starts below the hero.
 
+- **Smaller owner-requested effects** (Figma intentionally not updated):
+  - Home capability folders (`ui/FolderPanel.astro`, CSS only): on hover, or a tap or keyboard press on the arrow button, the flap tips forward and the `tools` logos from `data/home.ts` rise out of it.
+  - CTA email (`sections/ContactCta.astro`, CSS only): on hover or focus, the letters roll up and are replaced by a `text-shadow` copy, while the underline wipes out and back in.
+  - Footer wordmark (`footer-wordmark.ts` + `layout/FooterMascot.astro`): a line-drawn figure throws a rope onto the S, shoulders it and hauls the letters in, hops along their tops to the R (each letter turns white as he lands), hops back to the I (which dims as he lands) and sits on it. The figure is posed by tweening joint angles written as SVG `rotate()` attributes. Reduced motion shows him already seated; without JS there is no figure.
 - Always `gsap.matchMedia()`: everything inside `MOTION_OK`; reduced motion = static or a plain fade; return cleanup (`mm.revert()`).
 - **On-load intros** mark their elements `data-intro`: CSS hides them only while `html.js:not(.motion-ready)`. The script calls `markMotionReady()` after setting start states, on every code path; `BaseLayout` adds `motion-ready` after 2.5s as a failsafe.
 - Progressive enhancement: without JS (or with reduced motion) everything is visible and usable — e.g. the process dial falls back to a plain step list, the marquee to wrapped rows, filters to the full list.
