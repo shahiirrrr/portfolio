@@ -62,7 +62,7 @@ src/
 │   ├── common/          Seo, Button, Chip, Stat
 │   ├── layout/          Header (fixed), MobileMenu (<dialog>), Footer
 │   ├── ui/              FolderPanel, ExperienceCard, ProjectCard, …
-│   └── sections/        ContactCta (shared) + home/, work/, about/, case-study/, contact/, not-found/
+│   └── sections/        home/, work/, about/, case-study/, contact/, not-found/
 └── pages/               index, work/ (index + [slug]), about/, contact/, 404, robots.txt.ts
 public/                  favicon.svg, images/og-default.png
 .github/                 workflows/ (ci, auto-pr, claude-review), actions/setup, claude-review.md (review prompt)
@@ -78,7 +78,7 @@ white hero under a transparent header) to `PageLayout`.
 - **`layouts/`** — shared document/page structure. `BaseLayout` owns `<html>`/`<head>`; `PageLayout` owns skip link, header, `<main>`, footer. Every page uses `PageLayout`.
 - **`components/common/`** — small reusable primitives (buttons, links, icons, badges, section headings).
 - **`components/layout/`** — site chrome (header, footer, navigation).
-- **`components/sections/<page>/`** — page-level blocks, one folder per page. `sections/ContactCta.astro` is shared by Home, Work and About.
+- **`components/sections/<page>/`** — page-level blocks, one folder per page. The contact CTA (`home/ContactCta.astro`) is Home-only (owner decision).
 - **`components/ui/`** — composite pieces reused across sections (cards, panels).
 - **`config/`** — constants shared across the site. `site.ts` is the single source of truth for identity and is imported by `astro.config.ts`, so it may only use relative imports.
 - **`data/`** — typed structured data that isn't long-form content (page copy lists, experience, stack table, FAQ).
@@ -197,7 +197,7 @@ Motion is specified per section in the Figma "Dev Notes" frames — implement wh
 - **Smaller owner-requested effects** (Figma intentionally not updated):
   - Home capability folders (`ui/FolderPanel.astro`, CSS only): on hover, or a tap or keyboard press on the arrow button, the flap tips forward and the `tools` logos from `data/home.ts` rise out of it.
   - Home experience cards (`ui/ExperienceCard.astro`, CSS only): on hover a glossy diagonal sheen sweeps across the card once, and the artwork zooms slightly.
-  - CTA email (`sections/ContactCta.astro`, CSS only): on hover or focus, the letters roll up and are replaced by a `text-shadow` copy, while the underline wipes out and back in.
+  - CTA email (`sections/home/ContactCta.astro`, CSS only): on hover or focus, the letters roll up and are replaced by a `text-shadow` copy, while the underline wipes out and back in.
   - Footer wordmark (`footer-wordmark.ts` + `layout/FooterMascot.astro`): a line-drawn figure throws a rope onto the S, shoulders it and hauls the letters in, hops along their tops to the R (each letter turns white as he lands), hops back to the I (which dims as he lands) and sits on it. The figure is posed by tweening joint angles written as SVG `rotate()` attributes. Reduced motion shows him already seated; without JS there is no figure.
 - Always `gsap.matchMedia()`: everything inside `MOTION_OK`; reduced motion = static or a plain fade; return cleanup (`mm.revert()`).
 - **On-load intros** mark their elements `data-intro`: CSS hides them only while `html.js:not(.motion-ready)`. The script calls `markMotionReady()` after setting start states, on every code path; `BaseLayout` adds `motion-ready` after 2.5s as a failsafe.
