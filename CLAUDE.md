@@ -196,6 +196,7 @@ Motion is specified per section in the Figma "Dev Notes" frames — implement wh
 
 - **Smaller owner-requested effects** (Figma intentionally not updated):
   - Home capability folders (`ui/FolderPanel.astro`, CSS only): on hover, or a tap or keyboard press on the arrow button, the flap tips forward and the `tools` logos from `data/home.ts` rise out of it.
+  - Home experience cards (`ui/ExperienceCard.astro`, CSS only): on hover a glossy diagonal sheen sweeps across the card once, and the artwork zooms slightly.
   - CTA email (`sections/ContactCta.astro`, CSS only): on hover or focus, the letters roll up and are replaced by a `text-shadow` copy, while the underline wipes out and back in.
   - Footer wordmark (`footer-wordmark.ts` + `layout/FooterMascot.astro`): a line-drawn figure throws a rope onto the S, shoulders it and hauls the letters in, hops along their tops to the R (each letter turns white as he lands), hops back to the I (which dims as he lands) and sits on it. The figure is posed by tweening joint angles written as SVG `rotate()` attributes. Reduced motion shows him already seated; without JS there is no figure.
 - Always `gsap.matchMedia()`: everything inside `MOTION_OK`; reduced motion = static or a plain fade; return cleanup (`mm.revert()`).

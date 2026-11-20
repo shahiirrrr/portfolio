@@ -1,0 +1,125 @@
+---
+/**
+ * Process "act" drawings (owner-requested original line art; Figma
+ * intentionally not updated): one thin line drawing per step, in step order —
+ * Plan (blueprint grid), Architect (component tree), Build (code lines),
+ * Animate (easing curve), Ship (launch line). Every stroke is a path with
+ * pathLength 1, so home-process-dial.ts draws them with stroke-dashoffset.
+ * ProcessDial places and shows the wrapper (only on the enhanced dial); the
+ * drawings start hidden and the script reveals the active one.
+ */
+interface Art {
+  /** Muted construction lines. */
+  lines: string[];
+  /** The one brighter line that carries the idea. */
+  accent: string[];
+}
+
+/** Paths in a 400 × 400 box. Rectangles are paths so pathLength works everywhere. */
+const box = (x: number, y: number, w: number, h: number) => `M${x} ${y}h${w}v${h}h${-w}Z`;
+
+const ARTS: Art[] = [
+  {
+    lines: [40, 120, 200, 280, 360].flatMap((p) => [`M${p} 40V360`, `M40 ${p}H360`]),
+    accent: [box(120, 120, 160, 120), 'M200 100V260', 'M100 180H300'],
+  },
+  {
+    lines: [
+      'M200 88V140',
+      'M80 140H320',
+      'M80 140V180',
+      'M200 140V180',
+      'M320 140V180',
+      box(40, 180, 80, 48),
+      box(160, 180, 80, 48),
+      box(280, 180, 80, 48),
+      'M200 228V280',
+      'M150 280H250',
+      'M150 280V310',
+      'M250 280V310',
+      box(120, 310, 60, 40),
+      box(220, 310, 60, 40),
+    ],
+    accent: [box(160, 40, 80, 48)],
+  },
+  {
+    lines: [
+      'M80 60H60V340H80',
+      'M320 60H340V340H320',
+      'M100 100H260',
+      'M130 140H300',
+      'M130 180H220',
+      'M160 220H290',
+      'M130 260H250',
+      'M100 300H200',
+    ],
+    accent: ['M214 286V314'],
+  },
+  {
+    lines: ['M60 60V340H340', 'M60 340L140 340', 'M340 80L160 80', 'M60 200H340', 'M200 60V340'],
+    accent: ['M60 340C140 340 160 80 340 80', 'M340 72a8 8 0 1 1 0 16a8 8 0 1 1 0-16'],
+  },
+  {
+    lines: [
+      'M40 340H360',
+      ...[100, 180, 260, 340].map((x) => `M${x} 340V352`),
+      'M140 340V262',
+      'M200 340V280',
+    ],
+    accent: ['M60 300L140 260L200 280L340 100', 'M296 100H340V144'],
+  },
+];
+---
+
+<div class="process-art" aria-hidden="true">
+  {ARTS.map(({ lines, accent }) => (
+    <svg class="process-art__svg" viewBox="0 0 400 400" data-process-art>
+      {lines.map((d) => (
+        <path d={d} pathLength="1" />
+      ))}
+      {accent.map((d) => (
+        <path class="process-art__accent" d={d} pathLength="1" />
+      ))}
+    </svg>
+  ))}
+</div>
+
+<style>
+  .process-art {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .process-art__svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    visibility: hidden;
+    fill: none;
+    stroke: var(--color-border-strong);
+    /* SVG units: ~1.2px at the 480px desktop size. */
+    stroke-width: 1;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1;
+  }
+
+  .process-art__accent {
+    stroke: var(--color-text-secondary);
+    stroke-width: 1.5;
+  }
+
+  /* Mobile draws the art at ~300px: thicker units keep the lines visible. */
+  @media (max-width: 47.99em) {
+    .process-art__svg {
+      stroke-width: 1.5;
+    }
+
+    .process-art__accent {
+      stroke-width: 2;
+    }
+  }
+</style>

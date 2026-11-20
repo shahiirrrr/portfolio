@@ -12,7 +12,6 @@ const wordmarkLetters = [...SITE.name.toUpperCase()];
   <div class="container site-footer__inner">
     <div class="site-footer__top">
       <div class="site-footer__brand">
-        <p class="site-footer__name">{SITE.name.toUpperCase()}</p>
         <p class="text-body-sm text-secondary">
           Frontend developer, {SITE.location}.<br />
           {SITE.availability}.
@@ -107,13 +106,6 @@ const wordmarkLetters = [...SITE.name.toUpperCase()];
 
   .site-footer__brand {
     gap: var(--space-3);
-  }
-
-  .site-footer__name {
-    font-size: var(--text-2xl);
-    font-weight: var(--weight-bold);
-    line-height: var(--leading-snug);
-    letter-spacing: var(--tracking-h3);
   }
 
   .site-footer__columns {
