@@ -85,6 +85,8 @@ export interface ProcessStep {
 export interface PanelItem {
   title: string;
   body: string;
+  /** Tool logos that rise out of the folder on hover (Home capabilities). */
+  tools?: TechItem[];
 }
 
 export interface StatItem {

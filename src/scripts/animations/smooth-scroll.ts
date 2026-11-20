@@ -23,7 +23,9 @@ const LERP = 0.075;
 export const SMOOTH_SCROLL = `${MOTION_OK} and ${CAN_HOVER}`;
 
 let lenis: Lenis | undefined;
-let locked = false;
+/** Who currently holds the scroll lock; the page scrolls only when nobody does. */
+const holders = new Set<string>();
+const isLocked = (): boolean => holders.size > 0;
 
 /** A textarea with overflowing text scrolls itself; a short one lets the page scroll. */
 const isNestedScroller = (node: HTMLElement): boolean =>
@@ -47,7 +49,7 @@ gsap.matchMedia().add(SMOOTH_SCROLL, () => {
   instance.on('scroll', ScrollTrigger.update);
   gsap.ticker.add(raf);
   ScrollTrigger.addEventListener('refresh', resize);
-  if (locked) instance.stop();
+  if (isLocked()) instance.stop();
   lenis = instance;
 
   return () => {
@@ -66,7 +68,7 @@ gsap.matchMedia().add(SMOOTH_SCROLL, () => {
 function yieldToNativeScroll(): void {
   if (lenis?.isScrolling !== 'smooth') return;
   lenis.stop();
-  if (!locked) lenis.start();
+  if (!isLocked()) lenis.start();
 }
 
 const SCROLL_KEYS = new Set([' ', 'PageUp', 'PageDown', 'Home', 'End', 'ArrowUp', 'ArrowDown']);
@@ -89,16 +91,20 @@ export function scrollToY(y: number): void {
   else window.scrollTo({ top: y, behavior: matchMedia(MOTION_OK).matches ? 'smooth' : 'auto' });
 }
 
-/** Freeze page scrolling (e.g. while a modal is open). */
-export function lockScroll(): void {
-  locked = true;
+/**
+ * Freeze page scrolling (e.g. while a modal is open). `holder` names the lock,
+ * so independent locks (a modal, an intro) don't release each other.
+ */
+export function lockScroll(holder = 'default'): void {
+  holders.add(holder);
   lenis?.stop();
   document.documentElement.style.overflow = 'hidden';
 }
 
-/** Undo `lockScroll()`. */
-export function unlockScroll(): void {
-  locked = false;
+/** Undo `lockScroll(holder)`; the page scrolls again once no lock is held. */
+export function unlockScroll(holder = 'default'): void {
+  holders.delete(holder);
+  if (isLocked()) return;
   document.documentElement.style.overflow = '';
   lenis?.start();
 }

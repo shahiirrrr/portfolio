@@ -19,6 +19,8 @@
  *
  * Loaded on demand by home-hero.ts after the portrait and fonts are ready;
  * returns null when WebGL2 is unavailable so the classic hero takes over.
+ * `onSettled` runs once the develop act has fully played (the ground is clear
+ * and every letter has risen), or at once when there is no develop act.
  */
 import { gsap } from './core.ts';
 import { createLetterSprings, type PointerSample } from './home-hero-letters.ts';
@@ -103,7 +105,11 @@ function inkColors(): { cover: Rgb; negative: Rgb } | null {
 
 const lerp = (a: number, b: number, t: number): number => a + (b - a) * t;
 
-export function initNegative(parts: NegativeParts, develop: boolean): (() => void) | null {
+export function initNegative(
+  parts: NegativeParts,
+  develop: boolean,
+  onSettled: () => void,
+): (() => void) | null {
   const inks = inkColors();
   const field = inks ? createInkField(parts.canvas, develop ? inks.cover : inks.negative) : null;
   if (!inks || !field) return null;
@@ -210,6 +216,10 @@ export function initNegative(parts: NegativeParts, develop: boolean): (() => voi
         return Math.hypot(x - state.originX, y - state.originY);
       };
       let risen = 0;
+      let cleared = false;
+      const settle = (): void => {
+        if (cleared && risen === chars.length) onSettled();
+      };
       const queue = chars.map((el) => ({
         dist: reach(el.getBoundingClientRect()),
         rise: () =>
@@ -222,6 +232,7 @@ export function initNegative(parts: NegativeParts, develop: boolean): (() => voi
               onComplete: () => {
                 risen += 1;
                 if (risen === chars.length) startPlay();
+                settle();
               },
             }),
           ),
@@ -315,6 +326,8 @@ export function initNegative(parts: NegativeParts, develop: boolean): (() => voi
           field.setInk(inks.negative);
           developing = false;
           placeShield();
+          cleared = true;
+          settle();
         },
       });
       timeline.add(spread, 0.6);
@@ -323,6 +336,7 @@ export function initNegative(parts: NegativeParts, develop: boolean): (() => voi
   } else {
     state.radius = maxRadius;
     startPlay();
+    onSettled();
   }
 
   // ── Act 3: flood (scroll-linked) ──────────────────────────────────────

@@ -1,4 +1,10 @@
 import astroIcon from '@/assets/icons/tech/astro.svg';
+import claudeIcon from '@/assets/icons/tech/claude.svg';
+import figmaIcon from '@/assets/icons/tech/figma.svg';
+import githubIcon from '@/assets/icons/tech/github.svg';
+import lighthouseIcon from '@/assets/icons/tech/lighthouse.svg';
+import viteIcon from '@/assets/icons/tech/vite.svg';
+import zohoIcon from '@/assets/icons/tech/zoho.svg';
 import bigcommerceIcon from '@/assets/icons/tech/bigcommerce-logo.svg';
 import css3Icon from '@/assets/icons/tech/css3.svg';
 import framerMotionIcon from '@/assets/icons/tech/framer-motion.svg';
@@ -71,14 +77,33 @@ export const CAPABILITIES: PanelItem[] = [
   {
     title: 'Agentic workflow',
     body: 'AI agents in the daily build loop — scoped tasks, automated reviews and CI checks on every change.',
+    tools: [
+      { name: 'Claude', icon: claudeIcon },
+      { name: 'Figma MCP', icon: figmaIcon },
+      { name: 'GitHub', icon: githubIcon },
+      { name: 'Zoho', icon: zohoIcon },
+    ],
   },
   {
     title: 'Micro frontends',
     body: 'Independent apps stitched into one seamless product — integration issues untangled, not papered over.',
+    // PLACEHOLDER: tool picks to be confirmed by the owner.
+    tools: [
+      { name: 'React', icon: reactIcon },
+      { name: 'Next.js', icon: nextjsIcon },
+      { name: 'Vite', icon: viteIcon },
+      { name: 'TypeScript', tile: { text: 'TS', background: '#3178c6', color: '#ffffff' } },
+    ],
   },
   {
     title: 'Performance first',
     body: 'Accessibility, Core Web Vitals and pixel-crisp UI systems as the default, not an afterthought.',
+    // PLACEHOLDER: tool picks to be confirmed by the owner.
+    tools: [
+      { name: 'Lighthouse', icon: lighthouseIcon },
+      { name: 'Astro', icon: astroIcon },
+      { name: 'HTML5', icon: html5Icon },
+    ],
   },
 ];
 

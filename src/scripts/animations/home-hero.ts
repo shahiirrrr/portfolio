@@ -3,10 +3,20 @@
  * (home-hero-negative.ts) once the portrait and fonts are ready; without
  * WebGL2 it falls back to the classic intro (letters rise out of a mask, the
  * portrait rises in front, then header, socials and role fade in). Either way
- * the name drifts up slower than the portrait on scroll.
+ * the name drifts up slower than the portrait on scroll. The page can't be
+ * scrolled until the intro has finished.
  * Reduced motion: a plain fade.
  */
 import { gsap, markMotionReady, MOTION_OK, MOTION_REDUCED, SplitText } from './core.ts';
+import { lockScroll, unlockScroll } from './smooth-scroll.ts';
+
+/** Scroll-lock holder name for the intro (see smooth-scroll.ts). */
+const INTRO_LOCK = 'home-hero-intro';
+/**
+ * Never keep the page frozen longer than this (ms), whatever happens to the
+ * intro: the CSS start-overlay failsafe (2.5s) plus the longest intro, with margin.
+ */
+const LOCK_FAILSAFE = 8000;
 
 /** True when this load came from the back/forward buttons (no bfcache). */
 function isHistoryNavigation(): boolean {
@@ -14,10 +24,15 @@ function isHistoryNavigation(): boolean {
   return entry instanceof PerformanceNavigationTiming && entry.type === 'back_forward';
 }
 
-function classicIntro(chars: Element[], portrait: HTMLElement, fades: HTMLElement[]): () => void {
+function classicIntro(
+  chars: Element[],
+  portrait: HTMLElement,
+  fades: HTMLElement[],
+  onSettled: () => void,
+): () => void {
   const ctx = gsap.context(() => {
     gsap
-      .timeline()
+      .timeline({ onComplete: onSettled })
       .from(chars, { yPercent: 110, stagger: 0.05, duration: 0.9, ease: 'power4.out' })
       .from(
         portrait,
@@ -57,6 +72,16 @@ export function initHero(hero: HTMLElement): () => void {
       return;
     }
 
+    // Hold the page still until the intro has played (only when the hero is
+    // in view: a reload restored further down keeps scrolling freely).
+    const lock = window.scrollY < hero.offsetHeight;
+    const release = (): void => {
+      window.clearTimeout(failsafe);
+      if (lock) unlockScroll(INTRO_LOCK);
+    };
+    const failsafe = lock ? window.setTimeout(release, LOCK_FAILSAFE) : 0;
+    if (lock) lockScroll(INTRO_LOCK);
+
     // Depth parallax on the wrapper, which no other animation touches.
     gsap.to(nameWrap, {
       yPercent: 12,
@@ -74,13 +99,17 @@ export function initHero(hero: HTMLElement): () => void {
       // The start overlay's CSS failsafe already showed the static hero: don't hide it again.
       const shown = getComputedStyle(hero, '::after').visibility === 'hidden';
       const develop = !shown && !isHistoryNavigation();
-      teardown =
-        (negative && canvas
+      const ink =
+        negative && canvas
           ? negative.initNegative(
               { hero, canvas, nameWrap, portrait, chars, fades, header },
               develop,
+              release,
             )
-          : null) ?? (shown ? undefined : classicIntro(chars, portrait, fades));
+          : null;
+      if (ink) teardown = ink;
+      else if (shown) release();
+      else teardown = classicIntro(chars, portrait, fades, release);
       // Start states are set: lift the start overlay (Hero.astro).
       hero.dataset.heroReady = '';
       markMotionReady();
@@ -98,6 +127,7 @@ export function initHero(hero: HTMLElement): () => void {
 
     return () => {
       cancelled = true;
+      release();
       teardown?.();
       split.revert();
     };
