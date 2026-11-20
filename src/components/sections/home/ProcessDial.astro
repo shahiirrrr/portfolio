@@ -11,6 +11,10 @@
  * Desktop: the dial fills the left side top to bottom; the heading sits on the
  * right, above the step copy.
  *
+ * Owner-requested additions (Figma intentionally not updated): a bezel of fine
+ * ticks that turns with the dial, a progress arc along the ring that ends on
+ * the active dot, and a line drawing per step (ProcessArt) in the glow.
+ *
  * Geometry is expressed in design pixels × `--u`, relative to the dial centre
  * (`--cx`, `--cy`), so the composition scales with the viewport.
  */
@@ -19,6 +23,7 @@ import dot from '@/assets/images/dial/dot.svg';
 import glow from '@/assets/images/dial/glow.svg';
 import ringInner from '@/assets/images/dial/ring-inner.png';
 import ring from '@/assets/images/dial/ring.svg';
+import ProcessArt from '@/components/sections/home/ProcessArt.astro';
 import { PROCESS_STEPS } from '@/data/home';
 import { padIndex } from '@/utils/helpers';
 
@@ -27,11 +32,17 @@ const numerals = PROCESS_STEPS.map((_, i) => padIndex(i + 1));
 const reels = Array.from({ length: numerals[0]?.length ?? 0 }, (_, d) =>
   numerals.map((numeral) => numeral.charAt(d)),
 );
+
+/** A full circle as a path (clockwise from 3 o'clock), so pathLength works in every browser. */
+const circle = (r: number) => `M${r} 0A${r} ${r} 0 1 1 ${-r} 0A${r} ${r} 0 1 1 ${r} 0`;
 ---
 
 <section class="process" aria-labelledby="process-heading" data-process>
   <div class="process__stage" aria-hidden="true">
     <img class="process__glow" src={glow.src} width="800" height="800" alt="" />
+    <div class="process__art">
+      <ProcessArt />
+    </div>
     <img class="process__ring" src={ring.src} width="760" height="760" alt="" />
     <img
       class="process__ring process__ring--inner desktop-only"
@@ -42,6 +53,20 @@ const reels = Array.from({ length: numerals[0]?.length ?? 0 }, (_, d) =>
       loading="lazy"
     />
     <div class="process__dial" data-process-dial>
+      <!-- Ring radius = 100 units. The arc's start is turned back to step 1's notch. -->
+      <svg class="process__bezel" viewBox="-100 -100 200 200">
+        <path class="process__ticks" d={circle(96)} pathLength="360" />
+        {PROCESS_STEPS.map((_, i) => (
+          <path class="process__tick-major" d="M93 0H98" style={`--i:${i - 2}`} />
+        ))}
+        <path
+          class="process__arc process__arc--glow"
+          d={circle(100)}
+          pathLength="360"
+          data-process-arc
+        />
+        <path class="process__arc" d={circle(100)} pathLength="360" data-process-arc />
+      </svg>
       {PROCESS_STEPS.map((_, i) => (
         <div class="process__notch" style={`--i:${i - 2}`}>
           <img class="process__dot" src={dot.src} width="8" height="8" alt="" />
@@ -200,12 +225,68 @@ const reels = Array.from({ length: numerals[0]?.length ?? 0 }, (_, d) =>
     width: calc(var(--radius) * 1.526);
   }
 
+  /* Step drawings, centred on the glow behind the numeral. */
+  .process__art {
+    position: absolute;
+    inset-block-start: var(--cy);
+    inset-inline-start: calc(260 * var(--u));
+    width: calc(300 * var(--u));
+    aspect-ratio: 1;
+    translate: -50% -50%;
+  }
+
   .process__dial {
     inset-inline-start: var(--cx);
     width: 0;
     height: 0;
     /* Step 1 rests two notches clockwise; the script scrubs it to the mirror angle. */
     rotate: calc(2 * var(--step-angle));
+  }
+
+  /*
+   * Bezel, centred on the dial origin so it turns with the dial. Stroke widths
+   * are in SVG units (1 unit = 1% of the radius: ~2.6px on mobile, ~5px on
+   * desktop); non-scaling strokes would break pathLength in Chrome.
+   */
+  .process__bezel {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    width: calc(2 * var(--radius));
+    height: calc(2 * var(--radius));
+    max-width: none;
+    overflow: visible;
+    fill: none;
+    translate: -50% -50%;
+  }
+
+  /* One minor tick every 5° (both step angles are multiples of 5°). */
+  .process__ticks {
+    stroke: var(--color-border-strong);
+    stroke-width: 2;
+    stroke-dasharray: 0.2 4.8;
+    stroke-dashoffset: 0.1;
+  }
+
+  .process__tick-major {
+    stroke: var(--color-text-muted);
+    stroke-width: 0.4;
+    rotate: calc(var(--i) * var(--step-angle));
+  }
+
+  /* Progress arc: the script grows its dash from 0 to the full four-step sweep. */
+  .process__arc {
+    stroke: var(--color-accent);
+    stroke-width: 0.5;
+    stroke-linecap: round;
+    stroke-dasharray: 0 360;
+    rotate: calc(-2 * var(--step-angle));
+  }
+
+  /* A wider, faint copy under the arc as its glow (CSS filters on SVG lag in Safari). */
+  .process__arc--glow {
+    stroke-width: 3;
+    opacity: 0.12;
   }
 
   .process__notch {
@@ -237,7 +318,13 @@ const reels = Array.from({ length: numerals[0]?.length ?? 0 }, (_, d) =>
   .process__notch-number {
     font-size: calc(32 * var(--u));
     color: var(--color-text-muted);
-    transition: opacity var(--duration-base) ease-out;
+    transition:
+      opacity var(--duration-base) ease-out,
+      color var(--duration-slow) ease-out;
+  }
+
+  .process__notch-number.is-passed {
+    color: var(--color-text-secondary);
   }
 
   .process__notch-number.is-active {
@@ -342,7 +429,8 @@ const reels = Array.from({ length: numerals[0]?.length ?? 0 }, (_, d) =>
       font-size: min(calc(120 * var(--u)), 40cqh);
     }
 
-    .process__glow {
+    .process__glow,
+    .process__art {
       inset-inline-start: calc(220 * var(--u));
     }
 
@@ -393,6 +481,12 @@ const reels = Array.from({ length: numerals[0]?.length ?? 0 }, (_, d) =>
       width: calc(800 * var(--u));
     }
 
+    /* Ends at x 790, clear of the step copy (x 760 + its own left margin). */
+    .process__art {
+      inset-inline-start: calc(590 * var(--u));
+      width: calc(400 * var(--u));
+    }
+
     .process__notch {
       gap: calc(24 * var(--u));
       translate: calc(var(--radius) - 4 * var(--u)) 0;
@@ -401,6 +495,22 @@ const reels = Array.from({ length: numerals[0]?.length ?? 0 }, (_, d) =>
 
     .process__dot {
       width: calc(8 * var(--u));
+    }
+
+    .process__ticks {
+      stroke-width: 1.2;
+    }
+
+    .process__tick-major {
+      stroke-width: 0.2;
+    }
+
+    .process__arc {
+      stroke-width: 0.3;
+    }
+
+    .process__arc--glow {
+      stroke-width: 1.6;
     }
 
     .process__notch-number {

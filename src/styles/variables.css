@@ -35,6 +35,8 @@
   --color-border-strong: #3b3b3b; /* border/strong */
   --color-overlay: rgb(10 10 10 / 0.55); /* pills over imagery */
   --color-scrim: rgb(10 10 10 / 0.88); /* legibility gradient end */
+  --color-sheen: rgb(255 255 255 / 0.22); /* experience card hover sheen */
+  --color-sheen-shadow: rgb(11 11 11 / 0.06); /* …its edges on light artwork */
   --color-header-solid: rgb(11 11 11 / 0.72); /* blurred header background */
   --color-focus: var(--color-accent);
   --color-error: #ff6b5b; /* Input Field error helper text */
@@ -144,6 +146,7 @@
   --duration-base: 300ms;
   --duration-medium: 350ms;
   --duration-slow: 500ms;
+  --duration-sheen: 900ms; /* experience card hover sweep */
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-in-out: cubic-bezier(0.7, 0, 0.2, 1);
   --ease-spring: cubic-bezier(

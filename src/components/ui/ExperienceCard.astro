@@ -5,6 +5,8 @@
  * arrow rotates 45°. (The component note also mentions lifting a desaturation
  * on hover, but the final frames show the artwork at full colour
  * at rest — the Synnefo logo is orange — so no filter is applied.)
+ * Owner-requested addition (CSS only): on hover a glossy diagonal sheen sweeps
+ * across the card once, and the artwork zooms slightly.
  */
 import { Image } from 'astro:assets';
 
@@ -21,7 +23,7 @@ const isLight = item.cardTheme === 'light';
 const arrow = isLight ? arrowLight : arrowDark;
 ---
 
-<article class:list={['xp-card', { 'xp-card--light': isLight }]} data-reveal-item>
+<article class:list={['xp-card', { 'xp-card--light': isLight }]} data-reveal-item data-xp-card>
   <Image
     class="xp-card__image"
     src={item.image}
@@ -56,6 +58,7 @@ const arrow = isLight ? arrowLight : arrowDark;
       <p class="xp-card__period text-mono">{item.periodShort}</p>
     </div>
   </div>
+  <span class="xp-card__sheen" aria-hidden="true"></span>
 </article>
 
 <style>
@@ -74,6 +77,7 @@ const arrow = isLight ? arrowLight : arrowDark;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: scale var(--duration-slow) var(--ease-out);
   }
 
   /* Legibility gradient. */
@@ -82,6 +86,38 @@ const arrow = isLight ? arrowLight : arrowDark;
     inset: 0;
     content: '';
     background: linear-gradient(to bottom, rgb(10 10 10 / 0) 35%, var(--color-scrim));
+  }
+
+  /*
+   * Hover sheen: a diagonal band of light, parked off the left edge, that
+   * sweeps across once per hover. It sits over the text like a reflection on
+   * glass. Light artwork gets a faint shadow either side of the band so the
+   * gloss still reads on white.
+   */
+  .xp-card__sheen {
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-raised);
+    pointer-events: none;
+    background: linear-gradient(105deg, transparent 30%, var(--color-sheen) 50%, transparent 70%);
+    translate: -100% 0;
+  }
+
+  .xp-card--light .xp-card__sheen {
+    background: linear-gradient(
+      105deg,
+      transparent 25%,
+      var(--color-sheen-shadow) 40%,
+      var(--color-sheen) 50%,
+      var(--color-sheen-shadow) 60%,
+      transparent 75%
+    );
+  }
+
+  @keyframes xp-card-sheen {
+    to {
+      translate: 100% 0;
+    }
   }
 
   .xp-card__content {
@@ -151,6 +187,14 @@ const arrow = isLight ? arrowLight : arrowDark;
   @media (hover: hover) {
     .xp-card:hover .xp-card__arrow {
       rotate: 45deg;
+    }
+
+    .xp-card:hover .xp-card__image {
+      scale: 1.03;
+    }
+
+    .xp-card:hover .xp-card__sheen {
+      animation: xp-card-sheen var(--duration-sheen) var(--ease-in-out);
     }
   }
 
