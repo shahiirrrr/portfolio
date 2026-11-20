@@ -40,12 +40,13 @@ const toolItems = tools.map((tool, i) => {
   const aspect = tool.icon ? tool.icon.width / tool.icon.height : 1;
   return { ...tool, style: `--i:${i};--offset:${i - middle};--aspect:${aspect.toFixed(3)}` };
 });
+const hasTools = toolItems.length > 0;
 ---
 
 <article
   class:list={[
     'folder-panel',
-    { 'folder-panel--compact': compact, 'folder-panel--tools': toolItems.length > 0 },
+    { 'folder-panel--compact': compact, 'folder-panel--tools': hasTools },
   ]}
   data-reveal-item
 >
@@ -54,7 +55,19 @@ const toolItems = tools.map((tool, i) => {
     <div class="folder-panel__content">
       <div class="folder-panel__top">
         <p class="folder-panel__index">{padIndex(index)}</p>
-        <img class="folder-panel__arrow" src={arrowLarge.src} width="40" height="40" alt="" />
+        {hasTools ? (
+          <button
+            class="folder-panel__toggle"
+            type="button"
+            aria-expanded="false"
+            aria-label={`Show tools: ${title}`}
+            data-folder-toggle
+          >
+            <img class="folder-panel__arrow" src={arrowLarge.src} width="40" height="40" alt="" />
+          </button>
+        ) : (
+          <img class="folder-panel__arrow" src={arrowLarge.src} width="40" height="40" alt="" />
+        )}
       </div>
       <div class="folder-panel__text">
         <Heading class={titleClass}>{title}</Heading>
@@ -62,7 +75,7 @@ const toolItems = tools.map((tool, i) => {
       </div>
     </div>
   </div>
-  {toolItems.length > 0 && (
+  {hasTools && (
     <ul class="folder-panel__tools" role="list" aria-label={`Tools: ${title}`}>
       {toolItems.map(({ name, icon, tile, style }) => (
         <li class="folder-panel__tool" style={style}>
@@ -82,6 +95,16 @@ const toolItems = tools.map((tool, i) => {
     </ul>
   )}
 </article>
+
+<script>
+  // Tap / keyboard: the arrow toggles the folder open (hover does it on desktop).
+  for (const toggle of document.querySelectorAll<HTMLButtonElement>('[data-folder-toggle]')) {
+    toggle.addEventListener('click', () => {
+      const open = toggle.getAttribute('aria-expanded') !== 'true';
+      toggle.setAttribute('aria-expanded', String(open));
+    });
+  }
+</script>
 
 <style>
   .folder-panel {
@@ -169,9 +192,11 @@ const toolItems = tools.map((tool, i) => {
     transition-delay: calc(var(--i) * var(--duration-fast) / 5);
   }
 
+  /* Tall logos (Figma) shrink a little and sit at the top so their base clears the flap. */
   .folder-panel__tool img {
+    align-self: start;
     inline-size: 100%;
-    block-size: 100%;
+    block-size: calc(100% * clamp(0.75, var(--aspect), 1));
     object-fit: contain;
   }
 
@@ -189,6 +214,48 @@ const toolItems = tools.map((tool, i) => {
     border-radius: 14.3%;
   }
 
+  /* The arrow button's hit area covers the whole flap, so a tap anywhere opens it. */
+  .folder-panel__toggle {
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-sm);
+  }
+
+  .folder-panel__toggle::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .folder-panel__arrow {
+    transition: rotate var(--duration-base) var(--ease-out);
+  }
+
+  /* Open (tap / keyboard). Viewed from above, so the flap's top edge drops as it tips forward. */
+  .folder-panel--tools {
+    perspective: 62.5rem;
+    perspective-origin: 50% -100%;
+  }
+
+  .folder-panel--tools:has([aria-expanded='true']) .folder-panel__shape {
+    filter: brightness(0.7);
+  }
+
+  .folder-panel--tools:has([aria-expanded='true']) .folder-panel__front {
+    transform: rotateX(-10deg);
+  }
+
+  .folder-panel--tools:has([aria-expanded='true']) .folder-panel__arrow {
+    rotate: -45deg;
+  }
+
+  /* Each logo clears the flap; the row fans out around the centre. */
+  .folder-panel--tools:has([aria-expanded='true']) .folder-panel__tool {
+    translate: calc(var(--offset) * var(--space-4)) -85%;
+    rotate: calc(var(--offset) * 6deg);
+  }
+
+  /* Open (hover): same state as above. */
   @media (hover: hover) {
     .folder-panel:hover {
       translate: 0 -4px;
@@ -198,19 +265,16 @@ const toolItems = tools.map((tool, i) => {
       filter: brightness(0.7);
     }
 
-    /* Viewed from above, so the flap's top edge drops as it tips forward. */
-    .folder-panel--tools {
-      perspective: 62.5rem;
-      perspective-origin: 50% -100%;
-    }
-
     .folder-panel--tools:hover .folder-panel__front {
       transform: rotateX(-10deg);
     }
 
-    /* Most of each logo clears the flap; the row fans out around the centre. */
+    .folder-panel--tools:hover .folder-panel__arrow {
+      rotate: -45deg;
+    }
+
     .folder-panel--tools:hover .folder-panel__tool {
-      translate: calc(var(--offset) * var(--space-4)) -55%;
+      translate: calc(var(--offset) * var(--space-4)) -85%;
       rotate: calc(var(--offset) * 6deg);
     }
   }
