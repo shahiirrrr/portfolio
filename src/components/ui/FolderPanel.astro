@@ -2,6 +2,9 @@
 /**
  * Folder-shaped numbered panel (Figma: Folder Panel). Used for the Home
  * capabilities and the About principles. Hover: lifts 4px.
+ * With `tools` (Home), hover also opens the folder: the front flap tips
+ * forward, the inside darkens and the tool logos spring up out of it, fanned
+ * and half visible. CSS only; without hover they stay tucked inside.
  * Mobile height can be overridden by a parent with `--folder-panel-height`
  * (Home 320px, About 300px in the mobile frames). `compact` is a smaller
  * variant (340px desktop, smaller index, title and body) for the Home row.
@@ -20,27 +23,72 @@ interface Props extends PanelItem {
   compact?: boolean;
 }
 
-const { index, title, body, headingLevel: Heading = 'h3', compact = false } = Astro.props;
+const {
+  index,
+  title,
+  body,
+  tools = [],
+  headingLevel: Heading = 'h3',
+  compact = false,
+} = Astro.props;
 const titleClass = compact ? 'text-h4' : 'text-h3';
 const bodyClass = compact ? 'text-body-sm' : 'text-body';
+// `--offset` fans the logos around the centre one; `--i` staggers them;
+// `--aspect` gives wide wordmark logos (Zoho) a wider slot.
+const middle = (tools.length - 1) / 2;
+const toolItems = tools.map((tool, i) => {
+  const aspect = tool.icon ? tool.icon.width / tool.icon.height : 1;
+  return { ...tool, style: `--i:${i};--offset:${i - middle};--aspect:${aspect.toFixed(3)}` };
+});
 ---
 
-<article class:list={['folder-panel', { 'folder-panel--compact': compact }]} data-reveal-item>
+<article
+  class:list={[
+    'folder-panel',
+    { 'folder-panel--compact': compact, 'folder-panel--tools': toolItems.length > 0 },
+  ]}
+  data-reveal-item
+>
   <img class="folder-panel__shape" src={folderPanel.src} width="424" height="400" alt="" />
-  <div class="folder-panel__content">
-    <div class="folder-panel__top">
-      <p class="folder-panel__index">{padIndex(index)}</p>
-      <img class="folder-panel__arrow" src={arrowLarge.src} width="40" height="40" alt="" />
-    </div>
-    <div class="folder-panel__text">
-      <Heading class={titleClass}>{title}</Heading>
-      <p class:list={[bodyClass, 'text-secondary']}>{body}</p>
+  <div class="folder-panel__front">
+    <div class="folder-panel__content">
+      <div class="folder-panel__top">
+        <p class="folder-panel__index">{padIndex(index)}</p>
+        <img class="folder-panel__arrow" src={arrowLarge.src} width="40" height="40" alt="" />
+      </div>
+      <div class="folder-panel__text">
+        <Heading class={titleClass}>{title}</Heading>
+        <p class:list={[bodyClass, 'text-secondary']}>{body}</p>
+      </div>
     </div>
   </div>
+  {toolItems.length > 0 && (
+    <ul class="folder-panel__tools" role="list" aria-label={`Tools: ${title}`}>
+      {toolItems.map(({ name, icon, tile, style }) => (
+        <li class="folder-panel__tool" style={style}>
+          {icon && <img src={icon.src} width={icon.width} height={icon.height} alt={name} />}
+          {tile && (
+            <span
+              class="folder-panel__tile"
+              role="img"
+              aria-label={name}
+              style={`background-color:${tile.background};color:${tile.color}`}
+            >
+              {tile.text}
+            </span>
+          )}
+        </li>
+      ))}
+    </ul>
+  )}
 </article>
 
 <style>
   .folder-panel {
+    /* Body top edge of folder-panel.svg (36.36 / 400): where the flap starts. */
+    --folder-tab: 9.0909%;
+    --tool-size: var(--space-14);
+
     position: relative;
     height: var(--folder-panel-height, 320px);
     /* `translate`, not `transform`: GSAP owns `transform` for the scroll reveal. */
@@ -53,11 +101,24 @@ const bodyClass = compact ? 'text-body-sm' : 'text-body';
     width: 100%;
     height: 100%;
     max-width: none;
+    transition: filter var(--duration-medium) var(--ease-out);
   }
 
+  /* Front flap: same colour as the shape, so at rest the two read as one folder. */
+  .folder-panel__front {
+    position: absolute;
+    inset: var(--folder-tab) 0 0;
+    z-index: var(--z-raised);
+    background-color: var(--color-bg-raised);
+    border-radius: var(--radius-card);
+    transform-origin: 50% 100%;
+    transition: transform var(--duration-slow) var(--ease-out);
+  }
+
+  /* Offsets are relative to the flap (10% of the flap = the tab height). */
   .folder-panel__content {
     position: absolute;
-    inset: var(--space-10) 0 0;
+    inset: calc(var(--space-10) - 10%) 0 0;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -84,14 +145,80 @@ const bodyClass = compact ? 'text-body-sm' : 'text-body';
     gap: var(--space-5);
   }
 
+  /* Tools sit between the shape and the flap, tucked just below its top edge. */
+  .folder-panel__tools {
+    position: absolute;
+    inset: var(--folder-tab) 0 auto;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  /* Bare logos, no tile: a drop shadow keeps them legible over the folder. */
+  .folder-panel__tool {
+    display: grid;
+    place-items: center;
+    inline-size: calc(var(--tool-size) * clamp(1, var(--aspect), 1.5));
+    block-size: var(--tool-size);
+    margin-inline: var(--space-1);
+    filter: drop-shadow(var(--shadow-float));
+    translate: 0 var(--space-3);
+    transition:
+      translate var(--duration-slow) var(--ease-spring),
+      rotate var(--duration-slow) var(--ease-spring);
+    transition-delay: calc(var(--i) * var(--duration-fast) / 5);
+  }
+
+  .folder-panel__tool img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: contain;
+  }
+
+  /* Drawn tiles (TS) fill the box like the SVG logos do. */
+  .folder-panel__tile {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    inline-size: 86%;
+    block-size: 86%;
+    padding: 0 6% 6% 0;
+    font-size: calc(var(--tool-size) * 0.3);
+    font-weight: var(--weight-bold);
+    line-height: 1.1;
+    border-radius: 14.3%;
+  }
+
   @media (hover: hover) {
     .folder-panel:hover {
       translate: 0 -4px;
+    }
+
+    .folder-panel--tools:hover .folder-panel__shape {
+      filter: brightness(0.7);
+    }
+
+    /* Viewed from above, so the flap's top edge drops as it tips forward. */
+    .folder-panel--tools {
+      perspective: 62.5rem;
+      perspective-origin: 50% -100%;
+    }
+
+    .folder-panel--tools:hover .folder-panel__front {
+      transform: rotateX(-10deg);
+    }
+
+    /* Most of each logo clears the flap; the row fans out around the centre. */
+    .folder-panel--tools:hover .folder-panel__tool {
+      translate: calc(var(--offset) * var(--space-4)) -55%;
+      rotate: calc(var(--offset) * 6deg);
     }
   }
 
   @media (min-width: 48em) {
     .folder-panel {
+      --tool-size: var(--space-16);
+
       height: 400px;
     }
 
