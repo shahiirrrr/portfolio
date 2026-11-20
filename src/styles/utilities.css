@@ -78,9 +78,11 @@
   line-height: var(--leading-snug);
 }
 
-/* Mono/Index: small uppercase-style meta text. */
+/* Mono/Index (Figma style name): small uppercase-style meta text. Set in
+   Manrope by owner decision; tabular figures keep indexes like 01–05 aligned. */
 .text-mono {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
   font-size: var(--text-mono);
   font-weight: var(--weight-medium);
   line-height: var(--leading-snug);

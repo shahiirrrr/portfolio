@@ -43,7 +43,7 @@
 
   /* ---- Typography: families (font files are configured in astro.config.ts) ---- */
   --font-sans: var(--font-manrope), system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+  --font-mono: ui-monospace, monospace; /* code/kbd/pre only — system font, no web font loaded */
   --font-numeric: var(--font-antonio), Impact, sans-serif;
   --font-wordmark: var(--font-unbounded), system-ui, sans-serif; /* footer wordmark only */
 
