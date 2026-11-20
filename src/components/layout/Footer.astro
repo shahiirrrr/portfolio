@@ -1,7 +1,11 @@
 ---
 /** Global footer with the giant wordmark (Figma: Footer). Used on every page. */
+import FooterMascot from '@/components/layout/FooterMascot.astro';
 import { MAIN_NAV } from '@/config/navigation';
 import { SITE, SOCIAL_LINKS } from '@/config/site';
+
+// One span per letter so the wordmark can be hauled in (footer-wordmark.ts).
+const wordmarkLetters = [...SITE.name.toUpperCase()];
 ---
 
 <footer class="site-footer">
@@ -60,11 +64,24 @@ import { SITE, SOCIAL_LINKS } from '@/config/site';
       </div>
     </div>
 
-    <p class="site-footer__wordmark" aria-hidden="true">
-      {SITE.name.toUpperCase()}
+    <p class="site-footer__wordmark" aria-hidden="true" data-footer-wordmark>
+      {wordmarkLetters.map((letter) => (
+        <span class="site-footer__letter" data-letter>
+          {letter}
+        </span>
+      ))}
+      <span class="site-footer__baseline" data-baseline></span>
+      <FooterMascot />
     </p>
   </div>
 </footer>
+
+<script>
+  import { initFooterWordmark } from '@/scripts/animations/footer-wordmark';
+
+  const wordmark = document.querySelector<HTMLElement>('[data-footer-wordmark]');
+  if (wordmark) initFooterWordmark(wordmark);
+</script>
 
 <style>
   .site-footer {
@@ -128,6 +145,19 @@ import { SITE, SOCIAL_LINKS } from '@/config/site';
     white-space: nowrap;
     color: var(--color-bg-raised);
     user-select: none;
+    position: relative; /* stage for the figure and rope */
+    isolation: isolate; /* keeps the rope's back layer above the page, below the letters */
+  }
+
+  .site-footer__letter {
+    display: inline-block;
+  }
+
+  /* Zero-size marker sitting on the baseline, measured by the script. */
+  .site-footer__baseline {
+    display: inline-block;
+    inline-size: 0;
+    block-size: 0;
   }
 
   @media (min-width: 48em) {

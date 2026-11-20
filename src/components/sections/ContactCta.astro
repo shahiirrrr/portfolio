@@ -5,6 +5,9 @@
  */
 import Button from '@/components/common/Button.astro';
 import { SITE } from '@/config/site';
+
+// Hover: each letter rolls up and a copy rises in after it, left to right.
+const emailChars = [...SITE.email];
 ---
 
 <section class="cta" aria-labelledby="cta-heading">
@@ -17,7 +20,15 @@ import { SITE } from '@/config/site';
     <div class="cta__row">
       <p class="cta__email">
         <span class="text-mono">DROP A LINE</span>
-        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+        <a class="cta__email-link" href={`mailto:${SITE.email}`} aria-label={SITE.email}>
+          <span class="cta__email-text" aria-hidden="true">
+            {emailChars.map((char, i) => (
+              <span class="cta__email-char" style={`--i:${i}`}>
+                {char}
+              </span>
+            ))}
+          </span>
+        </a>
       </p>
       <Button label="Start a project" href="/contact/" />
     </div>
@@ -75,7 +86,70 @@ import { SITE } from '@/config/site';
     font-weight: var(--weight-semibold);
     line-height: var(--leading-snug);
     letter-spacing: var(--tracking-h3);
-    text-decoration: underline;
+  }
+
+  /* Underline drawn as a background so it can wipe out and back in on hover. */
+  .cta__email-link {
+    --roll: 1.3em; /* > line box + descenders, so the copy waits out of sight */
+
+    display: inline-block;
+    padding-block-end: 0.12em;
+    background: linear-gradient(currentColor, currentColor) left bottom / 100% 0.06em no-repeat;
+  }
+
+  /* Clip window for the roll; padding keeps descenders (p, g) visible. */
+  .cta__email-text {
+    display: inline-block;
+    padding-block-end: 0.08em;
+    overflow: hidden;
+    white-space: nowrap;
+    vertical-align: bottom;
+  }
+
+  /* The copy is a text-shadow one roll below, so no duplicate text in the DOM. */
+  .cta__email-char {
+    display: inline-block;
+    white-space: pre;
+    text-shadow: 0 var(--roll) currentColor;
+    transition: translate var(--duration-slow) var(--ease-in-out);
+    transition-delay: calc(var(--i) * var(--duration-fast) / 12);
+  }
+
+  @keyframes cta-underline {
+    0% {
+      background-position: right bottom;
+      background-size: 100% 0.06em;
+    }
+
+    45% {
+      background-position: right bottom;
+      background-size: 0 0.06em;
+    }
+
+    55% {
+      background-position: left bottom;
+      background-size: 0 0.06em;
+    }
+
+    100% {
+      background-position: left bottom;
+      background-size: 100% 0.06em;
+    }
+  }
+
+  @media (hover: hover) {
+    .cta__email-link:hover .cta__email-char {
+      translate: 0 calc(var(--roll) * -1);
+    }
+
+    .cta__email-link:hover {
+      animation: cta-underline calc(var(--duration-slow) * 2) var(--ease-in-out);
+    }
+  }
+
+  /* Keyboard focus gets the same roll. */
+  .cta__email-link:focus-visible .cta__email-char {
+    translate: 0 calc(var(--roll) * -1);
   }
 
   @media (min-width: 48em) {

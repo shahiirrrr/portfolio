@@ -1,0 +1,139 @@
+---
+/**
+ * Line-drawn figure and his rope for the footer wordmark animation
+ * (footer-wordmark.ts): he lassoes the S, hauls the wordmark in, then hops over
+ * to sit on the I. Decorative. Drawn on a 60 × 120 grid facing right; each
+ * limb is a group the script rotates around its joint (hip 30,72 · knee 30,95 ·
+ * shoulder 30,44 · elbow 30,58 · neck 30,38).
+ * The rope is drawn in two layers: the back half of each turn round the S sits
+ * behind the letters, the line and the front halves in front of them.
+ * Hidden until the script places it (no JS: no figure, static wordmark).
+ */
+---
+
+<span class="footer-mascot" data-mascot>
+  <svg
+    class="footer-mascot__svg"
+    viewBox="0 0 60 120"
+    width="60"
+    height="120"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <g class="footer-mascot__far" data-joint="thighB">
+      <line x1="30" y1="72" x2="30" y2="95"></line>
+      <g data-joint="shinB">
+        <line x1="30" y1="95" x2="30" y2="117"></line>
+        <line x1="30" y1="117" x2="37" y2="117"></line>
+      </g>
+    </g>
+    <g data-joint="body">
+      <g class="footer-mascot__far" data-joint="armB">
+        <line x1="30" y1="44" x2="30" y2="58"></line>
+        <g data-joint="foreB">
+          <line x1="30" y1="58" x2="30" y2="71"></line>
+        </g>
+      </g>
+      <line x1="30" y1="38" x2="30" y2="72"></line>
+      <g data-joint="head">
+        <circle class="footer-mascot__head" cx="30" cy="26" r="12"></circle>
+        <circle class="footer-mascot__eye" cx="36" cy="24" r="2"></circle>
+      </g>
+      <g data-joint="armF">
+        <line x1="30" y1="44" x2="30" y2="58"></line>
+        <g data-joint="foreF">
+          <line x1="30" y1="58" x2="30" y2="71"></line>
+        </g>
+      </g>
+    </g>
+    <g data-joint="thighF">
+      <line x1="30" y1="72" x2="30" y2="95"></line>
+      <g data-joint="shinF">
+        <line x1="30" y1="95" x2="30" y2="117"></line>
+        <line x1="30" y1="117" x2="37" y2="117"></line>
+      </g>
+    </g>
+  </svg>
+</span>
+<svg
+  class="footer-mascot__rope footer-mascot__rope--back"
+  data-rope-back
+  width="1"
+  height="1"
+  aria-hidden="true"
+  focusable="false"
+>
+  <path data-band-back pathLength="1" stroke-dasharray="1 1"></path>
+  <path data-band-back pathLength="1" stroke-dasharray="1 1"></path>
+</svg>
+<svg
+  class="footer-mascot__rope"
+  data-rope
+  width="1"
+  height="1"
+  aria-hidden="true"
+  focusable="false"
+>
+  <path data-rope-line></path>
+  <path data-band-front pathLength="1" stroke-dasharray="1 1"></path>
+  <path data-band-front pathLength="1" stroke-dasharray="1 1"></path>
+</svg>
+
+<style>
+  /* Sized in em of the wordmark, so the figure scales with it. */
+  .footer-mascot {
+    position: absolute;
+    inset: 0 auto auto 0;
+    z-index: var(--z-raised);
+    display: block;
+    inline-size: 0.25em;
+    block-size: 0.5em;
+    color: var(--color-text);
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .footer-mascot__svg {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    overflow: visible;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 5;
+    stroke-linecap: round;
+  }
+
+  .footer-mascot__far {
+    color: var(--color-text-secondary);
+  }
+
+  .footer-mascot__head {
+    fill: currentColor;
+  }
+
+  .footer-mascot__eye {
+    fill: var(--color-bg);
+    stroke: none;
+  }
+
+  /* Rope: one path drawn in wordmark px by the script (hand → shoulder → S). */
+  .footer-mascot__rope {
+    position: absolute;
+    inset: 0 auto auto 0;
+    display: block;
+    overflow: visible;
+    fill: none;
+    stroke: var(--color-text);
+    stroke-width: max(2px, 0.012em);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  /* Behind the letters (the wordmark isolates, so this stays above the page). */
+  .footer-mascot__rope--back {
+    z-index: -1;
+  }
+</style>
