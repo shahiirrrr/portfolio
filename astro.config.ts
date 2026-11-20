@@ -25,15 +25,6 @@ export default defineConfig({
     },
     {
       provider: fontProviders.fontsource(),
-      name: 'JetBrains Mono',
-      cssVariable: '--font-jetbrains-mono',
-      weights: [500],
-      styles: ['normal'],
-      subsets: ['latin'],
-      fallbacks: ['ui-monospace', 'monospace'],
-    },
-    {
-      provider: fontProviders.fontsource(),
       name: 'Antonio',
       cssVariable: '--font-antonio',
       weights: [700],

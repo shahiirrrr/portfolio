@@ -28,20 +28,20 @@ repo URLs (`src/data/work.ts`) and the social preview image.
 
 ## 2. Technology stack
 
-| Tool                                                  | Role                           | Notes                                                                    |
-| ----------------------------------------------------- | ------------------------------ | ------------------------------------------------------------------------ |
-| Astro 7                                               | Framework, static output (SSG) | No adapter; no UI framework integration                                  |
-| TypeScript 6 (strict)                                 | Type safety                    | Pinned to 6.x — `@astrojs/check` does not support TS 7 yet               |
-| pnpm 12                                               | Package manager                | Never use npm or yarn                                                    |
-| Plain CSS + custom properties                         | Styling                        | Tokens in `src/styles/variables.css`; Tailwind is not installed          |
-| Astro Fonts API (Fontsource)                          | Self-hosted web fonts          | Manrope, JetBrains Mono, Antonio, Unbounded — configured in astro.config |
-| Astro Content Collections                             | Projects + case studies        | Schema in `src/content.config.ts`                                        |
-| GSAP 3 (ScrollTrigger, SplitText, Flip, ScrambleText) | Animation                      | Shared setup in `src/scripts/animations/core.ts`                         |
-| Lenis 1.3                                             | Smooth scrolling               | One instance in `src/scripts/animations/smooth-scroll.ts` (see §13)      |
-| `@astrojs/sitemap`                                    | Sitemap                        | Only integration installed                                               |
-| Prettier + `prettier-plugin-astro`                    | Formatting                     | No ESLint — `astro check` covers correctness                             |
-| Vercel                                                | Hosting                        | Static deploy; `vercel.json` enforces trailing slashes + redirects       |
-| GitHub Actions                                        | CI/CD                          | Validate, auto-PR, Claude review → auto-merge (see §18)                  |
+| Tool                                                  | Role                           | Notes                                                               |
+| ----------------------------------------------------- | ------------------------------ | ------------------------------------------------------------------- |
+| Astro 7                                               | Framework, static output (SSG) | No adapter; no UI framework integration                             |
+| TypeScript 6 (strict)                                 | Type safety                    | Pinned to 6.x — `@astrojs/check` does not support TS 7 yet          |
+| pnpm 12                                               | Package manager                | Never use npm or yarn                                               |
+| Plain CSS + custom properties                         | Styling                        | Tokens in `src/styles/variables.css`; Tailwind is not installed     |
+| Astro Fonts API (Fontsource)                          | Self-hosted web fonts          | Manrope, Antonio, Unbounded — configured in astro.config            |
+| Astro Content Collections                             | Projects + case studies        | Schema in `src/content.config.ts`                                   |
+| GSAP 3 (ScrollTrigger, SplitText, Flip, ScrambleText) | Animation                      | Shared setup in `src/scripts/animations/core.ts`                    |
+| Lenis 1.3                                             | Smooth scrolling               | One instance in `src/scripts/animations/smooth-scroll.ts` (see §13) |
+| `@astrojs/sitemap`                                    | Sitemap                        | Only integration installed                                          |
+| Prettier + `prettier-plugin-astro`                    | Formatting                     | No ESLint — `astro check` covers correctness                        |
+| Vercel                                                | Hosting                        | Static deploy; `vercel.json` enforces trailing slashes + redirects  |
+| GitHub Actions                                        | CI/CD                          | Validate, auto-PR, Claude review → auto-merge (see §18)             |
 
 ## 3. Architecture overview
 
@@ -131,7 +131,7 @@ Do not create empty folders or placeholder files "for later".
 - Tokens in `variables.css` mirror the Figma variables (`bg/*`, `text/*`, `border/*`, `brand/*`, text styles). The site is dark-only (`color-scheme: dark`); Figma "brand/orange" is `--color-accent` (#f5f5f5 — the final design is monochrome).
 - `variables.css` is the only place raw design values may appear. Everything else uses `var(--token)`. A genuinely one-off layout dimension copied from Figma (e.g. a fixed card height) may stay a literal px value in its component, with a comment.
 - Two design frames: mobile 390 and desktop 1440 (content 1304, gutter 68). Fluid tokens (`--text-h1`, `--text-display`, `--container-gutter`, …) interpolate between them. **The design breakpoint is 48em (768px)**: mobile layout below, desktop from it; use 64em when a desktop arrangement needs more room. Other allowed breakpoints: `30em / 80em / 90em / 96em`.
-- Typography: Manrope (`--font-sans`), JetBrains Mono (`.text-mono`), Antonio (`--font-numeric`, big numerals), Unbounded (footer wordmark only). Use the role classes in `utilities.css` (`.text-display`, `.text-h1`–`.text-h4`, `.text-body-lg/-body/-body-sm`, `.text-label`, `.text-mono`, `.text-stat`) — no arbitrary font sizes.
+- Typography: Manrope (`--font-sans`, also `.text-mono` — owner decision: no monospace web font; Figma not updated), Antonio (`--font-numeric`, big numerals), Unbounded (footer wordmark only). Use the role classes in `utilities.css` (`.text-display`, `.text-h1`–`.text-h4`, `.text-body-lg/-body/-body-sm`, `.text-label`, `.text-mono`, `.text-stat`) — no arbitrary font sizes.
 - Cascade layers: `reset, tokens, base, utilities` (declared in `global.css`). Scoped component styles are unlayered and win automatically — never use `!important` (except the visibility utilities) or `:global()` to fight specificity. (`:global(html.<state>)` to react to a state class on `<html>`, as `CardStage` does, is fine.)
 - Class naming: BEM-style scoped to the component (`.site-header__nav`, `.btn--ghost`); global utilities are single-purpose (`.container`, `.section`, `.flow`, `.visually-hidden`, `.mobile-only`, `.desktop-only`).
 - Hover effects only inside `@media (hover: hover)`. When GSAP animates an element (it owns `transform`), hover movement uses the individual `translate`/`scale`/`rotate` properties.

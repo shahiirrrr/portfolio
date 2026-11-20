@@ -48,8 +48,8 @@ export const MARQUEE_TECH: TechItem[] = [
 export const PROCESS_STEPS: ProcessStep[] = [
   {
     title: 'Plan',
-    body: 'Goals, constraints and success metrics agreed before a line of code — scope that survives contact with reality.',
-    bodyShort: 'Goals, constraints and success metrics agreed before a line of code.',
+    body: 'Design handoff, content and data needs mapped before a line of code — performance budgets set up front, not bolted on.',
+    bodyShort: 'Design, content and performance budgets agreed before any code.',
   },
   {
     title: 'Architect',

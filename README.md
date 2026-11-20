@@ -32,18 +32,18 @@ implemented from a Figma design.
 
 ## Tech stack
 
-| Tool                                                                      | Purpose                                                    |
-| ------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| [Astro](https://astro.build) 7                                            | Framework, static site generation                          |
-| TypeScript 6 (strict)                                                     | Type safety                                                |
-| [GSAP](https://gsap.com) 3 (ScrollTrigger, SplitText, Flip, ScrambleText) | Animation                                                  |
-| [Lenis](https://github.com/darkroomengineering/lenis) 1.3                 | Smooth scrolling                                           |
-| Plain CSS with custom properties and cascade layers                       | Styling, with design tokens from Figma                     |
-| Astro Fonts API (Fontsource)                                              | Self-hosted Manrope, JetBrains Mono, Antonio and Unbounded |
-| `@astrojs/sitemap`                                                        | Sitemap                                                    |
-| Prettier + `prettier-plugin-astro`                                        | Formatting                                                 |
-| pnpm                                                                      | Package manager                                            |
-| Vercel                                                                    | Hosting                                                    |
+| Tool                                                                      | Purpose                                    |
+| ------------------------------------------------------------------------- | ------------------------------------------ |
+| [Astro](https://astro.build) 7                                            | Framework, static site generation          |
+| TypeScript 6 (strict)                                                     | Type safety                                |
+| [GSAP](https://gsap.com) 3 (ScrollTrigger, SplitText, Flip, ScrambleText) | Animation                                  |
+| [Lenis](https://github.com/darkroomengineering/lenis) 1.3                 | Smooth scrolling                           |
+| Plain CSS with custom properties and cascade layers                       | Styling, with design tokens from Figma     |
+| Astro Fonts API (Fontsource)                                              | Self-hosted Manrope, Antonio and Unbounded |
+| `@astrojs/sitemap`                                                        | Sitemap                                    |
+| Prettier + `prettier-plugin-astro`                                        | Formatting                                 |
+| pnpm                                                                      | Package manager                            |
+| Vercel                                                                    | Hosting                                    |
 
 ## Getting started
 
