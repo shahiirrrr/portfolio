@@ -1,9 +1,11 @@
 ---
 /**
  * "Let's build something real." call-to-action panel (Figma: 06 Contact / CTA Panel).
- * Closes the Home, Work and About pages.
+ * Closes the Home page (Home-only by owner decision). The headline doubles
+ * as the level of the "headline runner" game (HeadlineRunner).
  */
 import Button from '@/components/common/Button.astro';
+import HeadlineRunner from '@/components/sections/home/HeadlineRunner.astro';
 import { SITE } from '@/config/site';
 
 // Hover: each letter rolls up and a copy rises in after it, left to right.
@@ -11,8 +13,10 @@ const emailChars = [...SITE.email];
 ---
 
 <section class="cta" aria-labelledby="cta-heading">
-  <div class="cta__panel">
-    <h2 class="cta__headline text-display" id="cta-heading">
+  <div class="cta__panel" data-cta data-email={SITE.email}>
+    <HeadlineRunner />
+
+    <h2 class="cta__headline text-display" id="cta-heading" data-runner-level>
       Let’s build <br class="desktop-only" />
       something real.
     </h2>
@@ -20,7 +24,12 @@ const emailChars = [...SITE.email];
     <div class="cta__row">
       <p class="cta__email">
         <span class="text-mono">DROP A LINE</span>
-        <a class="cta__email-link" href={`mailto:${SITE.email}`} aria-label={SITE.email}>
+        <a
+          class="cta__email-link"
+          href={`mailto:${SITE.email}`}
+          aria-label={SITE.email}
+          data-runner-email
+        >
           <span class="cta__email-text" aria-hidden="true">
             {emailChars.map((char, i) => (
               <span class="cta__email-char" style={`--i:${i}`}>
@@ -30,7 +39,9 @@ const emailChars = [...SITE.email];
           </span>
         </a>
       </p>
-      <Button label="Start a project" href="/contact/" />
+      <div class="cta__finish" data-runner-finish>
+        <Button label="Start a project" href="/contact/" />
+      </div>
     </div>
   </div>
 </section>
@@ -58,6 +69,7 @@ const emailChars = [...SITE.email];
       var(--color-bg) 70%
     );
     border-radius: var(--radius-panel);
+    touch-action: manipulation; /* fast taps for the runner's jump */
   }
 
   .cta__headline {
@@ -73,6 +85,11 @@ const emailChars = [...SITE.email];
     align-items: flex-start;
     gap: var(--space-6);
     margin-block-start: 120px;
+  }
+
+  /* Wraps the button so the runner can measure it as the finish platform. */
+  .cta__finish {
+    display: flex;
   }
 
   .cta__email {

@@ -1,0 +1,100 @@
+---
+/**
+ * "Headline runner" game layer for the Home CTA panel (home-cta-runner.ts;
+ * owner-requested, Figma intentionally not updated): the canvas the runner is
+ * drawn on, above the headline, and its HUD (status, Play / Retry, a mailto
+ * with the finished time). The panel must carry `data-cta` + `data-email`,
+ * and its headline `data-runner-level`.
+ * Hidden without JS and with reduced motion.
+ */
+---
+
+<canvas class="runner" data-runner aria-hidden="true"></canvas>
+
+<div class="runner-hud" data-runner-hud hidden>
+  <p class="runner-hud__status text-mono" data-runner-status aria-hidden="true"></p>
+  <a class="runner-hud__send text-mono" data-runner-send hidden>
+    Send my score
+  </a>
+  <button class="runner-hud__play text-mono" type="button" data-runner-play>
+    <span data-runner-play-label>Play</span>
+    <span class="visually-hidden">the headline runner game</span>
+  </button>
+  <p class="visually-hidden" aria-live="polite" data-runner-announce></p>
+</div>
+
+<script>
+  import { initCtaRunner } from '@/scripts/animations/home-cta-runner';
+
+  const panel = document.querySelector<HTMLElement>('[data-cta]');
+  if (panel) initCtaRunner(panel);
+</script>
+
+<style>
+  /* Above the headline so the runner stands on the letters; never takes clicks. */
+  .runner {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    inline-size: 100%;
+    block-size: 100%;
+    pointer-events: none;
+  }
+
+  .runner-hud {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    align-self: stretch;
+    justify-content: flex-end;
+    gap: var(--space-2) var(--space-4);
+    /* The Play button's height, kept while it is hidden mid-run: on mobile the HUD
+       is in flow, and a height change would move the headline (the level). */
+    min-block-size: 44px;
+    margin-block-end: var(--space-6);
+  }
+
+  .runner-hud[hidden],
+  .runner-hud__send[hidden],
+  .runner-hud__play[hidden] {
+    display: none;
+  }
+
+  .runner-hud__status {
+    color: var(--color-text-secondary);
+  }
+
+  .runner-hud__send {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  .runner-hud__play {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 44px;
+    padding-inline: var(--space-5);
+    color: var(--color-text);
+    background: transparent;
+    border: var(--border-strong);
+    border-radius: var(--radius-full);
+    transition: border-color var(--duration-fast) ease-out;
+  }
+
+  @media (hover: hover) {
+    .runner-hud__play:hover {
+      border-color: var(--color-text);
+    }
+  }
+
+  @media (min-width: 48em) {
+    .runner-hud {
+      position: absolute;
+      inset-block-start: var(--space-6);
+      inset-inline-end: var(--space-12);
+      margin-block-end: 0;
+    }
+  }
+</style>
