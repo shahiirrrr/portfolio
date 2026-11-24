@@ -10,6 +10,7 @@ import CaseOverview from '@/components/sections/case-study/CaseOverview.astro';
 import CaseResults from '@/components/sections/case-study/CaseResults.astro';
 import CaseShowcase from '@/components/sections/case-study/CaseShowcase.astro';
 import { SITE } from '@/config/site';
+import { stackItems } from '@/data/tech';
 import PageLayout from '@/layouts/PageLayout.astro';
 import { formatStack, getCaseStudies, projectPath } from '@/utils/projects';
 import { projectSchema } from '@/utils/seo';
@@ -29,7 +30,6 @@ type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 const { project, next } = Astro.props;
 const { title, stack, year, card } = project.data;
 const study = project.data.caseStudy;
-const stackLabel = formatStack(stack);
 
 // The hero shows the Home card's image, so the card → case study transition
 // lands on the same picture (no invented copy: the alt is title + category).
@@ -47,7 +47,7 @@ const ogImage = social
 const timeline = study.timeline ?? (year ? String(year) : undefined);
 const meta = [
   ...(study.role ? [{ label: 'ROLE', value: study.role }] : []),
-  { label: 'STACK', value: stackLabel },
+  { label: 'STACK', tech: stackItems(stack) },
   ...(timeline ? [{ label: 'TIMELINE', value: timeline }] : []),
   ...(study.live ? [{ label: 'LIVE', value: study.live.label, href: study.live.url }] : []),
 ];

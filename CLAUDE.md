@@ -52,7 +52,7 @@ src/
 ├── config/              site.ts (identity, contact, socials), navigation.ts, seo.ts
 ├── types/index.ts       shared TypeScript types
 ├── utils/               seo.ts (meta + JSON-LD), helpers.ts, projects.ts (queries)
-├── data/                experience.ts, home.ts, about.ts, work.ts, contact.ts
+├── data/                experience.ts, home.ts, about.ts, work.ts, contact.ts, tech.ts (stack name → icon)
 ├── content/projects/    one Markdown file per project (filename = slug)
 ├── assets/              icons/ (+ icons/tech/), images/ (portrait, experience, projects, shapes, dial, …)
 ├── styles/              global.css (entry, layers), variables.css (tokens), utilities.css
@@ -198,6 +198,7 @@ Motion is specified per section in the Figma "Dev Notes" frames — implement wh
   - Home capability folders (`ui/FolderPanel.astro`, CSS only): on hover, or a tap or keyboard press on the arrow button, the flap tips forward and the `tools` logos from `data/home.ts` rise out of it.
   - Home experience cards (`ui/ExperienceCard.astro`, CSS only): on hover a glossy diagonal sheen sweeps across the card once, and the artwork zooms slightly.
   - CTA email (`sections/home/ContactCta.astro`, CSS only): on hover or focus, the letters roll up and are replaced by a `text-shadow` copy, while the underline wipes out and back in.
+  - CTA "headline runner" (`sections/home/HeadlineRunner.astro` + `home-cta-runner.ts`, level from `home-cta-runner-level.ts`; canvas 2D above the headline, pointer-events none): a pixel figure auto-runs along the letter tops of the CTA headline and then the email address (glyphs scanned from an offscreen canvas). Space / ↑ / tap jumps (hold for higher); gaps between words drop him out, a line end carriage-returns to the next (after the headline, a drop onto the email), and from the email he leaps (desktop) or drops (mobile) onto the "Start a project" button, the finish, which gets a pixel selection box. Eight optional pickups; the best time is kept in `localStorage`; a finished run offers a mailto with the time in the subject. Only renders on screen; no game with reduced motion or without JS.
   - Footer wordmark (`footer-wordmark.ts` + `layout/FooterMascot.astro`): a line-drawn figure throws a rope onto the S, shoulders it and hauls the letters in, hops along their tops to the R (each letter turns white as he lands), hops back to the I (which dims as he lands) and sits on it. The figure is posed by tweening joint angles written as SVG `rotate()` attributes. Reduced motion shows him already seated; without JS there is no figure.
 - Always `gsap.matchMedia()`: everything inside `MOTION_OK`; reduced motion = static or a plain fade; return cleanup (`mm.revert()`).
 - **On-load intros** mark their elements `data-intro`: CSS hides them only while `html.js:not(.motion-ready)`. The script calls `markMotionReady()` after setting start states, on every code path; `BaseLayout` adds `motion-ready` after 2.5s as a failsafe.

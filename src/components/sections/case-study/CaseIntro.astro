@@ -3,13 +3,18 @@
  * Case study intro under the full-screen hero: the subtitle and the
  * ROLE / STACK / TIMELINE / LIVE facts (Figma "01 Hero" content, moved below
  * the cover for the card transition). Only facts that exist are rendered.
- * Both rise in as they scroll into view.
+ * Both rise in as they scroll into view. The stack shows as icons (owner
+ * decision); a technology without an icon falls back to its name.
  */
+import type { TechItem } from '@/types';
+
 interface MetaItem {
   label: string;
-  value: string;
+  value?: string;
   /** External URL: the value becomes a link that opens in a new tab. */
   href?: string;
+  /** Rendered as a row of icons instead of `value`. */
+  tech?: TechItem[];
 }
 
 interface Props {
@@ -33,7 +38,27 @@ const { subtitle, meta } = Astro.props;
         <div class="cs-intro__meta-item" data-reveal-item>
           <dt class="text-mono">{item.label}</dt>
           <dd class="text-h4">
-            {item.href ? (
+            {item.tech && (
+              <ul class="cs-intro__tech" role="list">
+                {item.tech.map((tool) => (
+                  <li>
+                    {tool.icon ? (
+                      <img
+                        class="cs-intro__tech-icon"
+                        src={tool.icon.src}
+                        width="28"
+                        height="28"
+                        alt={tool.name}
+                        title={tool.name}
+                      />
+                    ) : (
+                      tool.name
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {item.href && (
               <a class="cs-intro__live" href={item.href} target="_blank" rel="noopener">
                 {item.value}{' '}
                 <span class="cs-intro__live-arrow" aria-hidden="true">
@@ -41,9 +66,8 @@ const { subtitle, meta } = Astro.props;
                 </span>
                 <span class="visually-hidden">(opens in a new tab)</span>
               </a>
-            ) : (
-              item.value
             )}
+            {!item.tech && !item.href && item.value}
           </dd>
         </div>
       ))}
@@ -73,8 +97,6 @@ const { subtitle, meta } = Astro.props;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    padding-block-start: var(--space-5);
-    border-block-start: var(--border-strong);
   }
 
   .cs-intro__meta-item dt {
@@ -83,6 +105,21 @@ const { subtitle, meta } = Astro.props;
 
   .cs-intro__meta-item dd {
     overflow-wrap: break-word;
+  }
+
+  .cs-intro__tech {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-4);
+  }
+
+  /* Figma tech glyphs are drawn at 24–32px; show them all in one 28px box. */
+  .cs-intro__tech-icon {
+    display: block;
+    inline-size: 28px;
+    block-size: 28px;
+    object-fit: contain;
   }
 
   .cs-intro__live {
