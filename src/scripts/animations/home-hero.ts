@@ -74,13 +74,25 @@ export function initHero(hero: HTMLElement): () => void {
 
     // Hold the page still until the intro has played (only when the hero is
     // in view: a reload restored further down keeps scrolling freely).
-    const lock = window.scrollY < hero.offsetHeight;
+    const heroInView = (): boolean => window.scrollY < hero.offsetHeight;
+    let locked = heroInView();
     const release = (): void => {
       window.clearTimeout(failsafe);
-      if (lock) unlockScroll(INTRO_LOCK);
+      window.removeEventListener('scroll', onRestore);
+      if (!locked) return;
+      locked = false;
+      unlockScroll(INTRO_LOCK);
     };
-    const failsafe = lock ? window.setTimeout(release, LOCK_FAILSAFE) : 0;
-    if (lock) lockScroll(INTRO_LOCK);
+    // A reload or history load restores the old position around `load`, after
+    // this has run: when that lands below the hero, free the page at once.
+    const onRestore = (): void => {
+      if (!heroInView()) release();
+    };
+    const failsafe = locked ? window.setTimeout(release, LOCK_FAILSAFE) : 0;
+    if (locked) {
+      lockScroll(INTRO_LOCK);
+      window.addEventListener('scroll', onRestore, { passive: true });
+    }
 
     // Depth parallax on the wrapper, which no other animation touches.
     gsap.to(nameWrap, {
@@ -98,7 +110,8 @@ export function initHero(hero: HTMLElement): () => void {
       if (cancelled) return;
       // The start overlay's CSS failsafe already showed the static hero: don't hide it again.
       const shown = getComputedStyle(hero, '::after').visibility === 'hidden';
-      const develop = !shown && !isHistoryNavigation();
+      // No develop act off-screen (a reload restored further down).
+      const develop = !shown && !isHistoryNavigation() && heroInView();
       const ink =
         negative && canvas
           ? negative.initNegative(
