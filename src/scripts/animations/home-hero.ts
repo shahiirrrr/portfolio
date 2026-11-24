@@ -4,7 +4,8 @@
  * WebGL2 it falls back to the classic intro (letters rise out of a mask, the
  * portrait rises in front, then header, socials and role fade in). Either way
  * the name drifts up slower than the portrait on scroll. The page can't be
- * scrolled until the intro has finished.
+ * scrolled until the intro has finished. A reload or history load that
+ * restores a scrolled position skips the intro and never locks.
  * Reduced motion: a plain fade.
  */
 import { gsap, markMotionReady, MOTION_OK, MOTION_REDUCED, SplitText } from './core.ts';
@@ -17,11 +18,38 @@ const INTRO_LOCK = 'home-hero-intro';
  * intro: the CSS start-overlay failsafe (2.5s) plus the longest intro, with margin.
  */
 const LOCK_FAILSAFE = 8000;
+/** sessionStorage key: the scroll position Home was left at. */
+const LEFT_AT_KEY = 'home-hero:left-at';
+
+function navigationType(): string | undefined {
+  const entry = performance.getEntriesByType('navigation')[0];
+  return entry instanceof PerformanceNavigationTiming ? entry.type : undefined;
+}
 
 /** True when this load came from the back/forward buttons (no bfcache). */
-function isHistoryNavigation(): boolean {
-  const entry = performance.getEntriesByType('navigation')[0];
-  return entry instanceof PerformanceNavigationTiming && entry.type === 'back_forward';
+const isHistoryNavigation = (): boolean => navigationType() === 'back_forward';
+
+/**
+ * True when a reload or history load will put the page back below the top.
+ * The browser restores the position only around `load`, after this script
+ * has run, so the position is read from where the page was left instead.
+ */
+function restoresScrolled(): boolean {
+  const type = navigationType();
+  if (type !== 'reload' && type !== 'back_forward') return false;
+  try {
+    return Number(sessionStorage.getItem(LEFT_AT_KEY)) > 0;
+  } catch {
+    return false;
+  }
+}
+
+function rememberScroll(): void {
+  try {
+    sessionStorage.setItem(LEFT_AT_KEY, String(Math.round(window.scrollY)));
+  } catch {
+    // Storage unavailable: the next reload simply plays the intro.
+  }
 }
 
 function classicIntro(
@@ -72,10 +100,11 @@ export function initHero(hero: HTMLElement): () => void {
       return;
     }
 
-    // Hold the page still until the intro has played (only when the hero is
-    // in view: a reload restored further down keeps scrolling freely).
-    const heroInView = (): boolean => window.scrollY < hero.offsetHeight;
-    let locked = heroInView();
+    // Hold the page still until the intro has played — only on a load that
+    // starts at the top: a reload restored further down scrolls freely.
+    window.addEventListener('pagehide', rememberScroll);
+    const intro = !restoresScrolled();
+    let locked = intro && window.scrollY < hero.offsetHeight;
     const release = (): void => {
       window.clearTimeout(failsafe);
       window.removeEventListener('scroll', onRestore);
@@ -83,10 +112,10 @@ export function initHero(hero: HTMLElement): () => void {
       locked = false;
       unlockScroll(INTRO_LOCK);
     };
-    // A reload or history load restores the old position around `load`, after
-    // this has run: when that lands below the hero, free the page at once.
+    // Nothing else scrolls a locked page: a scroll now is the browser
+    // restoring a position the stored one missed, so free the page.
     const onRestore = (): void => {
-      if (!heroInView()) release();
+      if (window.scrollY > 0) release();
     };
     const failsafe = locked ? window.setTimeout(release, LOCK_FAILSAFE) : 0;
     if (locked) {
@@ -110,8 +139,9 @@ export function initHero(hero: HTMLElement): () => void {
       if (cancelled) return;
       // The start overlay's CSS failsafe already showed the static hero: don't hide it again.
       const shown = getComputedStyle(hero, '::after').visibility === 'hidden';
-      // No develop act off-screen (a reload restored further down).
-      const develop = !shown && !isHistoryNavigation() && heroInView();
+      // No intro once the page has moved off the top (a restored position).
+      const play = !shown && intro && window.scrollY === 0;
+      const develop = play && !isHistoryNavigation();
       const ink =
         negative && canvas
           ? negative.initNegative(
@@ -121,8 +151,8 @@ export function initHero(hero: HTMLElement): () => void {
             )
           : null;
       if (ink) teardown = ink;
-      else if (shown) release();
-      else teardown = classicIntro(chars, portrait, fades, release);
+      else if (play) teardown = classicIntro(chars, portrait, fades, release);
+      else release();
       // Start states are set: lift the start overlay (Hero.astro).
       hero.dataset.heroReady = '';
       markMotionReady();
@@ -140,6 +170,7 @@ export function initHero(hero: HTMLElement): () => void {
 
     return () => {
       cancelled = true;
+      window.removeEventListener('pagehide', rememberScroll);
       release();
       teardown?.();
       split.revert();

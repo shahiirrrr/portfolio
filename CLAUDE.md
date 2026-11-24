@@ -192,7 +192,7 @@ Motion is specified per section in the Figma "Dev Notes" frames — implement wh
   - The dark start state is `Hero.astro`'s `::after`. It is gated on the hero-local `data-hero-ready`, not on the global `motion-ready`, which other sections set early, and it has a CSS-only 2.5s failsafe.
   - Without WebGL2, or with software rendering (`failIfMajorPerformanceCaveat`), the classic GSAP intro runs instead. Reduced motion gets a plain fade.
   - Back/forward loads skip the develop act. Rendering pauses off-screen and when idle.
-  - The page is scroll-locked (holder `home-hero-intro`) from load until the intro has played — the develop act's ground is clear and every letter has risen, or the classic intro has ended — with an 8s failsafe. No lock when the load starts below the hero.
+  - The page is scroll-locked (holder `home-hero-intro`) from load until the intro has played — the develop act's ground is clear and every letter has risen, or the classic intro has ended — with an 8s failsafe. A reload or back/forward load that restores a scrolled position (Home saves `scrollY` to `sessionStorage` on `pagehide`, since the browser restores it only after the script runs) plays no intro and takes no lock.
 
 - **Smaller owner-requested effects** (Figma intentionally not updated):
   - Home capability folders (`ui/FolderPanel.astro`, CSS only): on hover, or a tap or keyboard press on the arrow button, the flap tips forward and the `tools` logos from `data/home.ts` rise out of it.
