@@ -91,6 +91,15 @@ const { pathname } = Astro.url;
     color: var(--color-text-inverse);
   }
 
+  /* Over the Home hero the pointer ink paints the ground dark behind the
+     header, so (like the hero's role and socials) it reads by difference:
+     white text turns black on the white hero and light on the ink. Only while
+     transparent: a solid header has its own background. */
+  .site-header[data-theme='light']:not(.is-solid) {
+    color: var(--color-bg-white);
+    mix-blend-mode: difference;
+  }
+
   .site-header.is-solid {
     color: var(--color-text);
     background-color: var(--color-header-solid);
